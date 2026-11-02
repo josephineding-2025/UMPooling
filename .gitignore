@@ -1,0 +1,26 @@
+# Android Studio / Gradle
+*.iml
+.gradle/
+.kotlin/
+local.properties
+/.idea/
+**/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Secrets (share these privately, never commit)
+google-services.json
+secrets.properties
+*.jks
+*.keystore
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
