@@ -34,7 +34,7 @@ AI is used only where it removes a real problem. All AI calls go through a backe
 
 1. **Natural-language ride request parser (NLP).**
    - Problem: typing origin, building code (e.g. FSKTM Block B), time and seats on a small screen while rushing is slow.
-   - Implementation: a cloud LLM (e.g. Gemini via a Firebase Cloud Function) turns a sentence such as "Need a ride from Tiara to FSKTM tomorrow by 8:30am" into structured JSON (origin, destination, time, seats). The app pre-fills the form and the user confirms.
+   - Implementation: a cloud LLM (e.g. Gemini via a Supabase Edge Function) turns a sentence such as "Need a ride from Tiara to FSKTM tomorrow by 8:30am" into structured JSON (origin, destination, time, seats). The app pre-fills the form and the user confirms.
    - Evaluation: 100+ test sentences (English, Bahasa Melayu, mixed) covering field-level accuracy, handling of ambiguous or invalid input, and a fallback to manual entry.
    - Note: a custom fine-tuned on-device model is NOT claimed. It is out of scope and hard to evidence.
 2. **Route and demand matching (recommendation).**
@@ -94,15 +94,15 @@ Data dependency: the Green Commuter Tier (M1) and the dashboard (M5) depend on v
 ## 5. Non-Functional Requirements (maximum 2)
 
 1. **Performance:** a ride-request notification shall reach matching drivers within 5 seconds, and each screen shall load within 3 seconds with up to 100 concurrent users. Justification: morning peak demand is concentrated in a short window, and slow matching defeats the purpose.
-2. **Security and privacy:** access is limited to verified UM accounts, data access is controlled by backend security rules, live location is shared only during an active trip, and only the minimum personal data is stored (consistent with Malaysia's PDPA 2010 [VERIFY]). Justification: users share trips with strangers, and trust determines adoption.
+2. **Security and privacy:** access is limited to verified UM accounts, data access is controlled by Supabase Row Level Security policies, live location is shared only during an active trip, and only the minimum personal data is stored (consistent with Malaysia's PDPA 2010 [VERIFY]). Justification: users share trips with strangers, and trust determines adoption.
 
 ## 6. Draft Architecture (to be confirmed by the team)
 
 - Client: Android, Kotlin, Jetpack Compose, MVVM. [CONFIRM stack with lecturer and team.]
-- Backend: Firebase Authentication (email verification), Firestore, Cloud Functions (AI call, matching, notifications), Firebase Cloud Messaging.
+- Backend: Supabase. Supabase Auth (email verification), Postgres database with Row Level Security, Edge Functions (AI call, matching, notifications) triggered by database webhooks, Realtime (chat). Push delivery uses Firebase Cloud Messaging (FCM) called from an Edge Function, because Supabase has no push service.
 - Maps: Google Maps or OpenStreetMap for pickup selection and distance.
-- AI: LLM API behind Cloud Functions; matching logic in Cloud Functions or on the device.
-- Core collections: users, savedLocations, tripOffers, rideRequests, trips (with ticket and seat data), messages, ratings, safetyLogs, impactStats.
+- AI: LLM API behind Edge Functions (TypeScript); matching logic in Edge Functions, Postgres functions or on the device.
+- Core tables: users, saved_routes, trip_offers, ride_requests, bookings (seat reservation and ticket), trips (lifecycle, confirmed passenger count, distance, CO2), messages, ratings, sos_alerts, impact_stats (per user), impact_aggregates (faculty, college, week; groups under 5 users hidden).
 
 ## 7. Validation Plan (summary)
 

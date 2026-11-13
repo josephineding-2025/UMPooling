@@ -47,7 +47,7 @@ Requirements: Android Studio, the Android SDK, and a device or emulator running 
    ```
 3. Open the folder in Android Studio and let Gradle sync. `local.properties` is created for you and is not committed.
 4. Run the `app` configuration on an emulator or device.
-5. Firebase and API keys : `google-services.json` and any API keys are NOT committed. Get them from the team's private chat and place `google-services.json` in `app/`.
+5. Supabase and API keys: keys are NOT committed. Get `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key) from the team's private chat and add them to `local.properties`. The service-role (secret) key must never go in the app or the repository; it is only for server-side use. If push notifications use FCM, `google-services.json` is also kept private and placed in `app/`.
 
 ## Repository structure
 

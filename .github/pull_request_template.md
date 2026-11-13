@@ -14,6 +14,6 @@
 - [ ] The app builds and `main` stays buildable
 - [ ] Tested (test or recorded manual test)
 - [ ] `TASKS.md` ticked if this finishes a requirement
-- [ ] No secrets, `google-services.json` or personal data committed
+- [ ] No secrets (Supabase service-role key, API keys), `google-services.json` or personal data committed
 - [ ] AI use (if any) logged in `AI_Usage_Log.md`
 - [ ] Reviewer assigned (review ring)

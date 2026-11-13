@@ -22,7 +22,7 @@ git config user.email "your-email@siswa.um.edu.my"
 - Commit small and often.
 - Message format: `<requirement id>: <what changed>`, for example `FR2.3: add destination filter`.
 - Use `docs:` for documentation, `fix:` for bug fixes, `chore:` for build or setup.
-- Do not commit secrets, `google-services.json`, `local.properties`, keystores or personal data.
+- Do not commit secrets (Supabase service-role key, API keys), `google-services.json`, `local.properties`, keystores or personal data.
 
 ## 4. Pull requests
 

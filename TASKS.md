@@ -29,7 +29,7 @@ One line per requirement. The owner ticks the box in the commit that finishes it
 
 ## Non-functional
 - [ ] NFR1 Performance: 5 s notification, 3 s screens, 100 users (tests: Member 6)
-- [ ] NFR2 Security and privacy (rules: Member 2, tests: Member 6)
+- [ ] NFR2 Security and privacy (RLS policies: Member 2, tests: Member 6)
 
 ## Shared interfaces (docs by Wed 11 Nov)
 - [ ] Trip lifecycle states (Member 6 defines, Member 2 implements)
@@ -39,12 +39,12 @@ One line per requirement. The owner ticks the box in the commit that finishes it
 - [ ] Green Commuter Tier names and thresholds (Members 1 and 4)
 
 ## Milestones
-- [ ] Validation done, Sun 8 Nov
-- [ ] Design review, Wed 11 Nov
-- [ ] Sprint 1 demo, Sun 18 Nov
-- [ ] Sprint 2 demo, Sun 25 Nov
-- [ ] Test report, Sun 5 Dec
-- [ ] Feature freeze, Sun 12 Dec
-- [ ] Video presentation, Sun 18 Dec
+- [ ] Validation done, Thu 5 Nov
+- [ ] Design review, Sun 8 Nov
+- [ ] Sprint 1 demo, Sun 15 Nov
+- [ ] Sprint 2 demo, Sun 22 Nov
+- [ ] Test report, Fri 27 Nov
+- [ ] Feature freeze, Sun 29 Nov
+- [ ] Video presentation, Fri 4 Dec
 - [ ] Video submitted, 12pm Sun 3 Jan
 - [ ] Report submitted, 12pm Sun 10 Jan
