@@ -18,6 +18,7 @@ This log is a mandatory appendix of the final report (Appendix D). Keep it in th
 | No. | Date | Member | AI tool | Prompt / query (verbatim) | Output received | How the output was used (used / modified / rejected) | How it was tested or verified, and what was changed |
 |---|---|---|---|---|---|---|---|
 | 1 | | | | | | | |
+| 2 | 2026-11-14 | Account: GeokLiu (member to confirm) | OpenAI Codex | I previously worked on Database branch but my members in main adn uiui branch said I do differnt project striucture as main branch can you help me check and change. And aslo what is my Android package name based on uiux and main branch | Branch comparison and database integration into main structure; package com.fopgang.umpooling. | Ported database layer on a new branch from main; retained Compose and configured one Supabase client. | Static model/repository comparison, package and unchanged UI checks, TOML/XML parsing and git diff --check; build/unit tests blocked by Gradle download connection refusal. Android Studio and live database checks NOT YET VERIFIED; see docs/database-integration.md. |
 
 ## Notes on authorship (fill in honestly)
 
