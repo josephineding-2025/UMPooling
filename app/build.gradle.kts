@@ -65,6 +65,8 @@ android {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(platform(libs.supabase.bom))
