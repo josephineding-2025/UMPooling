@@ -20,6 +20,8 @@ This log is a mandatory appendix of the final report (Appendix D). Keep it in th
 | 1 | | | | | | | |
 | 2 | 2026-11-14 | Account: GeokLiu (member to confirm) | OpenAI Codex | I previously worked on Database branch but my members in main adn uiui branch said I do differnt project striucture as main branch can you help me check and change. And aslo what is my Android package name based on uiux and main branch | Branch comparison and database integration into main structure; package com.fopgang.umpooling. | Ported database layer on a new branch from main; retained Compose and configured one Supabase client. | Static model/repository comparison, package and unchanged UI checks, TOML/XML parsing and git diff --check; build/unit tests blocked by Gradle download connection refusal. Android Studio and live database checks NOT YET VERIFIED; see docs/database-integration.md. |
 
+| 3 | 2026-11-14 | Account: GeokLiu (member to confirm) | OpenAI Codex | if not granted then just change and push to Database branch | Prepared the corrected project as a Database merge commit retaining both histories. | Updated Database locally with the main-based project structure. | Static checks and patch application check passed previously; checked merge ancestry and git diff --check. Build and live database checks remain NOT YET VERIFIED. |
+
 ## Notes on authorship (fill in honestly)
 
 - **Origin of the idea:** [Describe who in the team proposed UMPooling and why, e.g. from personal experience with "sapu" rides. This shows the idea and problem choice are the team's own.]

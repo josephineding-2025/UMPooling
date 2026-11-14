@@ -12,9 +12,10 @@ It uses `com.example.umpooling`, AppCompat/XML layouts, AGP 8.7.2 and SDK 35,
 whereas `main` uses AGP 9.0.1 and compile SDK 36.1 / target SDK 36. It also
 tracks local IDE files and Kotlin error logs.
 
-This branch starts from `main` and ports the database layer from `Database`.
-The original branch is preserved as a reference. Use this integration branch
-for future database work; do not merge the unrelated Database history into main.
+The corrected project starts from `main` and ports the database layer from
+`Database`. The Database update joins both histories with a merge commit while
+using the corrected project tree. Earlier Database commits remain available in
+Git history. Continue database work on the updated `Database` branch.
 
 ## Resulting source layout
 
