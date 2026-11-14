@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
@@ -62,6 +63,9 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
