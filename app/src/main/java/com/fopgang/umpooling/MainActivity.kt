@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
+import com.fopgang.umpooling.ui.sos.SosScreen
 
 class MainActivity : ComponentActivity() {
     private val notificationPermission = registerForActivityResult(
@@ -39,11 +40,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             UMPoolingTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+    SosScreen(
+        onSosActivated = {
+            android.util.Log.d(
+                "UMPoolingSOS",
+                "SOS hold activated - test only, no emergency message sent"
+            )
+        }
+    )
+}
             }
         }
     }
