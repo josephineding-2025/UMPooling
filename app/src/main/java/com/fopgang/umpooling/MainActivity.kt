@@ -2,6 +2,7 @@
 package com.fopgang.umpooling
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.fopgang.umpooling.auth.AuthViewModel
+import com.fopgang.umpooling.notifications.NotificationLinks
 import com.fopgang.umpooling.ui.UMPoolingApp
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
 
@@ -37,17 +39,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onNewIntent(intent: android.content.Intent) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        com.fopgang.umpooling.notifications.NotificationLinks.accept(intent)
+        NotificationLinks.accept(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            com.fopgang.umpooling.notifications.NotificationLinks.accept(intent)
+            NotificationLinks.accept(intent)
         }
 
         requestNotificationPermission()
