@@ -52,6 +52,31 @@ data class UserProfile(
     @SerialName("createdTime") val createdTime: String? = null
 )
 
+// Table: saved_routes (read model for frequent routes / FR2.1)
+@Serializable
+data class SavedRoute(
+    @SerialName("route_id") val routeId: String? = null,
+    @SerialName("user_id") val userId: String,
+    @SerialName("origin_zone") val originZone: String? = null,
+    @SerialName("destination_zone") val destinationZone: String? = null,
+    @SerialName("distance_km") val distanceKm: Double? = null,
+    @SerialName("preferred_time") val preferredTime: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+// Insert payload for saved_routes. origin_geo and destination_geo are NOT NULL in the database
+// and sent as EWKT text, e.g. GeoPoint.ewkt(lng, lat).
+@Serializable
+data class NewSavedRoute(
+    @SerialName("user_id") val userId: String,
+    @SerialName("origin_geo") val originGeo: String,
+    @SerialName("destination_geo") val destinationGeo: String,
+    @SerialName("origin_zone") val originZone: String? = null,
+    @SerialName("destination_zone") val destinationZone: String? = null,
+    @SerialName("distance_km") val distanceKm: Double? = null,
+    @SerialName("preferred_time") val preferredTime: String? = null
+)
+
 // Table: trip_offers
 @Serializable
 data class TripOffer(

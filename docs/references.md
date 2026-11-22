@@ -17,6 +17,10 @@ Universiti Malaya. (2021). *Universiti Malaya Sustainability Strategic Plan 2021
 
 ## 2. Emission Factors and Carbon Accounting
 
+Ministry of Investment, Trade and Industry (MITI). (2023). *Sustainability starter kit: Practical guidance for Malaysian enterprises and SMEs*. Ministry of Investment, Trade and Industry, Malaysia. https://www.miti.gov.my [M5, primary emission factor 0.20 kg CO2e/km]
+
+United States Environmental Protection Agency (US EPA). (2022). *Greenhouse gas inventory guidance: Direct emissions from mobile combustion sources*. EPA Center for Corporate Climate Leadership. https://www.epa.gov/climateleadership [M5, passenger vehicle baseline factor]
+
 Department for Energy Security and Net Zero. (2024). *Greenhouse gas reporting: Conversion factors 2024 (condensed set for most users)*. GOV.UK. https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024 [M5, CO2 calculation formula]
 
 Malaysian Green Technology and Climate Change Corporation (MGTC). (2023). *National greenhouse gas inventory reporting guidelines: Transport sector emissions factors*. Ministry of Natural Resources, Environment and Climate Change (NRECC). https://www.mgtc.gov.my [M5, Malaysian localized emission factors]

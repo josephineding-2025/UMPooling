@@ -45,6 +45,12 @@ set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if %ERRORLEVEL% equ 0 goto execute
 
+@rem Use Android Studio's bundled runtime when Java is not configured in this shell.
+if not exist "%ProgramFiles%\Android\Android Studio\jbr\bin\java.exe" goto javaNotFound
+set "JAVA_EXE=%ProgramFiles%\Android\Android Studio\jbr\bin\java.exe"
+goto execute
+
+:javaNotFound
 echo. 1>&2
 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
 echo. 1>&2

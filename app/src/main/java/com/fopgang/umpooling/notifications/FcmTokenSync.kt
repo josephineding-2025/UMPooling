@@ -51,6 +51,27 @@ object FcmTokenSync {
         // If signed out, the next authenticated session uploads Firebase's latest token.
     }
 
+    /** Serialize logout with token upload so a queued refresh cannot reattach the token. */
+    suspend fun signOut() {
+        syncMutex.withLock {
+            val client = SupabaseClientProvider.client
+            val userId = client.auth.currentUserOrNull()?.id
+            if (userId != null) {
+                try {
+                    client.postgrest["users"].update(mapOf("fcm_token" to null as String?)) {
+                        filter { eq(USER_ID_COLUMN, userId) }
+                    }
+                } catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { Log.w(TAG, "Remote token cleanup unavailable during logout.") }
+            }
+            try {
+                client.auth.signOut()
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { Log.w(TAG, "Remote sign-out unavailable; clearing the local session.") }
+            finally { client.auth.clearSession() }
+        }
+    }
+
     private suspend fun syncToken(refreshedToken: String? = null) {
         try {
             syncMutex.withLock {

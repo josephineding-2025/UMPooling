@@ -9,15 +9,10 @@ import androidx.core.content.ContextCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.fopgang.umpooling.ui.UMPoolingApp
+import com.fopgang.umpooling.auth.AuthViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
-import com.fopgang.umpooling.ui.sos.SosScreen
 
 class MainActivity : ComponentActivity() {
     private val notificationPermission = registerForActivityResult(
@@ -33,39 +28,25 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        com.fopgang.umpooling.notifications.NotificationLinks.accept(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if(savedInstanceState==null) com.fopgang.umpooling.notifications.NotificationLinks.accept(intent)
         requestNotificationPermission()
         enableEdgeToEdge()
         setContent {
-            UMPoolingTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-    SosScreen(
-        onSosActivated = {
-            android.util.Log.d(
-                "UMPoolingSOS",
-                "SOS hold activated - test only, no emergency message sent"
-            )
-        }
-    )
-}
-            }
-        }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+UMPoolingTheme {
+    UMPoolingApp(
+        ViewModelProvider(this)[AuthViewModel::class.java]
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    UMPoolingTheme {
-        Greeting("Android")
+        }
     }
 }

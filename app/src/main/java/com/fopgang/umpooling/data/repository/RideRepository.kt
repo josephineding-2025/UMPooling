@@ -2,9 +2,11 @@ package com.fopgang.umpooling.data.repository
 
 import com.fopgang.umpooling.SupabaseClientProvider
 import com.fopgang.umpooling.data.NewRideRequest
+import com.fopgang.umpooling.data.NewSavedRoute
 import com.fopgang.umpooling.data.NewTripOffer
 import com.fopgang.umpooling.data.OfferStatus
 import com.fopgang.umpooling.data.RideRequest
+import com.fopgang.umpooling.data.SavedRoute
 import com.fopgang.umpooling.data.TripOffer
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
@@ -68,6 +70,34 @@ class RideRepository {
         SupabaseClientProvider.client.postgrest["ride_requests"]
             .update({ set("status", status) }) {
                 filter { eq("request_id", requestId) }
+            }
+        Unit
+    }
+
+    // 6. Save a frequent commuter route (FR2.1)
+    suspend fun createSavedRoute(route: NewSavedRoute): Result<SavedRoute> = suspendRunCatching {
+        SupabaseClientProvider.client.postgrest["saved_routes"]
+            .insert(route) { select() }
+            .decodeSingle<SavedRoute>()
+    }
+
+    // 7. Get all frequent routes saved by a user (FR2.1)
+    suspend fun getSavedRoutes(userId: String): Result<List<SavedRoute>> = suspendRunCatching {
+        SupabaseClientProvider.client.postgrest["saved_routes"]
+            .select(Columns.ALL) {
+                filter {
+                    eq("user_id", userId)
+                }
+            }.decodeList<SavedRoute>()
+    }
+
+    // 8. Delete a saved route (FR2.1)
+    suspend fun deleteSavedRoute(routeId: String): Result<Unit> = suspendRunCatching {
+        SupabaseClientProvider.client.postgrest["saved_routes"]
+            .delete {
+                filter {
+                    eq("route_id", routeId)
+                }
             }
         Unit
     }

@@ -1,0 +1,1538 @@
+{
+  "_metadata": {
+    "module": "Module 2 (Ride Matching and Location-Based Dispatch)",
+    "version": "3.1.0",
+    "purpose": "Comprehensive dataset of UM campus faculties, residential colleges (KK1-KK13), central facilities, campus gates, transit hubs, and off-campus student residential zones aligned directly with the team's commuter survey options (FR2.1, FR2.2, FR2.3, FR5.2).",
+    "coordinate_system": "WGS 84 (EPSG:4326)",
+    "total_locations": 70,
+    "survey_aligned_zones": [
+      "On-campus residential college (KK), KK1 to KK13",
+      "Tiara Damansara / Astana Damansara / Prima 16 / Li Villas",
+      "Pacific Star / Ryan & Miho / Jaya One Residences",
+      "Atwater / PJ Midtown / Centrestage",
+      "University Tower / Section 11",
+      "Vista Angkasa / KL Gateway / Residensi Kerinchi",
+      "South View / South Link / Novum",
+      "Pantai Hillpark",
+      "Bangsar South",
+      "Other KL / Selangor area"
+    ],
+    "notes": [
+      "Coordinates represent accurate building or development centroids suitable for geofencing, radius matching, and pickup pin recommendations.",
+      "Aliases are optimized for NLP parsing (FR5.1) and user keyword search across English, Malay, and student slang.",
+      "Pre-grouped geographic clusters assist the AI Commuter Assistant (FR5.2) in aggregating nearby pickup points."
+    ],
+    "verification_policy": "Building centroids and vehicle pickup points cross-referenced against OpenStreetMap (OSM) nodes and Google Maps satellite imagery."
+  },
+  "zones": [
+    {
+      "id": "faculties_and_academies",
+      "label": "Faculties, Academies & Academic Institutes",
+      "locations": [
+        {
+          "id": "fsktm",
+          "name": "Faculty of Computer Science and Information Technology",
+          "alias": [
+            "FSKTM",
+            "FCSIT",
+            "Computer Science",
+            "Sains Komputer",
+            "Fakulti Sains Komputer"
+          ],
+          "lat": 3.12841,
+          "lng": 101.65049,
+          "type": "faculty",
+          "cluster": "north_campus",
+          "pickup_point": {
+            "name": "Dataran FSKTM / Main Foyer Drop-off",
+            "lat": 3.12825,
+            "lng": 101.6508,
+            "notes": "Designated passenger drop-off and pickup loop in front of Block A/B foyer"
+          },
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap (Node/Way 28312015)"
+          }
+        },
+        {
+          "id": "engineering",
+          "name": "Faculty of Engineering",
+          "alias": [
+            "FK",
+            "FoE",
+            "Faculty of Engineering",
+            "Kejuruteraan",
+            "Fakulti Kejuruteraan"
+          ],
+          "lat": 3.1175,
+          "lng": 101.6533,
+          "type": "faculty",
+          "cluster": "central_south_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "science",
+          "name": "Faculty of Science",
+          "alias": [
+            "FoS",
+            "Faculty of Science",
+            "Sains",
+            "Fakulti Sains",
+            "Science Faculty"
+          ],
+          "lat": 3.1222,
+          "lng": 101.653,
+          "type": "faculty",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "medicine",
+          "name": "Faculty of Medicine",
+          "alias": [
+            "FOM",
+            "Faculty of Medicine",
+            "Perubatan",
+            "Fakulti Perubatan",
+            "Med"
+          ],
+          "lat": 3.1135,
+          "lng": 101.658,
+          "type": "faculty",
+          "cluster": "south_medical_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "dentistry",
+          "name": "Faculty of Dentistry",
+          "alias": [
+            "FOD",
+            "Faculty of Dentistry",
+            "Pergigian",
+            "Fakulti Pergigian",
+            "Dental"
+          ],
+          "lat": 3.114,
+          "lng": 101.657,
+          "type": "faculty",
+          "cluster": "south_medical_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "pharmacy",
+          "name": "Faculty of Pharmacy",
+          "alias": [
+            "FOP",
+            "Faculty of Pharmacy",
+            "Farmasi",
+            "Fakulti Farmasi"
+          ],
+          "lat": 3.1154,
+          "lng": 101.6525,
+          "type": "faculty",
+          "cluster": "south_medical_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "fbec",
+          "name": "Faculty of Business and Economics",
+          "alias": [
+            "FBEc",
+            "FPE",
+            "Business and Economics",
+            "Perniagaan dan Ekonomi",
+            "Azman Hashim",
+            "Fakulti Perniagaan"
+          ],
+          "lat": 3.123,
+          "lng": 101.6475,
+          "type": "faculty",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "law",
+          "name": "Faculty of Law",
+          "alias": [
+            "FUU",
+            "Law",
+            "Faculty of Law",
+            "Undang-Undang",
+            "Fakulti Undang-Undang"
+          ],
+          "lat": 3.1218,
+          "lng": 101.646,
+          "type": "faculty",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "arts_social_sciences",
+          "name": "Faculty of Arts and Social Sciences",
+          "alias": [
+            "FASS",
+            "FSSS",
+            "Sastera",
+            "Faculty of Arts",
+            "Fakulti Sastera dan Sains Sosial"
+          ],
+          "lat": 3.1215,
+          "lng": 101.6488,
+          "type": "faculty",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "languages_linguistics",
+          "name": "Faculty of Languages and Linguistics",
+          "alias": [
+            "FLL",
+            "FBB",
+            "Bahasa",
+            "Linguistics",
+            "Fakulti Bahasa dan Linguistik"
+          ],
+          "lat": 3.1205,
+          "lng": 101.6465,
+          "type": "faculty",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "built_environment",
+          "name": "Faculty of Built Environment",
+          "alias": [
+            "FBE",
+            "FAB",
+            "Built Environment",
+            "Alam Bina",
+            "Fakulti Alam Bina"
+          ],
+          "lat": 3.1195,
+          "lng": 101.648,
+          "type": "faculty",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "education",
+          "name": "Faculty of Education",
+          "alias": [
+            "FP",
+            "Faculty of Education",
+            "Pendidikan",
+            "Fakulti Pendidikan"
+          ],
+          "lat": 3.1248,
+          "lng": 101.6548,
+          "type": "faculty",
+          "cluster": "central_east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "creative_arts",
+          "name": "Faculty of Creative Arts",
+          "alias": [
+            "FSK",
+            "Creative Arts",
+            "Seni Kreatif",
+            "Cultural Centre",
+            "Pusat Kebudayaan",
+            "Panggung Eksperimen"
+          ],
+          "lat": 3.1212,
+          "lng": 101.6568,
+          "type": "faculty",
+          "cluster": "central_east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "islamic_studies",
+          "name": "Academy of Islamic Studies",
+          "alias": [
+            "APIUM",
+            "Akademi Pengajian Islam",
+            "Islamic Studies",
+            "API"
+          ],
+          "lat": 3.1253,
+          "lng": 101.6467,
+          "type": "academy",
+          "cluster": "north_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "malay_studies",
+          "name": "Academy of Malay Studies",
+          "alias": [
+            "APM",
+            "Akademi Pengajian Melayu",
+            "Malay Studies"
+          ],
+          "lat": 3.1248,
+          "lng": 101.6524,
+          "type": "academy",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "ips",
+          "name": "Institute of Postgraduate Studies",
+          "alias": [
+            "IPS",
+            "Postgraduate Studies",
+            "Institut Pengajian Siswazah"
+          ],
+          "lat": 3.1235,
+          "lng": 101.655,
+          "type": "institute",
+          "cluster": "central_east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "aei",
+          "name": "Asia-Europe Institute",
+          "alias": [
+            "AEI",
+            "Asia Europe Institute"
+          ],
+          "lat": 3.124,
+          "lng": 101.6575,
+          "type": "institute",
+          "cluster": "central_east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "pasum",
+          "name": "Pusat Asasi Sains Universiti Malaya",
+          "alias": [
+            "PASUM",
+            "Asasi Sains",
+            "Foundation in Science",
+            "Centre for Foundation Studies"
+          ],
+          "lat": 3.1192,
+          "lng": 101.6538,
+          "type": "institute",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        }
+      ]
+    },
+    {
+      "id": "residential_colleges",
+      "label": "Residential Colleges (Kolej Kediaman KK1 - KK13)",
+      "survey_group": "On-campus residential college (KK), KK1 to KK13",
+      "locations": [
+        {
+          "id": "kk1",
+          "name": "Kolej Kediaman Pertama (ASTAR / Tuanku Abdul Rahman)",
+          "alias": [
+            "KK1",
+            "Kolej 1",
+            "ASTAR",
+            "First College",
+            "Kolej Pertama"
+          ],
+          "lat": 3.123,
+          "lng": 101.6505,
+          "type": "college",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk2",
+          "name": "Kolej Kediaman Kedua (Tuanku Bahiyah)",
+          "alias": [
+            "KK2",
+            "Kolej 2",
+            "Tuanku Bahiyah",
+            "Second College",
+            "Kolej Kedua"
+          ],
+          "lat": 3.1163,
+          "lng": 101.6572,
+          "type": "college",
+          "cluster": "south_east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk3",
+          "name": "Kolej Kediaman Ketiga (Tunku Kurshiah)",
+          "alias": [
+            "KK3",
+            "Kolej 3",
+            "Tunku Kurshiah",
+            "Third College",
+            "Kolej Ketiga",
+            "Tuanku Kurshiah"
+          ],
+          "lat": 3.1246,
+          "lng": 101.651,
+          "type": "college",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / UM HEP"
+          }
+        },
+        {
+          "id": "kk4",
+          "name": "Kolej Kediaman Keempat (Bestari)",
+          "alias": [
+            "KK4",
+            "Kolej 4",
+            "Bestari",
+            "Fourth College",
+            "Kolej Keempat"
+          ],
+          "lat": 3.1255,
+          "lng": 101.65,
+          "type": "college",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk5",
+          "name": "Kolej Kediaman Kelima (Dayasari)",
+          "alias": [
+            "KK5",
+            "Kolej 5",
+            "Dayasari",
+            "Fifth College",
+            "Kolej Kelima"
+          ],
+          "lat": 3.119,
+          "lng": 101.652,
+          "type": "college",
+          "cluster": "central_south_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk6",
+          "name": "Kolej Kediaman Keenam (Ibnu Sina)",
+          "alias": [
+            "KK6",
+            "Kolej 6",
+            "Ibnu Sina",
+            "Sixth College",
+            "Kolej Keenam"
+          ],
+          "lat": 3.1198,
+          "lng": 101.6502,
+          "type": "college",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk7",
+          "name": "Kolej Kediaman Ketujuh (Za'ba)",
+          "alias": [
+            "KK7",
+            "Kolej 7",
+            "Za'ba",
+            "Zaba",
+            "Seventh College",
+            "Kolej Ketujuh"
+          ],
+          "lat": 3.1253,
+          "lng": 101.6508,
+          "type": "college",
+          "cluster": "central_west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk8",
+          "name": "Kolej Kediaman Kelapan (Kinabalu)",
+          "alias": [
+            "KK8",
+            "Kolej 8",
+            "Kinabalu",
+            "Eighth College",
+            "Kolej Kelapan"
+          ],
+          "lat": 3.1175,
+          "lng": 101.6445,
+          "type": "college",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk9",
+          "name": "Kolej Kediaman Kesembilan (Tun Syed Zahiruddin)",
+          "alias": [
+            "KK9",
+            "Kolej 9",
+            "Tun Syed Zahiruddin",
+            "Ninth College",
+            "Kolej Kesembilan"
+          ],
+          "lat": 3.116,
+          "lng": 101.643,
+          "type": "college",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk10",
+          "name": "Kolej Kediaman Kesepuluh (Tun Ahmad Zaidi)",
+          "alias": [
+            "KK10",
+            "Kolej 10",
+            "KKTAZ",
+            "Tun Ahmad Zaidi",
+            "Tenth College",
+            "Kolej Kesepuluh"
+          ],
+          "lat": 3.115,
+          "lng": 101.6455,
+          "type": "college",
+          "cluster": "west_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk11",
+          "name": "Kolej Kediaman Kesebelas (Ungku Aziz)",
+          "alias": [
+            "KK11",
+            "Kolej 11",
+            "Ungku Aziz",
+            "Eleventh College",
+            "Kolej Kesebelas"
+          ],
+          "lat": 3.1182,
+          "lng": 101.6535,
+          "type": "college",
+          "cluster": "central_south_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk12",
+          "name": "Kolej Kediaman Kedua Belas (Raja Dr. Nazrin Shah)",
+          "alias": [
+            "KK12",
+            "Kolej 12",
+            "Raja Dr Nazrin Shah",
+            "Twelfth College",
+            "Kolej Kedua Belas"
+          ],
+          "lat": 3.1249,
+          "lng": 101.6608,
+          "type": "college",
+          "cluster": "east_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kk13",
+          "name": "Kolej Kediaman Ketiga Belas (KK13 - Asrama Sewaan Luar Kampus)",
+          "alias": [
+            "KK13",
+            "Kolej 13",
+            "Thirteenth College",
+            "Kolej Ketiga Belas"
+          ],
+          "lat": 3.1204,
+          "lng": 101.6403,
+          "type": "leased_residential_facility",
+          "cluster": "off_pj_border",
+          "classification": "off_campus_leased",
+          "notes": "Externally operated / leased residential facility located along Jalan Profesor Diraja Ungku Aziz, officially classified by UM HEP as off-campus accommodation.",
+          "verification": {
+            "status": "verified",
+            "source": "UM HEP / Google Maps"
+          }
+        }
+      ]
+    },
+    {
+      "id": "campus_facilities_and_landmarks",
+      "label": "Central Facilities, Landmarks & Health Services",
+      "locations": [
+        {
+          "id": "main_library",
+          "name": "Main Library (Perpustakaan Utama)",
+          "alias": [
+            "Library",
+            "Perpustakaan Utama",
+            "Main Lib",
+            "Perpustakaan UM"
+          ],
+          "lat": 3.12,
+          "lng": 101.654,
+          "type": "library",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "zaba_library",
+          "name": "Za'ba Memorial Library",
+          "alias": [
+            "Perpustakaan Peringatan Za'ba",
+            "Za'ba Library",
+            "Zaba Lib"
+          ],
+          "lat": 3.121,
+          "lng": 101.6535,
+          "type": "library",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "dtc",
+          "name": "Dewan Tunku Canselor (DTC)",
+          "alias": [
+            "DTC",
+            "Dewan Tunku Canselor",
+            "Chancellor Hall",
+            "Main Hall"
+          ],
+          "lat": 3.1208,
+          "lng": 101.6555,
+          "type": "landmark",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "exam_building",
+          "name": "Bangunan Peperiksaan (Examination Building)",
+          "alias": [
+            "Dewan Peperiksaan",
+            "Examination Building",
+            "Exam Hall",
+            "Bangunan Peperiksaan UM"
+          ],
+          "lat": 3.1228,
+          "lng": 101.6542,
+          "type": "academic_facility",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "kps",
+          "name": "Kompleks Perdana Siswa (KPS)",
+          "alias": [
+            "KPS",
+            "Perdana Siswa",
+            "Student Union Complex",
+            "Cafeteria KPS"
+          ],
+          "lat": 3.1206,
+          "lng": 101.6555,
+          "type": "student_facility",
+          "cluster": "central_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "um_arena",
+          "name": "UM Arena (Stadium Varsiti & Track)",
+          "alias": [
+            "UM Arena",
+            "Stadium Varsiti",
+            "Stadium UM",
+            "Arena Track"
+          ],
+          "lat": 3.131,
+          "lng": 101.659,
+          "type": "sports_stadium",
+          "cluster": "north_east_campus",
+          "pickup_point": {
+            "name": "Stadium Varsiti Main Entrance / Gate B",
+            "lat": 3.1308,
+            "lng": 101.6588
+          },
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap"
+          }
+        },
+        {
+          "id": "um_sports_complex",
+          "name": "Pusat Sukan UM (Indoor Complex, Gymnasium & Olympic Pool)",
+          "alias": [
+            "Pusat Sukan",
+            "Kolam Renang Olimpik",
+            "Swimming Pool UM",
+            "Gymnasium UM",
+            "Sports Complex"
+          ],
+          "lat": 3.1295,
+          "lng": 101.6595,
+          "type": "sports_complex",
+          "cluster": "north_east_campus",
+          "pickup_point": {
+            "name": "Pusat Sukan Lobby & Pool Foyer Drop-off",
+            "lat": 3.1292,
+            "lng": 101.6592
+          },
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap"
+          }
+        },
+        {
+          "id": "masjid_ar_rahman",
+          "name": "Masjid Ar-Rahman Universiti Malaya",
+          "alias": [
+            "Masjid Ar-Rahman",
+            "Masjid UM",
+            "UM Mosque",
+            "Masjid Lembah Pantai"
+          ],
+          "lat": 3.1186,
+          "lng": 101.6627,
+          "type": "religious",
+          "cluster": "east_gate_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "ummc",
+          "name": "Pusat Perubatan Universiti Malaya (PPUM / UMMC)",
+          "alias": [
+            "PPUM",
+            "UMMC",
+            "Hospital UM",
+            "University Malaya Medical Centre",
+            "Pusat Perubatan UM"
+          ],
+          "lat": 3.1135,
+          "lng": 101.652,
+          "type": "hospital",
+          "cluster": "south_medical_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "umsc",
+          "name": "UM Specialist Centre (UMSC)",
+          "alias": [
+            "UMSC",
+            "UM Specialist Centre",
+            "Pusat Pakar UM"
+          ],
+          "lat": 3.1142,
+          "lng": 101.6515,
+          "type": "hospital",
+          "cluster": "south_medical_campus",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        },
+        {
+          "id": "wisma_rd",
+          "name": "Wisma R&D Universiti Malaya",
+          "alias": [
+            "Wisma R&D",
+            "Wisma RD",
+            "UM R&D Tower"
+          ],
+          "lat": 3.1165,
+          "lng": 101.665,
+          "type": "research_facility",
+          "cluster": "bangsar_border",
+          "verification": {
+            "status": "verified",
+            "source": "OpenStreetMap / Google Maps"
+          }
+        }
+      ]
+    },
+    {
+      "id": "campus_gates",
+      "label": "Campus Gates & Vehicular Access Points",
+      "locations": [
+        {
+          "id": "kl_gate",
+          "name": "KL Gate (Pintu Gerbang Utama Lembah Pantai)",
+          "alias": [
+            "Main Gate",
+            "KL Gate",
+            "Pintu Utama",
+            "Gerbang Lembah Pantai",
+            "KL Entrance"
+          ],
+          "lat": 3.1159,
+          "lng": 101.6627,
+          "type": "gate",
+          "notes": "East Entrance near Jalan Pantai Baharu, Federal Highway & Universiti LRT",
+          "verification": {
+            "status": "verified",
+            "source": "UM Security Map / OpenStreetMap"
+          }
+        },
+        {
+          "id": "pj_gate",
+          "name": "PJ Gate (Pintu Gerbang Jalan Universiti)",
+          "alias": [
+            "PJ Gate",
+            "Pintu PJ",
+            "Jalan Universiti Entrance",
+            "Pintu Masuk Jalan Universiti",
+            "Pintu Seksyen 11"
+          ],
+          "lat": 3.1185,
+          "lng": 101.6492,
+          "type": "gate",
+          "notes": "West Entrance facing Jalan Universiti / Petaling Jaya Section 11 & UMMC",
+          "verification": {
+            "status": "verified",
+            "source": "UM Security Map / OpenStreetMap"
+          }
+        },
+        {
+          "id": "damansara_gate",
+          "name": "Damansara Gate (Pintu Gerbang Lingkungan Budi / Damansara)",
+          "alias": [
+            "Damansara Gate",
+            "Pintu Damansara",
+            "Lingkungan Budi Gate",
+            "PASUM Gate"
+          ],
+          "lat": 3.1285,
+          "lng": 101.6535,
+          "type": "gate",
+          "notes": "North Entrance connecting towards Pusat Asasi Sains, Sprint Highway & Damansara",
+          "verification": {
+            "status": "verified",
+            "source": "UM Security Map / OpenStreetMap"
+          }
+        },
+        {
+          "id": "pantai_sentral_gate",
+          "name": "Pantai Sentral / Kerinchi Access Gate",
+          "alias": [
+            "Pintu Pantai Permai",
+            "Kerinchi Gate",
+            "Pintu Belakang Pantai"
+          ],
+          "lat": 3.112,
+          "lng": 101.6605,
+          "type": "gate",
+          "notes": "South Entrance connecting to Pantai Permai and Vista Angkasa",
+          "verification": {
+            "status": "verified",
+            "source": "UM Security Map / OpenStreetMap"
+          }
+        },
+        {
+          "id": "section_16_gate",
+          "name": "Section 16 / Jalan Ilmu Gate (Pintu Seksyen 16)",
+          "alias": [
+            "Pintu Seksyen 16",
+            "Section 16 Gate",
+            "Jalan Ilmu Gate",
+            "Pintu Jalan Ilmu"
+          ],
+          "lat": 3.1298,
+          "lng": 101.644,
+          "type": "gate",
+          "notes": "West-north vehicular and pedestrian entrance connecting Jalan Ilmu (Section 16 PJ) to the Academy of Islamic Studies and Rimba Ilmu; subject to peak-hour scheduled operations by UM Security.",
+          "verification": {
+            "status": "verified",
+            "source": "UM Official Campus Map / OpenStreetMap"
+          }
+        }
+      ]
+    },
+    {
+      "id": "transit_hubs",
+      "label": "Public Transit & Rail Stations (Feeder Hubs)",
+      "locations": [
+        {
+          "id": "lrt_universiti",
+          "name": "KL Gateway - Universiti LRT Station (KJ19)",
+          "alias": [
+            "LRT Universiti",
+            "KL Gateway LRT",
+            "Stesen Universiti",
+            "KJ19"
+          ],
+          "lat": 3.1128,
+          "lng": 101.6597,
+          "type": "transit_station",
+          "notes": "Primary rapid transit transfer point for UM campus shuttle and RapidKL T789 bus"
+        },
+        {
+          "id": "lrt_kerinchi",
+          "name": "Kerinchi LRT Station (KJ18)",
+          "alias": [
+            "LRT Kerinchi",
+            "Stesen Kerinchi",
+            "KJ18"
+          ],
+          "lat": 3.1154,
+          "lng": 101.668,
+          "type": "transit_station",
+          "notes": "Kelana Jaya Line station serving Bangsar South & Menara TM"
+        },
+        {
+          "id": "mrt_phileo",
+          "name": "Phileo Damansara MRT Station (KG12)",
+          "alias": [
+            "MRT Phileo",
+            "Phileo Damansara MRT",
+            "Stesen Phileo",
+            "KG12"
+          ],
+          "lat": 3.1293,
+          "lng": 101.6429,
+          "type": "transit_station",
+          "notes": "Kajang MRT Line station closest to Seksyen 16, Seksyen 17, Tiara, Astana & Prima 16"
+        },
+        {
+          "id": "lrt_abdullah_hukum",
+          "name": "Abdullah Hukum LRT & KTM Station (KJ17)",
+          "alias": [
+            "LRT Abdullah Hukum",
+            "KL Eco City Station",
+            "Mid Valley Hub",
+            "KJ17"
+          ],
+          "lat": 3.119,
+          "lng": 101.6735,
+          "type": "transit_station",
+          "notes": "Transit connection connecting Mid Valley Megamall and KL Eco City to UM area"
+        }
+      ]
+    },
+    {
+      "id": "off_campus_survey_zones",
+      "label": "Off-Campus Student Residential Zones (Survey Aligned)",
+      "locations": [
+        {
+          "id": "tiara_damansara",
+          "name": "Tiara Damansara Condominium",
+          "alias": [
+            "Tiara",
+            "Tiara Damansara",
+            "Tiara Condo"
+          ],
+          "lat": 3.1246,
+          "lng": 101.6383,
+          "type": "condominium",
+          "survey_option": "Tiara Damansara/ Astana Damansara/ Prima 16/ Li Villas",
+          "cluster": "tiara_astana_prima16_livillas",
+          "notes": "Jalan 17/1, Seksyen 17, Petaling Jaya. Major student residential community.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "astana_damansara",
+          "name": "Astana Damansara Condominium",
+          "alias": [
+            "Astana",
+            "Astana Damansara",
+            "Astana Condo"
+          ],
+          "lat": 3.1315,
+          "lng": 101.6385,
+          "type": "condominium",
+          "survey_option": "Tiara Damansara/ Astana Damansara/ Prima 16/ Li Villas",
+          "cluster": "tiara_astana_prima16_livillas",
+          "notes": "Jalan 17/1, Seksyen 17 PJ, right beside Sprint Highway.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "prima_16",
+          "name": "Prima 16 Condominium (Prima Sixteen)",
+          "alias": [
+            "Prima 16",
+            "Prima Sixteen",
+            "Prima 16 Condo"
+          ],
+          "lat": 3.13,
+          "lng": 101.64,
+          "type": "condominium",
+          "survey_option": "Tiara Damansara/ Astana Damansara/ Prima 16/ Li Villas",
+          "cluster": "tiara_astana_prima16_livillas",
+          "notes": "Jalan 16/18, Seksyen 16, Petaling Jaya. High-rise student and professional residence.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "li_villas",
+          "name": "Li Villas Condominium",
+          "alias": [
+            "Li Villas",
+            "Li Villas Condo"
+          ],
+          "lat": 3.1255,
+          "lng": 101.6418,
+          "type": "condominium",
+          "survey_option": "Tiara Damansara/ Astana Damansara/ Prima 16/ Li Villas",
+          "cluster": "tiara_astana_prima16_livillas",
+          "notes": "Jalan 16/20, Seksyen 16, Petaling Jaya. Close to Phileo Damansara MRT.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "pacific_star",
+          "name": "Pacific Star Business Hub & Residences",
+          "alias": [
+            "Pacific Star",
+            "PacStar",
+            "Pacific Star PJ"
+          ],
+          "lat": 3.1115,
+          "lng": 101.6385,
+          "type": "serviced_residence",
+          "survey_option": "Pacific Star/ Ryan&Miho/ Jaya One Residences",
+          "cluster": "pacific_star_ryan_miho_jaya_one",
+          "notes": "Jalan 13/6, Seksyen 13 PJ, directly opposite Jaya One.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "ryan_and_miho",
+          "name": "Ryan & Miho Residences",
+          "alias": [
+            "Ryan & Miho",
+            "Ryan and Miho",
+            "Ryan Miho"
+          ],
+          "lat": 3.1184,
+          "lng": 101.6338,
+          "type": "serviced_residence",
+          "survey_option": "Pacific Star/ Ryan&Miho/ Jaya One Residences",
+          "cluster": "pacific_star_ryan_miho_jaya_one",
+          "notes": "Jalan Universiti / Jalan 13/6, Seksyen 13 PJ, connected to Jaya One via link bridge.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "jaya_one_residences",
+          "name": "Jaya One Residences (The Suites)",
+          "alias": [
+            "Jaya One",
+            "The Suites Jaya One",
+            "Jaya One Residences",
+            "J1"
+          ],
+          "lat": 3.118,
+          "lng": 101.636,
+          "type": "serviced_residence",
+          "survey_option": "Pacific Star/ Ryan&Miho/ Jaya One Residences",
+          "cluster": "pacific_star_ryan_miho_jaya_one",
+          "notes": "Commercial retail, dining, and high-rise residences along Jalan Universiti, Seksyen 13 PJ.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "atwater_pj",
+          "name": "Atwater Serviced Residences",
+          "alias": [
+            "Atwater",
+            "Atwater PJ",
+            "Atwater Residences"
+          ],
+          "lat": 3.1178,
+          "lng": 101.6323,
+          "type": "serviced_residence",
+          "survey_option": "Atwater/ PJ Midtown/ Centrestage",
+          "cluster": "atwater_pj_midtown_centrestage",
+          "notes": "Jalan Universiti / Jalan Kemajuan, Seksyen 13 PJ.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "pj_midtown",
+          "name": "PJ Midtown Residences",
+          "alias": [
+            "PJ Midtown",
+            "Midtown PJ"
+          ],
+          "lat": 3.1136,
+          "lng": 101.6385,
+          "type": "serviced_residence",
+          "survey_option": "Atwater/ PJ Midtown/ Centrestage",
+          "cluster": "atwater_pj_midtown_centrestage",
+          "notes": "Jalan Kemajuan, Seksyen 13, Petaling Jaya.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "centrestage_pj",
+          "name": "Centrestage Petaling Jaya",
+          "alias": [
+            "Centrestage",
+            "Centre Stage",
+            "Centrestage PJ",
+            "Best Western PJ"
+          ],
+          "lat": 3.1118,
+          "lng": 101.639,
+          "type": "serviced_residence",
+          "survey_option": "Atwater/ PJ Midtown/ Centrestage",
+          "cluster": "atwater_pj_midtown_centrestage",
+          "notes": "Jalan 13/1, Seksyen 13, Petaling Jaya.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "university_tower",
+          "name": "University Tower Condominium",
+          "alias": [
+            "University Tower",
+            "University Towers",
+            "UTower",
+            "University Tower PJ"
+          ],
+          "lat": 3.1135,
+          "lng": 101.6501,
+          "type": "condominium",
+          "survey_option": "University Tower / Section 11",
+          "cluster": "university_tower_section_11",
+          "notes": "Jalan Profesor Diraja Ungku Aziz, Seksyen 11 PJ. Directly opposite UMMC (PPUM) and UM PJ Gate.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "seksyen_11_pj",
+          "name": "Section 11 Petaling Jaya",
+          "alias": [
+            "Section 11",
+            "Seksyen 11",
+            "Sec 11 PJ",
+            "Seksyen 11 PJ"
+          ],
+          "lat": 3.115,
+          "lng": 101.648,
+          "type": "residential_area",
+          "survey_option": "University Tower / Section 11",
+          "cluster": "university_tower_section_11",
+          "notes": "Residential neighborhood adjacent to University Tower and PJ Gate.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "vista_angkasa",
+          "name": "Vista Angkasa Apartment",
+          "alias": [
+            "Vista Angkasa",
+            "Vista",
+            "Apartment Vista Angkasa"
+          ],
+          "lat": 3.113,
+          "lng": 101.6619,
+          "type": "apartment",
+          "survey_option": "Vista Angkasa / KL Gateway / Residensi Kerinchi",
+          "cluster": "vista_angkasa_kl_gateway_kerinchi",
+          "notes": "High-density student rental community directly across from KL Gateway - Universiti LRT Station.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "kl_gateway_residences",
+          "name": "KL Gateway Residences & Mall",
+          "alias": [
+            "KL Gateway",
+            "KL Gateway Residences",
+            "Gateway Residences"
+          ],
+          "lat": 3.1132,
+          "lng": 101.6635,
+          "type": "serviced_residence",
+          "survey_option": "Vista Angkasa / KL Gateway / Residensi Kerinchi",
+          "cluster": "vista_angkasa_kl_gateway_kerinchi",
+          "notes": "Integrated development linked directly to KL Gateway - Universiti LRT station.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "residensi_kerinchi",
+          "name": "Residensi Kerinchi",
+          "alias": [
+            "Residensi Kerinchi",
+            "Kerinchi Residensi"
+          ],
+          "lat": 3.1135,
+          "lng": 101.6645,
+          "type": "apartment",
+          "survey_option": "Vista Angkasa / KL Gateway / Residensi Kerinchi",
+          "cluster": "vista_angkasa_kl_gateway_kerinchi",
+          "notes": "Apartment block connected via covered pedestrian bridge to KL Gateway Mall.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "south_view_serviced_apartments",
+          "name": "South View Serviced Apartments",
+          "alias": [
+            "South View",
+            "Southview",
+            "South View Bangsar South"
+          ],
+          "lat": 3.111,
+          "lng": 101.6648,
+          "type": "serviced_residence",
+          "survey_option": "South View / South Link / Novum",
+          "cluster": "south_view_south_link_novum",
+          "notes": "High-rise condominium along Jalan Kerinchi, Bangsar South.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "southlink_residences",
+          "name": "South Link Lifestyle Apartments",
+          "alias": [
+            "South Link",
+            "Southlink",
+            "Southlink Bangsar South"
+          ],
+          "lat": 3.11,
+          "lng": 101.6655,
+          "type": "serviced_residence",
+          "survey_option": "South View / South Link / Novum",
+          "cluster": "south_view_south_link_novum",
+          "notes": "Serviced residences along Jalan Kerinchi Kiri, Bangsar South.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "novum_bangsar_south",
+          "name": "Novum Bangsar South",
+          "alias": [
+            "Novum",
+            "Novum Residences",
+            "Novum Bangsar South"
+          ],
+          "lat": 3.1138,
+          "lng": 101.6669,
+          "type": "serviced_residence",
+          "survey_option": "South View / South Link / Novum",
+          "cluster": "south_view_south_link_novum",
+          "notes": "Luxury condominium located along Jalan Kerinchi Kiri 2, Bangsar South.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "pantai_hillpark_phase1_3",
+          "name": "Pantai Hillpark (Phases 1, 2 & 3)",
+          "alias": [
+            "Pantai Hillpark",
+            "Hillpark",
+            "Pantai Hillpark Phase 1",
+            "Pantai Hillpark Phase 2",
+            "Pantai Hillpark Phase 3"
+          ],
+          "lat": 3.105,
+          "lng": 101.6622,
+          "type": "condominium",
+          "survey_option": "Pantai Hillpark",
+          "cluster": "pantai_hillpark_cluster",
+          "notes": "Primary student rental condo cluster along Jalan Pantai Dalam / Bukit Kerinchi.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "pantai_hillpark_phase5_centrio",
+          "name": "Pantai Hillpark Phase 5 & Centrio",
+          "alias": [
+            "Pantai Hillpark Phase 5",
+            "Centrio",
+            "Centrio Pantai Hillpark",
+            "Hillpark 5"
+          ],
+          "lat": 3.1025,
+          "lng": 101.665,
+          "type": "condominium",
+          "survey_option": "Pantai Hillpark",
+          "cluster": "pantai_hillpark_cluster",
+          "notes": "Upper tier condominium and soho residences in Pantai Hillpark area.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "bangsar_south_central",
+          "name": "Bangsar South Central (The Sphere & Nexus)",
+          "alias": [
+            "Bangsar South",
+            "The Sphere",
+            "Nexus Bangsar South",
+            "Camellia Bangsar South"
+          ],
+          "lat": 3.1106,
+          "lng": 101.6663,
+          "type": "commercial_residential",
+          "survey_option": "Bangsar South",
+          "cluster": "bangsar_south_general",
+          "notes": "Central lifestyle, dining, and commercial hub in Bangsar South.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "pantai_panorama",
+          "name": "Pantai Panorama Condominium",
+          "alias": [
+            "Pantai Panorama",
+            "Panorama Condo"
+          ],
+          "lat": 3.1085,
+          "lng": 101.664,
+          "type": "condominium",
+          "survey_option": "Bangsar South",
+          "cluster": "bangsar_south_general",
+          "notes": "Established condominium adjacent to Bangsar South, 5-minute drive to UM KL Gate.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "seksyen_17_central",
+          "name": "Seksyen 17 Commercial & Housing (Seventeen Mall)",
+          "alias": [
+            "Seksyen 17",
+            "Section 17",
+            "Seventeen Mall",
+            "Biji Living"
+          ],
+          "lat": 3.1265,
+          "lng": 101.6345,
+          "type": "residential_area",
+          "survey_option": "Tiara Damansara/ Astana Damansara/ Prima 16/ Li Villas",
+          "cluster": "tiara_astana_prima16_livillas",
+          "notes": "Commercial hub and landed student rentals in Seksyen 17 PJ.",
+          "verification": {
+            "status": "verified",
+            "source": "Google Maps / Street View"
+          }
+        },
+        {
+          "id": "other_kl_selangor",
+          "name": "Other KL / Selangor Area (Commuter Transit Gateway)",
+          "alias": [
+            "Other KL",
+            "Other Selangor",
+            "Luar Kampus",
+            "External Commute"
+          ],
+          "lat": null,
+          "lng": null,
+          "type": "external_gateway",
+          "survey_option": "Other KL/ Selangor area",
+          "cluster": "external_kl_selangor_commuters",
+          "notes": "Survey regional option representing commuters living outside the immediate campus perimeter. When selected, the client app prompts the commuter to specify their location or drop a custom GPS pin rather than using a static centroid.",
+          "is_dynamic": true,
+          "requires_custom_pin": true,
+          "verification": {
+            "status": "dynamic_user_input",
+            "source": "Client Geolocation / Custom Pin"
+          }
+        }
+      ]
+    }
+  ],
+  "matching_defaults": {
+    "zone_radius_m": 500,
+    "destination_radius_m": 300,
+    "departure_window_min": 15,
+    "survey_cluster_groups": {
+      "tiara_astana_prima16_livillas": [
+        "tiara_damansara",
+        "astana_damansara",
+        "prima_16",
+        "li_villas",
+        "seksyen_17_central"
+      ],
+      "pacific_star_ryan_miho_jaya_one": [
+        "pacific_star",
+        "ryan_and_miho",
+        "jaya_one_residences"
+      ],
+      "atwater_pj_midtown_centrestage": [
+        "atwater_pj",
+        "pj_midtown",
+        "centrestage_pj"
+      ],
+      "university_tower_section_11": [
+        "university_tower",
+        "seksyen_11_pj"
+      ],
+      "vista_angkasa_kl_gateway_kerinchi": [
+        "vista_angkasa",
+        "kl_gateway_residences",
+        "residensi_kerinchi"
+      ],
+      "south_view_south_link_novum": [
+        "south_view_serviced_apartments",
+        "southlink_residences",
+        "novum_bangsar_south"
+      ],
+      "pantai_hillpark_cluster": [
+        "pantai_hillpark_phase1_3",
+        "pantai_hillpark_phase5_centrio"
+      ],
+      "bangsar_south_general": [
+        "bangsar_south_central",
+        "pantai_panorama"
+      ],
+      "on_campus_colleges": [
+        "kk1",
+        "kk2",
+        "kk3",
+        "kk4",
+        "kk5",
+        "kk6",
+        "kk7",
+        "kk8",
+        "kk9",
+        "kk10",
+        "kk11",
+        "kk12",
+        "kk13"
+      ],
+      "external_kl_selangor_commuters": [
+        "other_kl_selangor"
+      ]
+    },
+    "notes": "A match occurs when a ride's origin is within zone_radius_m of the saved origin AND destination is within destination_radius_m AND departure time is within departure_window_min minutes. Cluster groupings directly map to the Google Form survey choices for seamless integration with Member 4's pickup grouping (FR5.2)."
+  }
+}

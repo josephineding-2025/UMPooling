@@ -22,6 +22,8 @@ Firebase: used only for FCM push delivery (no Analytics, no Firebase auth or dat
 
 ## 2. Components
 
+Client ownership and remaining UI work are documented in [UI handoff](ui-handoff.md). Bottom navigation is shared through CommuterNavigation. NotificationRoute delegates to NotificationViewModel/NotificationRepository; AccountViewModel owns settings and saved-label writes. My Trips and shared live/demo ticket presentation belong to booking; chat state belongs to chat.
+
 | Component | Technology | Notes |
 |---|---|---|
 | Client | Kotlin, Jetpack Compose, MVVM, package `com.fopgang.umpooling` | Reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key) from `local.properties` through `BuildConfig`. |
@@ -63,4 +65,4 @@ See `docs/schema.md` section 5. The functions are written (migration 7) but not 
 
 - The base tables were created in the Supabase dashboard, so the migrations alone cannot rebuild an empty project (see `supabase/README.md`).
 - Applying and testing the trip lifecycle functions, ride-request notifications (FR2.2), the staff aggregate read path and the CO2 and tier trigger are not built.
-- Push delivery to a real phone has not been tested, because the app has no sign-in screen yet.
+- Auth UI and session restoration are implemented. Physical-device push delivery and two-account staging integration still require recorded verification; the existence of a sign-in screen is no longer the blocker.
