@@ -41,7 +41,7 @@ This is a code-cleanup handoff, not certification that every Member 3 deliverabl
 
 ## Integration dependencies
 
-No Supabase migrations were deployed. Lifecycle migration 7 and participant offer-read migration 8 still require backend-owner review and staging checks. Live posting/reservation creation, automatic current location, server SOS audit records, ratings persistence, impact data and cross-device settings/routes are separate integrations.
+No Supabase migrations were deployed. Lifecycle migration 7 and participant offer-read migration 8 still require backend-owner review and staging checks. The signed-in reservation flow calls the existing booking RPC and requires a two-account staging check. Live posting, automatic current location, server SOS audit records, ratings persistence, impact data and cross-device settings/routes are separate integrations.
 
 ## Reviewer checks
 

@@ -25,6 +25,8 @@ import com.fopgang.umpooling.matching.SavedRoutesScreen
 import com.fopgang.umpooling.profile.ProfileScreen
 import com.fopgang.umpooling.safety.*
 import com.fopgang.umpooling.ui.components.PeachBackground
+import com.fopgang.umpooling.ui.matching.FeedScreen
+import java.time.Instant
 import com.fopgang.umpooling.chat.ChatScreen
 import com.fopgang.umpooling.dashboard.GreenCommuterTierScreen
 import com.fopgang.umpooling.dashboard.SustainabilityDashboardScreen
@@ -150,12 +152,12 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("verify") { VerificationScreen(authViewModel::logout,message,navigate,authState,authViewModel::verify,authViewModel::resend) }
                 } else {
                     composable("home") {
-                        HomeScreen(navigate,unavailable,onSearch={ criteria=it; navigate("find_ride") })
+                        HomeScreen(navigate,unavailable,onSearch={ criteria=it; navigate("find_ride") },showSampleRide=demo)
                     }
                     composable("find_ride") {
                         FindRideScreen(back,{ navigate("offer_ride") }, {
                             criteria=it
-                            navigate(if(it.isImmediate()) "immediate_results" else "request_future_ride")
+                            navigate(if (!demo) "live_offers" else if (it.isImmediate()) "immediate_results" else "request_future_ride")
                         },initialCriteria=criteria, requestText=transcript)
                     }
                     composable("offer_ride") {
@@ -167,6 +169,22 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("posted_offer") {
                         FlowDestination("Offer preview",back,"Demo offer only. A live post requires the ride repository.",
                             listOf("View offer" to { openOffer(DemoRideIds.HOME_OFFER) }, "Home" to home))
+                    }
+                    composable("live_offers") {
+                        if (owner != null) {
+                            val now = Instant.now()
+                            FeedScreen(
+                                onOfferClicked = { offer -> offer.tripOfferId?.let(openOffer) },
+                                onBack = back,
+                                offerFilter = { offer ->
+                                    val departure = offer.departureInstant()
+                                    offer.tripOfferId != null && offer.driverId != owner &&
+                                        offer.availableSeats >= criteria.seats &&
+                                        departure != null && departure.isAfter(now) &&
+                                        departure.atZone(CAMPUS_ZONE).toLocalDate() == criteria.departureDate
+                                },
+                            )
+                        }
                     }
                     composable("immediate_results") {
                         FlowDestination("Available rides",back,"Immediate ride results · demo listings",
@@ -184,18 +202,37 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     }
                     composable("offer_details/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) { entry ->
                         val id=entry.arguments!!.getString("id")!!
-                        RideMatchScreen(id,back,{ navigate(BookingRoute.Confirmation(it).encode()) },
-                            { navigate("chat/offer/"+Uri.encode(it)) },unavailable)
+                        if (owner != null) {
+                            LiveBookingScreen(
+                                id, owner, criteria, reviewing = false, back = back,
+                                onReview = { navigate(BookingRoute.Confirmation(id).encode()) },
+                                onBooked = {}, onMyTrips = { navigate("my_trips") },
+                            )
+                        } else {
+                            RideMatchScreen(id,back,{ navigate(BookingRoute.Confirmation(it).encode()) },
+                                { navigate("chat/offer/"+Uri.encode(it)) },unavailable)
+                        }
                     }
                     composable("booking_confirmation/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) { entry ->
                         val id=entry.arguments!!.getString("id")!!
-                        BookingConfirmationScreen(id,back,{
-                            if(demo) {
-                                completed=false;cancelled=false;bookedSeats=criteria.seats
-                                nav.navigate("my_trips") { popUpTo("home"); launchSingleTop=true }
-                                navigate(BookingRoute.Ticket(DemoRideIds.CONFIRMED_BOOKING).encode())
-                            } else unavailable()
-                        },{ navigate("chat/offer/"+Uri.encode(it)) },unavailable, requestedSeats=criteria.seats)
+                        if (owner != null) {
+                            LiveBookingScreen(
+                                id, owner, criteria, reviewing = true, back = back, onReview = {},
+                                onBooked = { bookingId ->
+                                    nav.navigate("my_trips") { popUpTo("home"); launchSingleTop = true }
+                                    navigate(BookingRoute.Ticket(bookingId).encode())
+                                },
+                                onMyTrips = { navigate("my_trips") },
+                            )
+                        } else {
+                            BookingConfirmationScreen(id,back,{
+                                if(demo) {
+                                    completed=false;cancelled=false;bookedSeats=criteria.seats
+                                    nav.navigate("my_trips") { popUpTo("home"); launchSingleTop=true }
+                                    navigate(BookingRoute.Ticket(DemoRideIds.CONFIRMED_BOOKING).encode())
+                                } else unavailable()
+                            },{ navigate("chat/offer/"+Uri.encode(it)) },unavailable, requestedSeats=criteria.seats)
+                        }
                     }
                     composable("confirmed_ticket/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) { entry ->
                         val id=entry.arguments!!.getString("id")!!

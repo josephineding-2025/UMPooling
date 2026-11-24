@@ -27,8 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,7 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fopgang.umpooling.data.CampusLocationProvider
 import com.fopgang.umpooling.data.TripOffer
+import androidx.compose.ui.res.stringResource
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.data.repository.RideRepository
+import androidx.compose.material3.TextButton
 import kotlinx.coroutines.launch
 
 /**
@@ -53,27 +54,26 @@ import kotlinx.coroutines.launch
 @Composable
 fun FeedScreen(
     repository: RideRepository = remember { RideRepository() },
-    onOfferClicked: ((TripOffer) -> Unit)? = null
+    onOfferClicked: ((TripOffer) -> Unit)? = null,
+    onBack: (() -> Unit)? = null,
+    offerFilter: (TripOffer) -> Boolean = { true },
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    var offers by remember { mutableStateOf<List<TripOffer>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    var loadedOffers by remember { mutableStateOf<List<TripOffer>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(false) }
+    var loadFailed by remember { mutableStateOf(false) }
+    val offers = loadedOffers.filter(offerFilter)
 
     fun loadFeed() {
+        if (isLoading) return
+        isLoading = true
+        loadFailed = false
         coroutineScope.launch {
-            isLoading = true
             repository.getOpenTripOffers().fold(
-                onSuccess = { list ->
-                    offers = list
-                    isLoading = false
-                },
-                onFailure = { err ->
-                    isLoading = false
-                    snackbarHostState.showSnackbar("Unable to load offers: ${err.message}")
-                }
+                onSuccess = { loadedOffers = it },
+                onFailure = { loadFailed = true },
             )
+            isLoading = false
         }
     }
 
@@ -84,15 +84,17 @@ fun FeedScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Carpool Feed") },
+                title = { Text(stringResource(R.string.live_offer_feed)) },
+                navigationIcon = {
+                    if (onBack != null) TextButton(onClick = onBack) { Text(stringResource(R.string.back)) }
+                },
                 actions = {
-                    IconButton(onClick = { loadFeed() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh feed")
+                    IconButton(onClick = { loadFeed() }, enabled = !isLoading) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.live_offer_refresh))
                     }
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -101,6 +103,11 @@ fun FeedScreen(
         ) {
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (loadFailed) {
+                Column(Modifier.align(Alignment.Center).padding(24.dp)) {
+                    Text(stringResource(R.string.live_offer_load_failed))
+                    TextButton(onClick = ::loadFeed) { Text(stringResource(R.string.live_offer_refresh)) }
+                }
             } else if (offers.isEmpty()) {
                 Column(
                     modifier = Modifier
@@ -117,12 +124,12 @@ fun FeedScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No open ride offers right now",
+                        text = stringResource(R.string.live_offer_empty),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Be the first to offer a ride or check back closer to peak commuting hours!",
+                        text = stringResource(R.string.live_offer_empty_hint),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -51,7 +51,9 @@ private val HomeText = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 1
 
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier: Modifier = Modifier,
-    onSearch: (com.fopgang.umpooling.booking.FindRideCriteria) -> Unit = { onNavigate("find_ride") }) {
+    onSearch: (com.fopgang.umpooling.booking.FindRideCriteria) -> Unit = { onNavigate("find_ride") },
+    showSampleRide: Boolean = true,
+) {
     val campus = stringResource(R.string.um_campus)
     val mall = stringResource(R.string.mid_valley)
     var origin by rememberSaveable { mutableStateOf(campus) }
@@ -167,9 +169,15 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                     QuickAction(stringResource(R.string.saved), R.drawable.home_frame8, Modifier.weight(1f)) { onNavigate("saved") }
                 }
                 Spacer(Modifier.height(22.dp))
-                SectionTitle(stringResource(R.string.available_rides), stringResource(R.string.nearby))
-                Spacer(Modifier.height(10.dp))
-                RideCard(ride) { onNavigate(com.fopgang.umpooling.booking.BookingRoute.OfferDetails(ride.offerId).encode()) }
+                if (showSampleRide) {
+                    SectionTitle(stringResource(R.string.available_rides), stringResource(R.string.nearby))
+                    Spacer(Modifier.height(10.dp))
+                    RideCard(ride) { onNavigate(com.fopgang.umpooling.booking.BookingRoute.OfferDetails(ride.offerId).encode()) }
+                } else {
+                    TextButton(onClick = { onNavigate("find_ride") }) {
+                        Text(stringResource(R.string.available_rides))
+                    }
+                }
             }
             CommuterNavigation("home", onNavigate,
                 Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp).padding(bottom = 30.dp))

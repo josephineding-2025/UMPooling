@@ -2,8 +2,8 @@
 
 Navigation Compose 2.8.5 owns the back stack. AuthViewModel gates verified accounts and isolates explicit demo access. Account changes discard the previous navigation scope.
 
-- Home -> Find a Ride -> immediate results (within 30 minutes) or future pickup groups.
-- Offer details -> booking confirmation -> confirmed ticket carries offer/booking IDs. Live posting, matching and reservation creation remain disconnected; demo confirmation is explicitly separate.
+- Signed-in Home → Find a Ride opens the live offer feed. It shows upcoming offers for the selected local date with enough seats and excludes the user's own offers. Demo users retain the immediate-results and future-group previews.
+- Live offer details → booking review requires a campus or commuter pickup point with coordinates. The app opens My Trips and the confirmed ticket only after the reservation RPC returns a booking ID. On failure, the review offers My Trips and refresh so users can check for an existing booking before retrying. Live ride posting and future-request submission are pending.
 - Signed-in My Trips loads participant bookings/trips and driver offers through Supabase RLS. Driver offer, booking ticket and trip destinations use distinct IDs.
 - Driver start, passenger end confirmation, driver completion and active-trip cancellation use existing lifecycle RPCs. Busy states block duplicate operations; failures remain visible; successful operations reload server state. Lists refresh every 10 seconds while displayed.
 - The backend currently supports driver cancellation of an active trip, not pre-start/passenger cancellation. These unsupported operations are not represented as successful cancellations.

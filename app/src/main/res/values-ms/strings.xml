@@ -240,4 +240,19 @@
     <string name="auth_verified_sign_in">Sudah disahkan melalui pautan e-mel? Log masuk</string>
     <string name="auth_demo_banner">Mod demo · Data contoh</string>
     <string name="auth_exit_demo">Keluar demo</string>
+
+    <string name="live_offer_feed">Perjalanan tersedia</string>
+    <string name="live_offer_refresh">Muat semula tawaran</string>
+    <string name="live_offer_load_failed">Tawaran perjalanan tidak dapat dimuatkan. Cuba muat semula.</string>
+    <string name="live_offer_empty">Tiada perjalanan tersedia</string>
+    <string name="live_offer_empty_hint">Cuba tarikh lain atau kurangkan bilangan tempat duduk.</string>
+    <string name="live_offer_unavailable">Perjalanan ini tidak lagi tersedia untuk bilangan tempat duduk yang diminta.</string>
+    <string name="live_booking_review">Semak tempahan</string>
+    <string name="live_booking_confirm">Sahkan tempahan</string>
+    <string name="live_booking_failed">Tempahan tidak dapat disahkan. Semak Perjalanan Saya sebelum mencuba lagi. Perjalanan mungkin sudah penuh.</string>
+    <string name="live_pickup">Lokasi pengambilan</string>
+    <string name="live_destination">Destinasi</string>
+    <string name="live_pickup_required">Pilih lokasi yang mempunyai tempat pengambilan yang ditetapkan.</string>
+    <string name="live_booking_seats">Tempat duduk diminta: %1$d · Tersedia: %2$d</string>
+    <string name="live_booking_total">Jumlah: RM %1$.2f</string>
 </resources>
