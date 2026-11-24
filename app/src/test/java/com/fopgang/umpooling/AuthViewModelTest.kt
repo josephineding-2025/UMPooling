@@ -37,6 +37,9 @@ class AuthViewModelTest {
             assertEquals("restoring", AuthAccess.Restoring.destinationFor(it))
         }
         assertEquals("register", AuthAccess.SignedOut.destinationFor("register"))
+        assertEquals("forgot", AuthAccess.SignedOut.destinationFor("forgot"))
+        assertEquals("home", AuthAccess.Authenticated(verified).destinationFor("forgot"))
+        assertEquals("verify", AuthAccess.VerificationRequired(verified.email).destinationFor("forgot"))
         assertEquals("home", AuthAccess.Authenticated(verified).destinationFor("login"))
     }
 
@@ -166,6 +169,59 @@ class AuthViewModelTest {
         assertNull(vm.state.value.issue)
     }
 
+    @Test fun resetRequestRejectsNonUmEmailsBeforeAnyNetworkCall() {
+        val gateway = FakeAuth()
+        val vm = model(gateway)
+        vm.requestReset("a@um.edu.my.evil.com")
+        assertEquals(AuthIssue.INVALID_EMAIL, vm.state.value.issue)
+        assertNull(gateway.resetRequestedFor)
+    }
+
+    @Test fun resetRequestSendsNormalizedEmailAndShowsNeutralNotice() {
+        val gateway = FakeAuth()
+        val vm = model(gateway)
+        vm.requestReset("  A@SISWA.UM.EDU.MY ")
+        assertEquals(verified.email, gateway.resetRequestedFor)
+        assertEquals(AuthNotice.RESET_CODE_SENT, vm.state.value.notice)
+        assertFalse(vm.state.value.busy)
+    }
+
+    @Test fun invalidResetInputNeverReachesTheGateway() {
+        val gateway = FakeAuth()
+        val vm = model(gateway)
+        vm.completeReset(verified.email, "12345", "password123")
+        assertEquals(AuthIssue.CODE, vm.state.value.issue)
+        vm.completeReset(verified.email, "12a456", "password123")
+        assertEquals(AuthIssue.CODE, vm.state.value.issue)
+        vm.completeReset(verified.email, "123456", "short")
+        assertEquals(AuthIssue.INVALID_FORM, vm.state.value.issue)
+        vm.completeReset("a@gmail.com", "123456", "password123")
+        assertEquals(AuthIssue.INVALID_EMAIL, vm.state.value.issue)
+        assertNull(gateway.resetWith)
+    }
+
+    @Test fun successfulResetEndsSignedOutWithNoticeEvenIfTheRecoverySessionAppears() {
+        val gateway = FakeAuth()
+        gateway.resetSignsInBriefly = true
+        val vm = model(gateway)
+        vm.completeReset(" A@siswa.um.edu.my", "123456", "password123")
+        assertEquals(Triple(verified.email, "123456", "password123"), gateway.resetWith)
+        assertEquals(AuthAccess.SignedOut, vm.state.value.access)
+        assertEquals(AuthNotice.PASSWORD_UPDATED, vm.state.value.notice)
+        assertNull(vm.state.value.issue)
+    }
+
+    @Test fun failedResetKeepsTheUserSignedOutAndReportsTheCode() {
+        val gateway = FakeAuth()
+        gateway.resetResult = Result.failure(AuthFailure(AuthIssue.CODE))
+        val vm = model(gateway)
+        vm.completeReset(verified.email, "123456", "password123")
+        assertEquals(AuthAccess.SignedOut, vm.state.value.access)
+        assertEquals(AuthIssue.CODE, vm.state.value.issue)
+        assertNull(vm.state.value.notice)
+        assertFalse(vm.state.value.busy)
+    }
+
     private class FakeAuth(initial: AuthSession = AuthSession.SignedOut) : AuthGateway {
         override val sessions = MutableStateFlow(initial)
         var user = AuthUser("user-a", "a@siswa.um.edu.my", true)
@@ -176,6 +232,10 @@ class AuthViewModelTest {
         var logoutCalls = 0
         var loginResult = Result.success(Unit)
         var pendingLogin: CompletableDeferred<Result<Unit>>? = null
+        var resetRequestedFor: String? = null
+        var resetWith: Triple<String, String, String>? = null
+        var resetResult = Result.success(Unit)
+        var resetSignsInBriefly = false
         override suspend fun signUp(submission: AuthSubmission): Result<Unit> {
             registered = submission
             return Result.success(Unit)
@@ -191,6 +251,18 @@ class AuthViewModelTest {
         override suspend fun resend(email: String): Result<Unit> {
             resentEmail = email
             return Result.success(Unit)
+        }
+        override suspend fun requestPasswordReset(email: String): Result<Unit> {
+            resetRequestedFor = email
+            return Result.success(Unit)
+        }
+        override suspend fun resetPassword(email: String, code: String, newPassword: String): Result<Unit> {
+            resetWith = Triple(email, code, newPassword)
+            if (resetSignsInBriefly) {
+                sessions.value = AuthSession.SignedIn(user)
+                sessions.value = AuthSession.SignedOut
+            }
+            return resetResult
         }
         override suspend fun refreshUser() = Result.success(user)
         override suspend fun signOut(): Result<Unit> {

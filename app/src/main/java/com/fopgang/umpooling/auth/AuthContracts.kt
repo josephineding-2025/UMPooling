@@ -21,7 +21,7 @@ sealed interface AuthAccess {
 }
 
 enum class AuthIssue { INVALID_EMAIL, INVALID_FORM, CREDENTIALS, UNVERIFIED, CODE, RATE_LIMIT, CONFIGURATION, SESSION, REQUEST }
-enum class AuthNotice { EMAIL_SENT }
+enum class AuthNotice { EMAIL_SENT, RESET_CODE_SENT, PASSWORD_UPDATED }
 class AuthFailure(val issue: AuthIssue) : Exception()
 
 /** A transient event. Passwords are never saved in UI state or SavedStateHandle. */
@@ -50,9 +50,9 @@ fun AuthUser.access(): AuthAccess = when {
 /** Gate restored and requested routes as well as button-driven navigation. */
 fun AuthAccess.destinationFor(requested: String): String = when (this) {
     AuthAccess.Restoring -> "restoring"
-    AuthAccess.SignedOut -> if (requested in setOf("welcome", "login", "register")) requested else "login"
+    AuthAccess.SignedOut -> if (requested in setOf("welcome", "login", "register", "forgot")) requested else "login"
     is AuthAccess.VerificationRequired -> "verify"
-    is AuthAccess.Authenticated, AuthAccess.Demo -> if (requested in setOf("welcome", "login", "register", "verify")) "home" else requested
+    is AuthAccess.Authenticated, AuthAccess.Demo -> if (requested in setOf("welcome", "login", "register", "verify", "forgot")) "home" else requested
 }
 
 interface AuthGateway {
@@ -61,6 +61,8 @@ interface AuthGateway {
     suspend fun signIn(email: String, password: String): Result<Unit>
     suspend fun verify(email: String, code: String): Result<Unit>
     suspend fun resend(email: String): Result<Unit>
+    suspend fun requestPasswordReset(email: String): Result<Unit>
+    suspend fun resetPassword(email: String, code: String, newPassword: String): Result<Unit>
     suspend fun refreshUser(): Result<AuthUser>
     suspend fun signOut(): Result<Unit>
 }

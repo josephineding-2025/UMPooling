@@ -50,7 +50,7 @@ AI is used only where it removes a real problem. All AI calls go through a backe
 **Module 1: Authentication and Green Commuter Profile**
 - 13.3 link: supporting. Stores the vehicle data used for CO2 estimates and shows the user's Green Commuter Tier, which recognises sustainable commuting.
 - FR1.1: The system shall allow registration and login only with @siswa.um.edu.my or @um.edu.my email addresses.
-- FR1.2: The system shall send a verification link to the institutional email and block access until the user verifies it.
+- FR1.2: The system shall send a verification code (or link) to the institutional email and block access until the user verifies it.
 - FR1.3: The user shall be able to manage a commuter profile (faculty or department, residential area, role as driver, passenger or both; for drivers, vehicle type, registration number and fuel-efficiency category). The profile shall show a verification badge and the user's cumulative Green Commuter Tier. Student ID images are NOT collected, to limit sensitive data.
 
 **Module 2: Ride Matching and Location-Based Dispatch**

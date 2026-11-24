@@ -146,6 +146,9 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("welcome") { WelcomeScreen(navigate) }
                     composable("login") { AuthScreen(false,navigate,back,message,authState) { authViewModel.submit(false,it) } }
                     composable("register") { AuthScreen(true,navigate,back,message,authState) { authViewModel.submit(true,it) } }
+                    composable("forgot") {
+                        ForgotPasswordScreen(navigate,back,authState,authViewModel::requestReset,authViewModel::completeReset)
+                    }
                 } else if(authState.access is AuthAccess.VerificationRequired) {
                     composable("verify") { VerificationScreen(authViewModel::logout,message,navigate,authState,authViewModel::verify,authViewModel::resend) }
                 } else {
