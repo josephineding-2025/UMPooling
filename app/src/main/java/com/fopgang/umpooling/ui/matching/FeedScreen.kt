@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fopgang.umpooling.data.CampusLocationProvider
 import com.fopgang.umpooling.data.TripOffer
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.fopgang.umpooling.ui.components.LoadingState
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.data.repository.RideRepository
 import androidx.compose.material3.TextButton
@@ -102,7 +103,7 @@ fun FeedScreen(
                 .padding(innerPadding)
         ) {
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                LoadingState(Modifier.align(Alignment.Center))
             } else if (loadFailed) {
                 Column(Modifier.align(Alignment.Center).padding(24.dp)) {
                     Text(stringResource(R.string.live_offer_load_failed))
@@ -142,9 +143,9 @@ fun FeedScreen(
                 ) {
                     items(offers, key = { it.tripOfferId ?: it.hashCode().toString() }) { offer ->
                         val origName = offer.originZone?.let { CampusLocationProvider.findById(it)?.name }
-                            ?: offer.originZone ?: "Pickup Location"
+                            ?: offer.originZone ?: stringResource(R.string.live_pickup)
                         val destName = offer.destinationZone?.let { CampusLocationProvider.findById(it)?.name }
-                            ?: offer.destinationZone ?: "Destination"
+                            ?: offer.destinationZone ?: stringResource(R.string.live_destination)
 
                         Card(
                             onClick = { onOfferClicked?.invoke(offer) },
@@ -182,7 +183,7 @@ fun FeedScreen(
                                     }
 
                                     Text(
-                                        text = "RM ${String.format("%.2f", offer.costPerSeat)}",
+                                        text = stringResource(R.string.ride_price, offer.costPerSeat),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -195,7 +196,7 @@ fun FeedScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
                                             Icons.Default.DateRange,
                                             contentDescription = null,
@@ -211,7 +212,7 @@ fun FeedScreen(
                                     }
 
                                     Badge {
-                                        Text(text = "${offer.availableSeats} seat(s) left")
+                                        Text(pluralStringResource(R.plurals.live_seats_left, offer.availableSeats, offer.availableSeats))
                                     }
                                 }
                             }

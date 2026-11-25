@@ -103,22 +103,22 @@ fun WelcomeScreen(navigate: (String) -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Text(stringResource(R.string.welcome_title).replace("lighten the campus.", "lighten\nthe campus."), fontSize = 29.sp, lineHeight = 34.sp,
+                Text(stringResource(R.string.welcome_title), fontSize = 29.sp, lineHeight = 34.sp,
                     fontWeight = FontWeight.ExtraBold, letterSpacing = (-.5).sp)
                 Spacer(Modifier.height(12.dp))
                 Text(stringResource(R.string.welcome_body), fontSize = 16.sp, lineHeight = 22.sp, color = AuthMuted)
                 Spacer(Modifier.height(26.dp))
                 Surface(onClick = { navigate("register") }, shape = CircleShape, color = Color.Transparent,
                     shadowElevation = 12.dp, border = BorderStroke(1.dp, Color(0xFF887F78))) {
-                    Box(Modifier.fillMaxWidth().height(56.dp).background(Brush.linearGradient(
+                    Box(Modifier.fillMaxWidth().heightIn(min = 56.dp).background(Brush.linearGradient(
                         listOf(Color(0xFF62564F), Color(0xFF27221F)))) , contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.get_started), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.get_started), Modifier.padding(horizontal = 54.dp, vertical = 10.dp), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         Text("›››", Modifier.align(Alignment.CenterEnd).padding(end = 17.dp),
                             color = Color.White, fontSize = 25.sp, letterSpacing = 1.sp)
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                Button({ navigate("login") }, Modifier.fillMaxWidth().height(56.dp), shape = CircleShape,
+                Button({ navigate("login") }, Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFFCFA)),
                     border = BorderStroke(1.dp, Color(0xFFB1AAA4)),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)) {
@@ -190,7 +190,7 @@ fun AuthScreen(register: Boolean, navigate: (String) -> Unit, back: () -> Unit, 
             }
             Spacer(Modifier.height(18.dp))
         } else {
-            TextButton({ message(R.string.not_connected) }, Modifier.align(Alignment.End).height(33.dp), contentPadding = PaddingValues(0.dp)) {
+            TextButton({ message(R.string.not_connected) }, Modifier.align(Alignment.End).heightIn(min = 33.dp), contentPadding = PaddingValues(0.dp)) {
                 Text(stringResource(R.string.forgot_password), color = AuthAccent, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(14.dp))
@@ -338,7 +338,7 @@ fun VerificationScreen(back: () -> Unit, message: (Int) -> Unit, navigate: (Stri
                 }
                 Spacer(Modifier.height(55.dp))
                 Button(
-                    { onVerify(code) }, Modifier.fillMaxWidth().height(54.dp),
+                    { onVerify(code) }, Modifier.fillMaxWidth().heightIn(min = 54.dp),
                     enabled = code.length == 6 && !state.busy, shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black,
                         contentColor = Color.White, disabledContainerColor = Color.Black,

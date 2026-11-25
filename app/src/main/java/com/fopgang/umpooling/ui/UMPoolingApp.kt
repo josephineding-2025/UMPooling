@@ -28,6 +28,7 @@ import com.fopgang.umpooling.profile.ProfileScreen
 import com.fopgang.umpooling.profile.ProfileViewModel
 import com.fopgang.umpooling.data.repository.ProfileRepository
 import com.fopgang.umpooling.safety.*
+import com.fopgang.umpooling.ui.components.LoadingState
 import com.fopgang.umpooling.ui.components.PeachBackground
 import com.fopgang.umpooling.ui.matching.FeedScreen
 import java.time.Instant
@@ -51,7 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 fun UMPoolingApp(authViewModel: AuthViewModel) {
     val state by authViewModel.state.collectAsState()
     if (state.access == AuthAccess.Restoring) {
-        PeachBackground { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
+        PeachBackground { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingState() } }
         return
     }
     val scopeKey = when (val access = state.access) {
@@ -180,7 +181,7 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     }
                     composable("posted_offer") {
                         FlowDestination("Offer preview",back,"Demo offer only. A live post requires the ride repository.",
-                            listOf("View offer" to { openOffer(DemoRideIds.HOME_OFFER) }, "Home" to home))
+                            listOf("View offer" to { openOffer(DemoRideIds.HOME_OFFER) }, stringResource(R.string.home) to home))
                     }
                     composable("live_offers") {
                         if (owner != null) {
@@ -199,7 +200,7 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                         }
                     }
                     composable("immediate_results") {
-                        FlowDestination("Available rides",back,"Immediate ride results · demo listings",
+                        FlowDestination(stringResource(R.string.live_offer_feed),back,"Immediate ride results · demo listings",
                             listOf("View driver and ride details" to { openOffer(DemoRideIds.HOME_OFFER) },
                                 "Adjust search" to back,"Save a route" to { navigate("saved") },
                                 "Request a ride" to unavailable))
@@ -277,7 +278,7 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     }
                     composable("pending_group/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) {
                         FlowDestination("Pending group",back,"No driver assigned. No seat has been reserved.",
-                            listOf("My Trips" to {navigate("my_trips")},"Adjust search" to {navigate("find_ride")}))
+                            listOf(stringResource(R.string.my_trips) to {navigate("my_trips")},"Adjust search" to {navigate("find_ride")}))
                     }
                     composable("active_trip/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) { entry ->
                         val id=entry.arguments!!.getString("id")!!

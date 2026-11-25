@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -133,15 +134,15 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)).show()
                             }
                             SmallField(Modifier.weight(1f), R.drawable.home_frame4,
-                                stringResource(R.string.seat_count, seats).replace("(s)", if (seats == 1) "" else "s")) {
+                                pluralStringResource(R.plurals.home_seats, seats, seats)) {
                                 seats = seats % 3 + 1
                             }
                         }
                         Spacer(Modifier.height(9.dp))
                         Button({ onSearch(com.fopgang.umpooling.booking.FindRideCriteria(
                             origin=com.fopgang.umpooling.booking.RideLocation(origin), destination=com.fopgang.umpooling.booking.RideLocation(destination),
-                            departureDate=java.time.LocalDate.ofEpochDay(selectedDay), seats=seats)) }, Modifier.fillMaxWidth().height(40.dp), shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(0.dp),
+                            departureDate=java.time.LocalDate.ofEpochDay(selectedDay), seats=seats)) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
                             FigmaIcon(R.drawable.home_frame5, Modifier.size(19.dp))
                             Spacer(Modifier.width(13.dp))
@@ -155,7 +156,7 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                 Spacer(Modifier.height(6.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                     QuickAction(stringResource(R.string.offer_ride), R.drawable.home_frame6, Modifier.weight(1f)) { onNavigate("offer_ride") }
-                    Surface(onClick = { onNavigate("dashboard") }, Modifier.weight(1f).height(62.dp),
+                    Surface(onClick = { onNavigate("dashboard") }, Modifier.weight(1f).heightIn(min = 62.dp),
                         shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             Box(Modifier.size(26.dp, 22.dp)) {
@@ -224,7 +225,7 @@ private fun SectionTitle(title: String, more: String, action: (() -> Unit)? = nu
 
 @Composable
 private fun QuickAction(label: String, icon: Int, modifier: Modifier, onClick: () -> Unit) {
-    Surface(onClick, modifier.height(62.dp), shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
+    Surface(onClick, modifier.heightIn(min = 62.dp), shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
         Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterVertically)) {
             FigmaIcon(icon, Modifier.size(20.dp, 19.dp))

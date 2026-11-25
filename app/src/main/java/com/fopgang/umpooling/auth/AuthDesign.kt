@@ -67,10 +67,10 @@ internal fun AuthChoice(label: String, selected: Boolean, modifier: Modifier = M
     Surface(selected = selected, onClick = action, modifier = modifier, shape = CircleShape,
         color = if (selected) Color(0xFF352D29) else Color.Transparent,
         shadowElevation = if (selected) 7.dp else 0.dp) {
-        Box(Modifier.height(38.dp).then(if (selected) Modifier.background(
+        Box(Modifier.heightIn(min = 38.dp).then(if (selected) Modifier.background(
             Brush.verticalGradient(listOf(Color(0xFF5C5049), Color(0xFF292321)))) else Modifier),
             contentAlignment = Alignment.Center) {
-            Text(label, Modifier.padding(horizontal = 20.dp), color = if (selected) Color.White else AuthInk,
+            Text(label, Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = if (selected) Color.White else AuthInk,
                 fontSize = 15.sp, lineHeight = 19.sp, fontWeight = FontWeight.Bold)
         }
     }
@@ -89,7 +89,7 @@ internal fun AuthTabs(register: Boolean, navigate: (String) -> Unit) {
 
 @Composable
 internal fun AuthAction(label: String, modifier: Modifier = Modifier, enabled: Boolean = true, secondary: Boolean = false, action: () -> Unit) {
-    Button(action, modifier.fillMaxWidth().height(56.dp), enabled = enabled, shape = CircleShape,
+    Button(action, modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled, shape = CircleShape,
         border = if (secondary) BorderStroke(1.dp, Color(0xFFF2CABB)) else null,
         colors = ButtonDefaults.buttonColors(containerColor = if (secondary) Color.White.copy(alpha = .8f) else Color.Black,
             disabledContainerColor = Color(0xFF655952), disabledContentColor = Color.White.copy(alpha = .7f)),
