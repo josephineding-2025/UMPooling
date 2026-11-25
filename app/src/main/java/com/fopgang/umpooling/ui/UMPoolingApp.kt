@@ -22,7 +22,11 @@ import com.fopgang.umpooling.booking.RequestFutureRideScreen
 import com.fopgang.umpooling.home.HomeScreen
 import com.fopgang.umpooling.notifications.LiveNotificationScreen
 import com.fopgang.umpooling.matching.SavedRoutesScreen
+import com.fopgang.umpooling.profile.DemoProfileGateway
+import com.fopgang.umpooling.profile.ProfileEditScreen
 import com.fopgang.umpooling.profile.ProfileScreen
+import com.fopgang.umpooling.profile.ProfileViewModel
+import com.fopgang.umpooling.data.repository.ProfileRepository
 import com.fopgang.umpooling.safety.*
 import com.fopgang.umpooling.ui.components.PeachBackground
 import com.fopgang.umpooling.ui.matching.FeedScreen
@@ -94,6 +98,14 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                 return AccountViewModel(AccountStorage(context.applicationContext,owner ?: "demo")) as T
             }
         })
+    val profileViewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel(viewModelStoreOwner=accountStoreOwner,key="profile/"+(owner ?: "demo"),
+        factory=object: androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T: androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return ProfileViewModel(if(owner!=null) ProfileRepository() else DemoProfileGateway()) as T
+            }
+        })
+    val profile by profileViewModel.state.collectAsState()
     val account by accountViewModel.state.collectAsState()
     val notificationPreferences=account.preferences
     val savePreferences:(NotificationPreferences)->Unit=accountViewModel::savePreferences
@@ -287,9 +299,10 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("sos_trip/{id}?prepared={prepared}",arguments=listOf(navArgument("prepared"){type=NavType.BoolType;defaultValue=false})) {entry->if(owner!=null) LiveTripsScreen(owner,back,navigate,tripId=entry.arguments?.getString("id"),sos=true,sosPrepared=entry.arguments?.getBoolean("prepared")==true)}
                     composable("chat/trip/{id}") {entry->if(owner!=null) LiveChatScreen(owner,ConversationKind.TRIP,entry.arguments!!.getString("id")!!,back)}
                     composable("profile") { ProfileScreen(navigate,unavailable,message,
-                        notificationPreferences.push,{savePreferences(notificationPreferences.copy(push=it))},authViewModel::logout) }
-                    composable("profile_setup") { FlowDestination("Commuter profile",back,"Passenger, Driver or Both · Faculty · Residential area · Vehicle details",listOf("Home" to home)) }
-                    composable("emergency_contacts") { EmergencyContactScreen(owner ?: "demo",back) }
+                        notificationPreferences.push,{savePreferences(notificationPreferences.copy(push=it))},authViewModel::logout,
+                        name=profile.profile?.displayName,role=profile.profile?.usersRole) }
+                    composable("profile_setup") { ProfileEditScreen(profile,{profileViewModel.clearMessages();back()},profileViewModel::edit,profileViewModel::save,profileViewModel::load) }
+                    composable("emergency_contacts") { EmergencyContactScreen(owner ?: "demo",profile,{profileViewModel.clearMessages();back()},profileViewModel::saveContact,profileViewModel::load) }
                     composable("saved") { SavedRoutesScreen(back,unavailable,onNavigate=navigate,initialRoutes=account.routes,showSamples=demo,onRoutesChanged=accountViewModel::saveRoutes) }
                     composable("voice") { VoiceRequestScreen(back,unavailable,message,onManual={transcript=it;navigate("find_ride")}) }
                     listOf("chat","chat/offer/{id}","chat/booking/{id}").forEach { path ->
