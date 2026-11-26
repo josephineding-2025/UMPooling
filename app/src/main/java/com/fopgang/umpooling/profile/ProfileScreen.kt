@@ -27,7 +27,8 @@ import com.fopgang.umpooling.ui.theme.*
 
 @Composable
 fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: (Int) -> Unit,
-    notifications: Boolean = true, onNotificationsChange: (Boolean) -> Unit = {}, onLogout: () -> Unit) {
+    notifications: Boolean = true, onNotificationsChange: (Boolean) -> Unit = {}, onLogout: () -> Unit,
+    name: String? = null, role: String? = null) {
     CompositionLocalProvider(LocalTextStyle provides TextStyle(fontFamily = FontFamily.SansSerif, color = Ink),
         LocalMinimumInteractiveComponentSize provides 0.dp) {
     Box(Modifier.fillMaxSize().background(Color(0xFFFCEAE2))) {
@@ -43,13 +44,13 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box {
                 Surface(shape = CircleShape, color = Apricot, border = androidx.compose.foundation.BorderStroke(3.dp, Color.White.copy(alpha = .8f)), shadowElevation = 10.dp) {
-                    Box(Modifier.size(94.dp), contentAlignment = Alignment.Center) { Text("AS", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF321C13)) }
+                    Box(Modifier.size(94.dp), contentAlignment = Alignment.Center) { Text(initials(name), fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF321C13)) }
                 }
                 Surface(Modifier.align(Alignment.BottomEnd), shape = CircleShape, color = Color(0xFFF8C4B0), border = androidx.compose.foundation.BorderStroke(2.dp, Ink)) {
                     FigmaIcon(R.drawable.profile_frame7, Modifier.padding(6.dp).size(14.dp))
                 }
                 }
-                Text(stringResource(R.string.profile_name), fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_name_unset), fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Surface(shape = RoundedCornerShape(14.dp), color = Color.White.copy(alpha = .2f),
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
@@ -63,7 +64,7 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
                         }
                     }
                 }
-                Text(stringResource(R.string.passenger), Modifier.fillMaxWidth(.76f).background(
+                Text(stringResource(roleLabel(role)), Modifier.fillMaxWidth(.76f).background(
                     Brush.horizontalGradient(listOf(Color.Transparent, Color(0xFFFCEAE2), Color(0xFFFCEAE2), Color.Transparent)),
                     CircleShape).padding(vertical = 7.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -102,6 +103,17 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
         CommuterNavigation("profile", navigate, Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp).padding(bottom = 30.dp))
     }
     }
+}
+
+internal fun initials(name: String?): String =
+    name.orEmpty().trim().split(' ').filter { it.isNotEmpty() }.take(2)
+        .joinToString("") { it.first().uppercase() }.ifEmpty { "UM" }
+
+internal fun roleLabel(role: String?): Int = when (role) {
+    "drivers" -> R.string.role_drivers
+    "both" -> R.string.role_both
+    "staffAnalyst" -> R.string.role_staff
+    else -> R.string.role_passengers
 }
 
 @Composable

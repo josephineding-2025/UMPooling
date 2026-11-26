@@ -49,7 +49,16 @@ data class UserProfile(
     @SerialName("vehicle_type") val vehicleType: String? = null,
     @SerialName("fuel_category") val fuelCategory: String? = null,
     @SerialName("trust_rating") val trustRating: Double? = null,
-    @SerialName("createdTime") val createdTime: String? = null
+    @SerialName("createdTime") val createdTime: String? = null,
+    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("emergency_contact") val emergencyContact: EmergencyContact? = null
+)
+
+// Stored in users.emergency_contact (jsonb). Used by the SOS flow (FR4.2).
+@Serializable
+data class EmergencyContact(
+    @SerialName("name") val name: String = "",
+    @SerialName("phone") val phone: String
 )
 
 // Table: saved_routes (read model for frequent routes / FR2.1)
