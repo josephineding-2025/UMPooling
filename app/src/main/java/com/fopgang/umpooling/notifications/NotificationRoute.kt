@@ -1,6 +1,10 @@
 package com.fopgang.umpooling.notifications
 
+import android.content.res.Resources
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import com.fopgang.umpooling.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -27,13 +31,14 @@ fun LiveNotificationScreen(owner: String, back: () -> Unit, navigate: (String) -
         }
     }
     val entries = state.inbox.entries
-    val cards = inboxCards(state.inbox)
+    val locale = LocalConfiguration.current.locales[0]
+    val cards = inboxCards(state.inbox, LocalContext.current.resources, locale)
     NotificationScreen(cards, back, navigate, { item ->
         entries.firstOrNull { notificationIdentity(it) == item.id }?.let(vm::open)
-    }, vm::markAllRead, state.error)
+    }, vm::markAllRead, state.error?.let { stringResource(it) })
 }
 
-internal fun inboxCards(inbox: InboxSnapshot, now: Instant = Instant.now(), zone: ZoneId = ZoneId.systemDefault()): List<NotificationItem> =
+internal fun inboxCards(inbox: InboxSnapshot, resources: Resources, locale: java.util.Locale, now: Instant = Instant.now(), zone: ZoneId = ZoneId.systemDefault()): List<NotificationItem> =
     inbox.entries.map { p ->
         val id = notificationIdentity(p)
         val received = p["_received_at"]?.toLongOrNull()?.let(Instant::ofEpochMilli)
@@ -41,27 +46,28 @@ internal fun inboxCards(inbox: InboxSnapshot, now: Instant = Instant.now(), zone
         val minutes = received?.let { java.time.Duration.between(it, now).toMinutes().coerceAtLeast(0) }
         val time = when {
             received == null -> ""
-            earlier -> received.atZone(zone).format(java.time.format.DateTimeFormatter.ofPattern("d MMM"))
-            minutes!! < 1 -> "Now"
-            minutes < 60 -> "${minutes}m"
-            else -> "${minutes / 60}h"
+            earlier -> received.atZone(zone).format(java.time.format.DateTimeFormatter.ofPattern("d MMM", locale))
+            minutes!! < 1 -> resources.getString(R.string.notif_now)
+            minutes < 60 -> resources.getString(R.string.notif_minutes, minutes)
+            else -> resources.getString(R.string.notif_hours, minutes / 60)
         }
         val message = p.containsKey("message_id")
         val booking = p.containsKey("booking_id")
         val requestMatch = p.containsKey("request_id")
         val match = requestMatch || (p.containsKey("trip_offer_id") && !booking && !p.containsKey("trip_id"))
         val requestSummary = if (requestMatch) {
-            val dep = p["departure_time"] ?: "Soon"
-            val dest = p["destination"] ?: "UM Campus"
-            val seats = p["available_seats"] ?: "1"
+            val dep = p["departure_time"] ?: resources.getString(R.string.notif_soon)
+            val dest = p["destination"] ?: resources.getString(R.string.notif_campus)
+            val seats = p["available_seats"]?.toIntOrNull() ?: 1
             val co2 = p["estimated_co2_kg"] ?: "1.00"
-            "Departs $dep to $dest • $seats seat(s) • ~$co2 kg CO₂ saved"
+            resources.getString(R.string.notif_request_summary, dep, dest,
+                resources.getQuantityString(R.plurals.home_seats, seats, seats), co2)
         } else null
         NotificationItem(id,
-            when { message -> "New conversation update"; booking -> "Booking update"; requestMatch -> "Overlapping Ride Request"; match -> "Ride offer update"; p.containsKey("alert_id") -> "Trip safety update"; else -> "Trip update" },
-            when { message -> "Open your booking or trip conversation."; booking -> "View the latest status of your booking."; requestSummary != null -> requestSummary; match -> "View the latest ride offer details."; else -> "Open your trip for current details." },
+            when { message -> resources.getString(R.string.notif_message_title); booking -> resources.getString(R.string.notif_booking_title); requestMatch -> resources.getString(R.string.notif_request_title); match -> resources.getString(R.string.notif_offer_title); p.containsKey("alert_id") -> resources.getString(R.string.notif_safety_title); else -> resources.getString(R.string.notif_trip_title) },
+            when { message -> resources.getString(R.string.notif_message_body); booking -> resources.getString(R.string.notif_booking_body); requestSummary != null -> requestSummary; match -> resources.getString(R.string.notif_offer_body); else -> resources.getString(R.string.notif_trip_body) },
             when { message -> NotificationCategory.Messages; match -> NotificationCategory.Matches; else -> NotificationCategory.Bookings },
             when { message -> NotificationGlyph.Message; match -> NotificationGlyph.Group; else -> NotificationGlyph.Check },
             time = time, earlier = earlier, unread = id !in inbox.read,
-            action = when { message -> "Open messages"; booking -> "View booking"; requestMatch -> "View match"; match -> "View offer"; else -> "View trip" })
+            action = when { message -> resources.getString(R.string.notif_open_messages); booking -> resources.getString(R.string.notif_view_booking); requestMatch -> resources.getString(R.string.notif_view_match); match -> resources.getString(R.string.notif_view_offer); else -> resources.getString(R.string.ui_view_trip) })
     }

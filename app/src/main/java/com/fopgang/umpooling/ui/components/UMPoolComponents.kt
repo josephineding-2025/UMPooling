@@ -103,7 +103,7 @@ fun LabeledInput(label: String, value: String, onValueChange: (String) -> Unit, 
     var visible by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(label, Modifier.padding(start = 6.dp), style = MaterialTheme.typography.labelMedium)
-        OutlinedTextField(value, onValueChange, Modifier.fillMaxWidth(), placeholder = { Text(placeholder) },
+        OutlinedTextField(value, onValueChange, Modifier.fillMaxWidth(), placeholder = { Text(placeholder, color = PoolDesign.Placeholder) },
             singleLine = true, shape = CircleShape,
             visualTransformation = if (password && !visible) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
             leadingIcon = if (icon != null) { { FigmaIcon(icon, Modifier.size(20.dp)) } } else null,

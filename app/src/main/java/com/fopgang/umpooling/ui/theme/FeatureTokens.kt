@@ -12,6 +12,7 @@ object PoolDesign {
     val Strong = Color(0xFF2B2523)
     val Secondary = Color(0xFF6B5C57)
     val Muted = Color(0xFF7C6C66)
+    val Placeholder = Color(0xFF9D8C85)
     val Coral = Color(0xFFF08F76)
     val CoralLight = Color(0xFFF8C4B0)
     val Accent = Color(0xFF8A3524)

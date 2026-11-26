@@ -142,7 +142,7 @@ fun ChatScreen(back: () -> Unit, externalAction: () -> Unit, conversationId: Str
                     enabled = !sending, textStyle = MaterialTheme.typography.bodyLarge.copy(color = PoolDesign.Text), cursorBrush = SolidColor(PoolDesign.Text),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { send() }),
                     maxLines = 4, decorationBox = { inner ->
-                        if (draft.isEmpty()) Text(hint, style = MaterialTheme.typography.bodyLarge, color = PoolDesign.Muted)
+                        if (draft.isEmpty()) Text(hint, style = MaterialTheme.typography.bodyLarge, color = PoolDesign.Placeholder)
                         inner()
                     })
                 Surface(shape = CircleShape, color = PoolDesign.Coral) {

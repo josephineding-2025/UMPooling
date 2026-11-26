@@ -168,7 +168,12 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("verify") { VerificationScreen(authViewModel::logout,message,navigate,authState,authViewModel::verify,authViewModel::resend) }
                 } else {
                     composable("home") {
-                        HomeScreen(navigate,unavailable,onSearch={ criteria=it; navigate("find_ride") },showSampleRide=demo)
+                        HomeScreen(
+                            navigate, unavailable,
+                            onSearch = { criteria = it; navigate("find_ride") },
+                            showSampleRide = demo,
+                            profileName = profile.profile?.displayName,
+                        )
                     }
                     composable("find_ride") {
                         if (!demo) Column {
@@ -288,8 +293,8 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                                 detailRoute=when {cancelled->"cancelled_trip";completed->"review";else->item.detailRoute})
                             else item
                         } + pendingGroups.map {id->
-                            MyTripItem("group/"+id,MyTripStatus.Pending,"Pickup group",id,
-                                summary="No driver assigned yet",detailRoute="pending_group/"+Uri.encode(id))
+                            MyTripItem("group/"+id,MyTripStatus.Pending,stringResource(R.string.trips_pickup_group),id,
+                                summary=stringResource(R.string.trips_no_driver),detailRoute="pending_group/"+Uri.encode(id))
                         }
                         MyTripsScreen(cards,navigate={route->
                             if(route=="active_trip/demo-active") activeBooking="demo-active"

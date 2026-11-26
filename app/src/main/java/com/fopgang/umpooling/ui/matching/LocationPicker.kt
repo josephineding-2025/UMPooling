@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fopgang.umpooling.data.CampusLocation
 import com.fopgang.umpooling.data.CampusLocationProvider
+import com.fopgang.umpooling.ui.theme.PoolDesign
 
 /**
  * Reusable location selector Composable backed by the 75 verified UM campus locations,
@@ -65,7 +66,7 @@ fun LocationSelectorField(
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
-            placeholder = { Text("Select campus or residential zone") },
+            placeholder = { Text("Select campus or residential zone", color = PoolDesign.Placeholder) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Place,
@@ -138,7 +139,7 @@ fun LocationSelectorField(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search college, faculty, or area...") },
+                    placeholder = { Text("Search college, faculty, or area...", color = PoolDesign.Placeholder) },
                     singleLine = true,
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {

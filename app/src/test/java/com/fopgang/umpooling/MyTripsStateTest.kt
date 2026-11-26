@@ -28,7 +28,7 @@ class MyTripsStateTest {
     @Test fun driverOfferUsesOfferIdAndDoesNotClaimPassengerBooking() {
         val item=CoordinationData(emptyList(),listOf(offer),emptyList()).myTripItems("driver").single()
         assertEquals("driver_offer/offer",item.detailRoute)
-        assertEquals("Your ride offer",item.statusLabel)
+        assertEquals(R.string.trips_your_offer, item.statusLabelRes)
         assertEquals(MyTripStatus.Pending,item.status)
         assertNull(item.chatRoute)
         assertNull(item.sosRoute)
@@ -37,7 +37,7 @@ class MyTripsStateTest {
         val item=CoordinationData(listOf(booking.copy(tripId=null)),emptyList(),emptyList())
             .myTripItems("passenger").single()
         assertEquals(MyTripStatus.Confirmed,item.status)
-        assertEquals("Pickup unavailable",item.origin)
+        assertNull(item.origin)
         assertNull(item.costPerSeat)
         assertEquals("chat/booking/booking",item.chatRoute)
     }

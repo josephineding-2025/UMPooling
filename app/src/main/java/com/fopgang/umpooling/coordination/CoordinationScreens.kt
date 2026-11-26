@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fopgang.umpooling.booking.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.chat.*
 import com.fopgang.umpooling.safety.LiveSosPanel
@@ -43,8 +44,10 @@ fun LiveTripsScreen(
  val lifecycle=LocalLifecycleOwner.current.lifecycle
  LaunchedEffect(lifecycle,owner,bookingId,tripId,offerId) {lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){while(true){vm.refresh();delay(10000)}}}
  val data=state.data
+ val error = state.error?.let { stringResource(it) }
  if(bookingId==null && tripId==null && offerId==null) {
-  MyTripsScreen(data?.myTripItems(owner).orEmpty(),navigate,loading=state.loading,error=state.error,refresh=vm::refresh)
+  val locale = LocalConfiguration.current.locales[0]
+  MyTripsScreen(data?.myTripItems(owner, locale).orEmpty(),navigate,loading=state.loading,error=error,refresh=vm::refresh)
   return
  }
  if(bookingId!=null && data!=null && !sos) {
@@ -58,12 +61,12 @@ fun LiveTripsScreen(
     {if(active) navigate("sos_trip/${trip!!.id}")},reservedSeats=booking.seats,
     details=TicketDetails(
      status=trip?.status ?: booking.status,
-     departure=booking.departureSnapshot?.let(::tripDeparture) ?: "Departure snapshot unavailable",
+     departure=booking.departureSnapshot?.let { tripDeparture(it) } ?: "Departure snapshot unavailable",
      pickup=booking.originSnapshot ?: "Pickup unavailable",destination=booking.destinationSnapshot ?: "Destination unavailable",
      driverName="Driver details unavailable",vehicle=trip?.plate ?: "Vehicle details unavailable",
      passengerName=if(booking.passengerId==owner) "You" else "Passenger",
      costPerSeat=booking.costSnapshot,canSos=active,reference=booking.reference),
-    onTripControls=trip?.let {{navigate("trip/${it.id}")}},loading=state.loading || state.busy,error=state.error,
+    onTripControls=trip?.let {{navigate("trip/${it.id}")}},loading=state.loading || state.busy,error=error,
     onCancelBooking=if(booking.tripId==null && booking.status=="confirmed" && booking.passengerId==owner) {{vm.cancelBooking(booking.id)}} else null)
    return
   }
@@ -72,7 +75,7 @@ fun LiveTripsScreen(
   Column(Modifier.padding(24.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
    RideHeader("Trip Details",back)
    if(state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-   state.error?.let {Text(it,color=MaterialTheme.colorScheme.error)}
+   error?.let {Text(it,color=MaterialTheme.colorScheme.error)}
    RideAction("Refresh",enabled=!state.loading && !state.busy,action=vm::refresh)
    if(data!=null) {
     val bookings=data.bookings.filter {bookingId==null || it.id==bookingId}

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fopgang.umpooling.ui.theme.PoolDesign
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ui.components.FigmaIcon
 
@@ -115,7 +116,7 @@ internal fun AuthInput(label: String, value: String, onChange: (String) -> Unit,
                     keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboardType),
                     visualTransformation = if (password && !visible) PasswordVisualTransformation() else VisualTransformation.None,
                     cursorBrush = SolidColor(AuthInk), decorationBox = { inner ->
-                        if (value.isEmpty()) Text(hint, fontSize = 16.sp, color = AuthMuted)
+                        if (value.isEmpty()) Text(hint, fontSize = 16.sp, color = PoolDesign.Placeholder)
                         inner()
                     })
                 if (password && showEye) IconButton({ visible = !visible }, Modifier.size(25.dp)) {
