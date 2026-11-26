@@ -44,6 +44,13 @@ private val DashboardFont = FontFamily(
 @Composable
 fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () -> Unit) {
     var monthly by rememberSaveable { mutableStateOf(false) }
+    val impactRepo = remember { com.fopgang.umpooling.ai.ImpactRepository.instance }
+    val userStats = remember { impactRepo.getDemoUserImpactStats() }
+    val personalInsight = remember(userStats) { impactRepo.generatePersonalInsights(userStats) }
+    val campusSummary = remember { impactRepo.getCampusImpactSummary().getOrNull() ?: com.fopgang.umpooling.ai.CampusImpactSummary() }
+    val facultyLeaderboard = remember { impactRepo.getFacultyLeaderboard() }
+    val collegeLeaderboard = remember { impactRepo.getCollegeLeaderboard() }
+
     val base = MaterialTheme.typography
     fun androidx.compose.ui.text.TextStyle.dashboardStyle() = copy(fontFamily = DashboardFont)
     MaterialTheme(typography = base.copy(
@@ -58,9 +65,13 @@ fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () ->
     ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = DashboardFont)) {
     Column(Modifier.fillMaxSize().background(Color(0xFFFCEBE3))) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            ImpactHero { navigate("tier") }
+            ImpactHero(
+                tier = { navigate("tier") },
+                userStats = userStats,
+                insight = personalInsight
+            )
             Column(Modifier.padding(horizontal = PoolDesign.ScreenPadding).padding(top = 0.dp, bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 DashboardCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -82,8 +93,10 @@ fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () ->
                         ImpactBarChart(bars, Modifier.heightIn(max = 120.dp))
                     }
                 }
-                DashboardPair(first = { DashboardMetric(stringResource(R.string.four_shared_rides), "6", stringResource(R.string.four_this_week), it) },
-                    second = { DashboardMetric(stringResource(R.string.four_this_month), "22.8", stringResource(R.string.four_kg_co2), it, dark = true) })
+                DashboardPair(
+                    first = { DashboardMetric(stringResource(R.string.four_shared_rides), (userStats.totalTrips / 2).toString(), stringResource(R.string.four_this_week), it) },
+                    second = { DashboardMetric(stringResource(R.string.four_this_month), String.format(java.util.Locale.US, "%.1f", userStats.totalCo2SavedKg), stringResource(R.string.four_kg_co2), it, dark = true) }
+                )
                 DashboardCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -91,18 +104,47 @@ fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () ->
                             StatusPill(stringResource(R.string.four_november))
                         }
                         DashboardPair(first = {
-                            CampusMetric("3,420 kg", stringResource(R.string.four_saved_together), it)
+                            CampusMetric("${java.text.NumberFormat.getIntegerInstance().format(campusSummary.totalCo2SavedKg.toInt())} kg", stringResource(R.string.four_saved_together), it)
                         }, second = {
-                            CampusMetric("1,800", stringResource(R.string.four_shared_rides), it)
+                            CampusMetric(java.text.NumberFormat.getIntegerInstance().format(campusSummary.totalSharedRides), stringResource(R.string.four_shared_rides), it)
                         })
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(stringResource(R.string.four_semester_goal), Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
-                            Text("34%", style = MaterialTheme.typography.labelLarge)
+                            Text("${campusSummary.semesterGoalPercentage}%", style = MaterialTheme.typography.labelLarge)
                         }
-                        GradientProgress(.342f, stringResource(R.string.four_goal_progress))
+                        GradientProgress((campusSummary.semesterGoalPercentage / 100f).coerceIn(0f, 1f), stringResource(R.string.four_goal_progress))
                     }
                 }
 
+                // Community Leaderboards (FR5.3 - Strictly Faculty & College, Never Individual)
+                DashboardCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Faculty Leaderboard", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = PoolDesign.Text)
+                            StatusPill("Top 3")
+                        }
+                        facultyLeaderboard.take(3).forEachIndexed { idx, item ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text("#${idx + 1}", fontWeight = FontWeight.Bold, color = PoolDesign.Secondary, fontSize = 14.sp)
+                                Text(item.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = PoolDesign.Text, maxLines = 1)
+                                Text("${item.totalCo2SavedKg.toInt()} kg", fontWeight = FontWeight.ExtraBold, color = PoolDesign.Strong, fontSize = 14.sp)
+                            }
+                        }
+                        HorizontalDivider(color = Color(0xFFF0CBBB).copy(alpha = 0.5f))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("College Leaderboard", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = PoolDesign.Text)
+                            StatusPill("Top 3")
+                        }
+                        collegeLeaderboard.take(3).forEachIndexed { idx, item ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text("#${idx + 1}", fontWeight = FontWeight.Bold, color = PoolDesign.Secondary, fontSize = 14.sp)
+                                Text(item.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = PoolDesign.Text, maxLines = 1)
+                                Text("${item.totalCo2SavedKg.toInt()} kg", fontWeight = FontWeight.ExtraBold, color = PoolDesign.Strong, fontSize = 14.sp)
+                            }
+                        }
+                        Text("Grouped by cohort to protect commuter privacy (FR5.3)", style = MaterialTheme.typography.labelSmall, color = PoolDesign.Secondary)
+                    }
+                }
             }
         }
         CommuterNavigation("dashboard", navigate, Modifier.padding(horizontal = 14.dp).padding(top = 10.dp, bottom = 30.dp))
@@ -112,7 +154,11 @@ fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () ->
 }
 
 @Composable
-private fun ImpactHero(tier: () -> Unit) {
+private fun ImpactHero(
+    tier: () -> Unit,
+    userStats: com.fopgang.umpooling.ai.UserImpactStats,
+    insight: com.fopgang.umpooling.ai.PersonalInsight
+) {
     Column(Modifier.fillMaxWidth().background(Color(0xFFFF9E9C))
         .then(Modifier.drawWithCache {
             val topCoral = Brush.radialGradient(
@@ -147,7 +193,8 @@ private fun ImpactHero(tier: () -> Unit) {
                 border = BorderStroke(1.dp, Color.White.copy(alpha = .8f))) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(R.string.four_you_saved), color = Color.White, style = MaterialTheme.typography.labelLarge)
-                    Text("11.4", fontFamily = DashboardFont, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, lineHeight = 39.sp, color = Color.White)
+                    val thisWeekKg = String.format(java.util.Locale.US, "%.1f", userStats.totalCo2SavedKg / 2.0)
+                    Text(thisWeekKg, fontFamily = DashboardFont, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, lineHeight = 39.sp, color = Color.White)
                     Text(stringResource(R.string.four_co2_this_week), color = Color.White, style = MaterialTheme.typography.labelMedium,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 }
@@ -157,14 +204,14 @@ private fun ImpactHero(tier: () -> Unit) {
                 Surface(shape = MaterialTheme.shapes.large, color = Color.White.copy(alpha = .18f), border = BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.four_compared), color = Color.White, fontSize = 13.sp, lineHeight = 17.sp)
-                        Text("+1.9 kg", color = Color.White, fontSize = 20.sp, lineHeight = 25.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(insight.headline, color = Color.White, fontSize = 17.sp, lineHeight = 21.sp, fontWeight = FontWeight.ExtraBold)
                     }
                 }
                 Surface(onClick = tier, shape = CircleShape, color = PoolDesign.Coral) {
                     Row(Modifier.fillMaxWidth().heightIn(min = 36.dp).padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FeatureIcon(FeatureSymbol.Leaf)
-                        Text(stringResource(R.string.four_more_ride), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = PoolDesign.Text)
+                        Text(insight.lowCarbonTip, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = PoolDesign.Text, maxLines = 1)
                         FeatureIcon(FeatureSymbol.Chevron, Modifier.size(16.dp))
                     }
                 }
