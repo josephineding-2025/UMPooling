@@ -165,7 +165,10 @@
     <string name="four_your_tier">Tahap anda</string>
     <string name="four_sprout">Tunas</string>
     <string name="four_level">Tahap 2 daripada 5</string>
+    <string name="four_tier_level_format">Tahap %1$d</string>
     <string name="four_next">Seterusnya: Anak Pokok</string>
+    <string name="four_tier_next_format">Seterusnya: %1$s</string>
+    <string name="four_tier_max_achieved">Tahap Maksimum Dicapai</string>
     <string name="four_tier_progress">13 / 15 perjalanan · 24.1 / 20 kg</string>
     <string name="four_tier_progress_label">Kemajuan ke Anak Pokok</string>
     <string name="four_seedling">Benih</string>

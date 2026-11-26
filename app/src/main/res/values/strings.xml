@@ -223,7 +223,10 @@
     <string name="four_your_tier">Your tier</string>
     <string name="four_sprout">Sprout</string>
     <string name="four_level">Level 2 of 5</string>
+    <string name="four_tier_level_format">Level %1$d</string>
     <string name="four_next">Next: Sapling</string>
+    <string name="four_tier_next_format">Next: %1$s</string>
+    <string name="four_tier_max_achieved">Maximum Tier Achieved</string>
     <string name="four_tier_progress">13 / 15 trips · 24.1 / 20 kg</string>
     <string name="four_tier_progress_label">Progress to Sapling</string>
     <string name="four_seedling">Seedling</string>
