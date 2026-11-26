@@ -79,14 +79,16 @@ class ImpactRepository(
     /**
      * Campus-wide overall sustainability totals for UM community goal.
      */
+    fun getDemoCampusImpactSummary(): CampusImpactSummary = CampusImpactSummary(
+        totalCo2SavedKg = 3420.0,
+        totalSharedRides = 1800,
+        semesterGoalKg = 10000.0,
+        semesterGoalPercentage = 34
+    )
+
     suspend fun getCampusImpactSummary(): Result<CampusImpactSummary> = suspendRunCatching {
         if (!configured) {
-            return@suspendRunCatching CampusImpactSummary(
-                totalCo2SavedKg = 3420.0,
-                totalSharedRides = 1800,
-                semesterGoalKg = 10000.0,
-                semesterGoalPercentage = 34
-            )
+            return@suspendRunCatching getDemoCampusImpactSummary()
         }
 
         try {

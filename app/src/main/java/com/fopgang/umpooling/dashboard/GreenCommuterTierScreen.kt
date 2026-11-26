@@ -96,6 +96,7 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
                 names.forEachIndexed { index, name ->
                     val isCurrent = (index + 1) == currentLevel
                     val isUnlocked = (index + 1) <= currentLevel
+                    val isLocked = !isUnlocked
                     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(27.dp),
                         color = Color.White.copy(alpha = if (isCurrent) .4f else if (isUnlocked) .8f else .5f),
                         border = BorderStroke(if (isCurrent) 1.5.dp else 1.dp, if (isCurrent) Color(0xFFF3AC95) else Color(0xFFF3D7CC)),
@@ -106,20 +107,20 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
                                 if (isCurrent) Color(0xFFF4A38A) else if (isUnlocked) PoolDesign.Strong else Color(0xFFF4E5DD), CircleShape),
                                 contentAlignment = Alignment.Center) {
                                 Text((index + 1).toString(), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold,
-                                    color = if (index == 0) Color.White else if (locked) Color(0xFF91817A) else PoolDesign.Text)
+                                    color = if (index == 0) Color.White else if (isLocked) Color(0xFF91817A) else PoolDesign.Text)
                             }
                             Column(Modifier.weight(1f)) {
                                 Text(stringResource(name), fontSize = 16.sp, lineHeight = 19.sp, fontWeight = FontWeight.ExtraBold,
-                                    color = if (locked) Color(0xFF544F4C) else PoolDesign.Text, letterSpacing = (-.4).sp)
+                                    color = if (isLocked) Color(0xFF544F4C) else PoolDesign.Text, letterSpacing = (-.4).sp)
                                 Text(stringResource(thresholds[index]), fontSize = 13.sp, lineHeight = 16.sp,
-                                    fontWeight = FontWeight.SemiBold, color = if (locked) Color(0xFF93837A) else PoolDesign.Secondary)
+                                    fontWeight = FontWeight.SemiBold, color = if (isLocked) Color(0xFF93837A) else PoolDesign.Secondary)
                             }
-                            if (current) Surface(shape = CircleShape, color = PoolDesign.Strong) {
+                            if (isCurrent) Surface(shape = CircleShape, color = PoolDesign.Strong) {
                                 Text(stringResource(R.string.four_you_here), Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            } else FeatureIcon(if (locked) FeatureSymbol.Lock else FeatureSymbol.Check, Modifier.size(16.dp),
-                                description = stringResource(if (locked) R.string.four_locked else R.string.four_achieved),
-                                tint = if (locked) Color(0xFF544F4C) else PoolDesign.Strong)
+                            } else FeatureIcon(if (isLocked) FeatureSymbol.Lock else FeatureSymbol.Check, Modifier.size(16.dp),
+                                description = stringResource(if (isLocked) R.string.four_locked else R.string.four_achieved),
+                                tint = if (isLocked) Color(0xFF544F4C) else PoolDesign.Strong)
                         }
                     }
                 }
@@ -135,4 +136,4 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
 @Preview(name = "Tier compact large text", widthDp = 320, heightDp = 720, fontScale = 1.5f)
 @Preview(name = "Tier wide", widthDp = 600, heightDp = 900)
 @Composable
-private fun TierPreview() { UMPoolingTheme { GreenCommuterTierScreen({}) } }
+private fun TierPreview() { UMPoolingTheme { GreenCommuterTierScreen {} } }

@@ -47,7 +47,10 @@ fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () ->
     val impactRepo = remember { com.fopgang.umpooling.ai.ImpactRepository.instance }
     val userStats = remember { impactRepo.getDemoUserImpactStats() }
     val personalInsight = remember(userStats) { impactRepo.generatePersonalInsights(userStats) }
-    val campusSummary = remember { impactRepo.getCampusImpactSummary().getOrNull() ?: com.fopgang.umpooling.ai.CampusImpactSummary() }
+    var campusSummary by remember { mutableStateOf(impactRepo.getDemoCampusImpactSummary()) }
+    LaunchedEffect(Unit) {
+        impactRepo.getCampusImpactSummary().onSuccess { campusSummary = it }
+    }
     val facultyLeaderboard = remember { impactRepo.getFacultyLeaderboard() }
     val collegeLeaderboard = remember { impactRepo.getCollegeLeaderboard() }
 
