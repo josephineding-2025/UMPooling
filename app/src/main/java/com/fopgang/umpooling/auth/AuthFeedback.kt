@@ -30,6 +30,11 @@ fun AuthFeedback(state: AuthUiState) {
             Text(stringResource(R.string.auth_working))
         }
         state.issue?.let { Text(stringResource(it.stringId()), color = MaterialTheme.colorScheme.error) }
-        if (state.notice == AuthNotice.EMAIL_SENT) Text(stringResource(R.string.auth_email_sent))
+        when (state.notice) {
+            AuthNotice.EMAIL_SENT -> Text(stringResource(R.string.auth_email_sent))
+            AuthNotice.RESET_CODE_SENT -> Text(stringResource(R.string.reset_code_sent))
+            AuthNotice.PASSWORD_UPDATED -> Text(stringResource(R.string.password_updated))
+            null -> Unit
+        }
     }
 }

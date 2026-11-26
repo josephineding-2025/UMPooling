@@ -190,7 +190,7 @@ fun AuthScreen(register: Boolean, navigate: (String) -> Unit, back: () -> Unit, 
             }
             Spacer(Modifier.height(18.dp))
         } else {
-            TextButton({ message(R.string.not_connected) }, Modifier.align(Alignment.End).height(33.dp), contentPadding = PaddingValues(0.dp)) {
+            TextButton({ navigate("forgot") }, Modifier.align(Alignment.End).height(33.dp), contentPadding = PaddingValues(0.dp)) {
                 Text(stringResource(R.string.forgot_password), color = AuthAccent, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(14.dp))

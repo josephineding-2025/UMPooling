@@ -237,6 +237,17 @@
     <string name="auth_request_error">Permintaan tidak dapat diselesaikan. Semak sambungan anda dan cuba lagi.</string>
     <string name="auth_working">Sila tunggu…</string>
     <string name="auth_email_sent">E-mel pengesahan telah dihantar.</string>
+    <string name="forgot_title">Tetapkan semula kata laluan anda</string>
+    <string name="forgot_body">Masukkan e-mel UM anda dan kami akan menghantar kod 6 digit.</string>
+    <string name="reset_send_code">Hantar kod</string>
+    <string name="reset_code_sent">Jika e-mel UM ini mempunyai akaun, kod 6 digit telah dihantar.</string>
+    <string name="reset_code_label">Kod 6 digit</string>
+    <string name="reset_code_hint">123456</string>
+    <string name="reset_new_password">Kata laluan baharu</string>
+    <string name="reset_confirm">Tetapkan semula kata laluan</string>
+    <string name="reset_resend">Hantar kod baharu</string>
+    <string name="password_updated">Kata laluan dikemas kini. Log masuk dengan kata laluan baharu.</string>
+    <string name="back_to_login">Kembali ke log masuk</string>
     <string name="auth_verified_sign_in">Sudah disahkan melalui pautan e-mel? Log masuk</string>
     <string name="auth_demo_banner">Mod demo · Data contoh</string>
     <string name="auth_exit_demo">Keluar demo</string>
