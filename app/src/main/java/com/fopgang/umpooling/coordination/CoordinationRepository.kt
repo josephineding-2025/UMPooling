@@ -15,6 +15,11 @@ import java.util.UUID
  @SerialName("passenger_id") val passengerId:String,
  @SerialName("seats_booked") val seats:Int,
  val status:String,
+ @SerialName("booking_reference") val reference:String?=null,
+ @SerialName("cost_per_seat_snapshot") val costSnapshot:Double?=null,
+ @SerialName("origin_zone_snapshot") val originSnapshot:String?=null,
+ @SerialName("destination_zone_snapshot") val destinationSnapshot:String?=null,
+ @SerialName("departure_time_snapshot") val departureSnapshot:String?=null,
 )
 @Serializable data class TripRecord(
  @SerialName("trip_id") val id:String,
@@ -22,6 +27,9 @@ import java.util.UUID
  @SerialName("driver_id") val driverId:String,
  val status:String,
  @SerialName("vehicle_plate_snapshot") val plate:String?=null,
+ @SerialName("distance_km") val distanceKm:Double?=null,
+ @SerialName("confirmed_passenger_count") val passengerCount:Int?=null,
+ @SerialName("co2_saved_kg") val co2SavedKg:Double?=null,
 )
 data class CoordinationData(val bookings:List<BookingRecord>,val offers:List<TripOffer>,val trips:List<TripRecord>)
 enum class ConversationKind(val column:String) { BOOKING("booking_id"), TRIP("trip_id") }
@@ -62,6 +70,11 @@ class CoordinationRepository(val owner:String):ChatGateway {
    if(id !in offers) client.postgrest["trip_offers"].select {filter {eq("trip_offer_id",id)}}.decodeList<TripOffer>().firstOrNull()?.let {offers[id]=it}
   }
   CoordinationData(bookings,offers.values.toList(),trips)
+ }
+ suspend fun cancelBooking(id:String):Result<Unit> = suspendRunCatching {
+  checkOwner()
+  RideRepository().cancelBooking(id).getOrThrow()
+  Unit
  }
  suspend fun act(action:TripAction,id:String):Result<Unit> = suspendRunCatching {
   checkOwner()
@@ -105,6 +118,11 @@ class CoordinationRepository(val owner:String):ChatGateway {
  }
  suspend fun resolveNotification(payload:Map<String,String>):Result<String> = suspendRunCatching {
   checkOwner()
+  payload["request_id"]?.let { id ->
+   UUID.fromString(id)
+   client.postgrest["ride_requests"].select {filter {eq("request_id",id)}}.decodeSingle<RideRequest>()
+   return@suspendRunCatching "offer_ride"
+  }
   if(payload.containsKey("message_id")) return@suspendRunCatching resolveMessage(payload.getValue("message_id"))
   payload["booking_id"]?.let { id->UUID.fromString(id);client.postgrest["bookings"].select {filter {eq("booking_id",id)}}.decodeSingle<BookingRecord>();return@suspendRunCatching "confirmed_ticket/$id" }
   payload["trip_id"]?.let { id->UUID.fromString(id);client.postgrest["trips"].select {filter {eq("trip_id",id)}}.decodeSingle<TripRecord>();return@suspendRunCatching "trip/$id" }

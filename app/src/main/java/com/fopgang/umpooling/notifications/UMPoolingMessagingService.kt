@@ -16,7 +16,7 @@ class UMPoolingMessagingService : FirebaseMessagingService() {
  override fun onNewToken(token:String) {super.onNewToken(token);FcmTokenSync.onTokenRefreshed(token)}
  override fun onMessageReceived(message:RemoteMessage) {
   val owner=runCatching{SupabaseClientProvider.client.auth.currentUserOrNull()?.id}.getOrNull() ?: return
-  val payload=message.data.filterKeys {it in setOf("booking_id","trip_id","trip_offer_id","message_id","alert_id")}
+  val payload=message.data.filterKeys {it in setOf("booking_id","trip_id","trip_offer_id","message_id","alert_id","request_id")}
   if(payload.isEmpty()) return
   runCatching {NotificationInbox.record(this,owner,payload)}
   val settings=AccountStorage(this,owner).preferences()

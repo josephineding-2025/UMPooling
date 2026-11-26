@@ -17,6 +17,19 @@ import kotlinx.serialization.json.put
 
 class RideRepository {
 
+    /** Server-configured cap; fail closed instead of inventing a UI policy. */
+    suspend fun maxCostPerSeat(): Result<Double> = suspendRunCatching {
+        val cap = SupabaseClientProvider.client.postgrest.rpc("max_cost_per_seat").decodeAs<Double>()
+        require(cap.isFinite() && cap in 0.0..999.99)
+        cap
+    }
+
+    suspend fun cancelBooking(bookingId: String): Result<Int> = suspendRunCatching {
+        SupabaseClientProvider.client.postgrest.rpc("cancel_booking", buildJsonObject {
+            put("p_booking_id", bookingId)
+        }).decodeAs<Int>()
+    }
+
     // 1. Post a new trip offer. The cost-share cap is enforced by the database (FR3.1),
     // so a modified client cannot bypass it; a violation comes back as a failure.
     suspend fun createTripOffer(offer: NewTripOffer): Result<TripOffer> = suspendRunCatching {
@@ -61,16 +74,18 @@ class RideRepository {
         tripOfferId: String,
         seats: Int,
         pickupLng: Double,
-        pickupLat: Double
+        pickupLat: Double,
+        quoteVersion: Long? = null
     ): Result<String> = suspendRunCatching {
         val client = SupabaseClientProvider.client
         val passengerId = client.auth.currentUserOrNull()?.id
             ?: throw IllegalStateException("Sign in before booking.")
         client.postgrest.rpc(
-            "book_seat_transaction",
+            if (quoteVersion == null) "book_seat_transaction" else "book_seat_with_quote",
             buildJsonObject {
                 put("p_trip_offer_id", tripOfferId)
-                put("p_passenger_id", passengerId)
+                if (quoteVersion == null) put("p_passenger_id", passengerId)
+                else put("p_quote_version", quoteVersion)
                 put("p_seats", seats)
                 put("p_pickup_lng", pickupLng)
                 put("p_pickup_lat", pickupLat)

@@ -335,6 +335,24 @@
     <string name="contact_saved">Contact saved.</string>
     <string name="contact_invalid">Enter a valid phone number.</string>
     <string name="contact_remove">Remove contact</string>
+    <string name="booking_cap_loading">Loading contribution cap…</string>
+    <string name="booking_cap_amount">Maximum RM %1$.2f per seat</string>
+    <string name="booking_cap_retry">Retry loading contribution cap</string>
+    <string name="booking_back">Back</string>
+    <string name="booking_request">Request a future ride</string>
+    <string name="booking_continue">Review booking</string>
+    <string name="booking_reserve">Confirm reservation</string>
+    <string name="booking_retry">Retry</string>
+    <string name="booking_load_failed">Unable to load this offer. Please retry.</string>
+    <string name="booking_submit_failed">Reservation failed. Retry or refresh the offer.</string>
+    <string name="booking_seats">Seats requested: %1$d</string>
+    <string name="booking_total">RM %1$.2f per seat · Total RM %2$.2f</string>
+    <string name="booking_pickup">Choose your pickup point</string>
+    <string name="booking_not_open">This offer is unavailable for booking.</string>
+    <string name="booking_completed_impact">Distance: %1$.2f km · Confirmed passengers: %2$d · CO₂ saved: %3$.2f kg</string>
+    <string name="booking_snapshot_missing">Original ticket price is unavailable for this older booking.</string>
+    <string name="booking_cancel">Cancel reservation before trip starts</string>
+    <string name="booking_snapshot_total">Reserved contribution: RM %1$.2f per seat</string>
     <!-- FR4.2 Emergency SOS -->
     <string name="sos_saved_contact">Saved emergency contact</string>
     <string name="sos_no_contact">No emergency contact saved. Add one in your profile before preparing an alert.</string>

@@ -277,6 +277,24 @@
     <string name="contact_saved">Kenalan disimpan.</string>
     <string name="contact_invalid">Masukkan nombor telefon yang sah.</string>
     <string name="contact_remove">Buang kenalan</string>
+    <string name="booking_cap_loading">Memuatkan had sumbangan…</string>
+    <string name="booking_cap_amount">Maksimum RM %1$.2f setiap tempat duduk</string>
+    <string name="booking_cap_retry">Cuba muatkan had sumbangan semula</string>
+    <string name="booking_back">Kembali</string>
+    <string name="booking_request">Mohon perjalanan akan datang</string>
+    <string name="booking_continue">Semak tempahan</string>
+    <string name="booking_reserve">Sahkan tempahan</string>
+    <string name="booking_retry">Cuba semula</string>
+    <string name="booking_load_failed">Tawaran ini tidak dapat dimuatkan. Sila cuba semula.</string>
+    <string name="booking_submit_failed">Tempahan gagal. Cuba semula atau muat semula tawaran.</string>
+    <string name="booking_seats">Tempat duduk dimohon: %1$d</string>
+    <string name="booking_total">RM %1$.2f setiap tempat duduk · Jumlah RM %2$.2f</string>
+    <string name="booking_pickup">Pilih tempat pengambilan anda</string>
+    <string name="booking_not_open">Tawaran ini tidak tersedia untuk tempahan.</string>
+    <string name="booking_completed_impact">Jarak: %1$.2f km · Penumpang disahkan: %2$d · CO₂ dijimatkan: %3$.2f kg</string>
+    <string name="booking_snapshot_missing">Harga tiket asal tidak tersedia untuk tempahan lama ini.</string>
+    <string name="booking_cancel">Batalkan tempahan sebelum perjalanan bermula</string>
+    <string name="booking_snapshot_total">Sumbangan ditempah: RM %1$.2f setiap tempat duduk</string>
     <!-- FR4.2 SOS Kecemasan -->
     <string name="sos_saved_contact">Kenalan kecemasan yang disimpan</string>
     <string name="sos_no_contact">Tiada kenalan kecemasan disimpan. Tambahkan kenalan dalam profil anda sebelum menyediakan amaran.</string>
