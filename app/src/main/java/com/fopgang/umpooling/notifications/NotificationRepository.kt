@@ -11,7 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-private val destinationKeys = setOf("booking_id", "trip_id", "trip_offer_id", "message_id", "alert_id")
+private val destinationKeys = setOf("booking_id", "trip_id", "trip_offer_id", "message_id", "alert_id", "request_id")
 internal fun notificationIdentity(payload: Map<String, String>): String =
     payload.filterKeys { it in destinationKeys }.toSortedMap().entries.joinToString("|") { "${it.key}=${it.value}" }
 

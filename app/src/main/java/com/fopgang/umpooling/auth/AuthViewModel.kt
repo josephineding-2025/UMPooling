@@ -22,12 +22,15 @@ class AuthViewModel(
     private val mutableState = MutableStateFlow(AuthUiState(access = AuthAccess.Restoring))
     val state = mutableState.asStateFlow()
     private var hasSession = false
+    private var resetting = false
 
     init {
         scope.launch {
             gateway.sessions.collect { session ->
                 if (session is AuthSession.SignedIn) hasSession = true
                 if (session == AuthSession.SignedOut) hasSession = false
+                // A password reset briefly signs the user in; do not let that open the app.
+                if (resetting) return@collect
                 if (saved.get<Boolean>("auth.demo") == true) {
                     mutableState.update { it.copy(access = AuthAccess.Demo) }
                 } else {
@@ -108,6 +111,50 @@ class AuthViewModel(
         action { refreshVerifiedUser(email) }
     }
 
+    /** Step 1 of a password reset: email a 6-digit code. */
+    fun requestReset(emailInput: String) {
+        val email = UmEmail.normalize(emailInput)
+        if (!UmEmail.isValid(email)) {
+            mutableState.update { it.copy(issue = AuthIssue.INVALID_EMAIL, notice = null) }
+            return
+        }
+        action {
+            gateway.requestPasswordReset(email).fold(
+                onSuccess = { mutableState.update { it.copy(notice = AuthNotice.RESET_CODE_SENT) } },
+                onFailure = { e -> mutableState.update { it.copy(issue = issue(e)) } },
+            )
+        }
+    }
+
+    /** Step 2: check the code, set the new password, then require a normal sign-in. */
+    fun completeReset(emailInput: String, code: String, newPassword: String) {
+        val email = UmEmail.normalize(emailInput)
+        val invalid = when {
+            !UmEmail.isValid(email) -> AuthIssue.INVALID_EMAIL
+            code.length != 6 || code.any { !it.isDigit() } -> AuthIssue.CODE
+            newPassword.length < MIN_PASSWORD_LENGTH -> AuthIssue.INVALID_FORM
+            else -> null
+        }
+        if (invalid != null) {
+            mutableState.update { it.copy(issue = invalid, notice = null) }
+            return
+        }
+        action {
+            resetting = true
+            try {
+                gateway.resetPassword(email, code, newPassword).fold(
+                    onSuccess = {
+                        mutableState.update { it.copy(access = AuthAccess.SignedOut, notice = AuthNotice.PASSWORD_UPDATED) }
+                    },
+                    onFailure = { e -> mutableState.update { it.copy(issue = issue(e)) } },
+                )
+            } finally {
+                resetting = false
+                hasSession = false
+            }
+        }
+    }
+
     fun enterDemo() {
         if (state.value.busy || state.value.access == AuthAccess.Restoring ||
             state.value.access is AuthAccess.Authenticated) return
@@ -178,4 +225,8 @@ class AuthViewModel(
     fun dismissMessage() { mutableState.update { it.copy(issue = null, notice = null) } }
 
     private fun issue(error: Throwable) = (error as? AuthFailure)?.issue ?: AuthIssue.REQUEST
+
+    private companion object {
+        const val MIN_PASSWORD_LENGTH = 8
+    }
 }

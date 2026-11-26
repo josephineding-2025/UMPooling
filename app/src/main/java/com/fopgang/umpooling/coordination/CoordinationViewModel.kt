@@ -27,4 +27,14 @@ class CoordinationViewModel(private val repository:CoordinationRepository):ViewM
    },{mutable.update {it.copy(busy=false,error="Trip update failed. The server may reject this transition or its lifecycle RPC may not be installed. Refresh and retry.")}})
   }
  }
+ fun cancelBooking(id:String) {
+  if(mutable.value.busy) return
+  mutable.update {it.copy(busy=true,error=null)}
+  viewModelScope.launch {
+   repository.cancelBooking(id).fold({
+    mutable.update {it.copy(busy=false)};refresh()
+   },{mutable.update {it.copy(busy=false,error="Cancellation failed. Refresh the ticket and retry.")}})
+  }
+ }
+
 }

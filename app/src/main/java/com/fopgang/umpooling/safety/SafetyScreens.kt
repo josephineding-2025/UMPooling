@@ -94,9 +94,21 @@ private fun SafetyHeader(title: String, back: () -> Unit, close: Boolean = false
 }
 
 @Composable
-fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
+fun SosScreen(
+    back: () -> Unit,
+    message: (Int) -> Unit,
+    onSosActivated: (() -> Unit)? = null,
+    onPrepareMessage: (() -> Unit)? = null,
+    onCallEmergency: (() -> Unit)? = null,
+    tripSummary: String? = null,
+    contactName: String? = null,
+    footer: @Composable ColumnScope.() -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
     val holdLabel = stringResource(R.string.hold_sos)
+    val live = onSosActivated != null
+    val currentActivation by rememberUpdatedState(onSosActivated)
+    val activate: () -> Unit = { currentActivation?.invoke() ?: message(R.string.sos_demo) }
     SafetyPage {
         Spacer(Modifier.height(52.dp))
         SafetyHeader(stringResource(R.string.emergency_sos), back)
@@ -123,11 +135,12 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
                 Modifier.fillMaxSize(.544f)
                     .semantics {
                         role = Role.Button
-                        onClick(holdLabel) { message(R.string.sos_demo); true }
+                        // Accessibility activation opens preparation/confirmation; it never sends automatically.
+                        onClick(holdLabel) { activate(); true }
                     }
                     .pointerInput(Unit) {
                         detectTapGestures(onPress = {
-                            val job = scope.launch { delay(3000); message(R.string.sos_demo) }
+                            val job = scope.launch { delay(3000); activate() }
                             try { tryAwaitRelease() } finally { job.cancel() }
                         })
                     },
@@ -148,7 +161,7 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
         Text(holdLabel, Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 17.sp,
             lineHeight = 22.sp, fontWeight = FontWeight.Bold, letterSpacing = (-.4).sp)
         Spacer(Modifier.height(2.dp))
-        Text(stringResource(R.string.sos_cancel_note), Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        Text(stringResource(if (live) R.string.sos_hold_explanation else R.string.sos_demo), Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             textAlign = TextAlign.Center, fontSize = 12.5.sp, lineHeight = 17.sp, color = SafetyMuted)
         Spacer(Modifier.height(23.dp))
         Surface(
@@ -162,12 +175,12 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Box(Modifier.size(40.dp).background(Color(0xFFFDE0D2), CircleShape),
                             contentAlignment = Alignment.Center) {
-                            Text("HR", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            Text(if (live) "SOS" else "HR", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         }
                         Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.sos_driver), fontSize = 15.sp, lineHeight = 18.sp,
+                            Text(if (live) (contactName ?: stringResource(R.string.sos_saved_contact)) else stringResource(R.string.sos_driver), fontSize = 15.sp, lineHeight = 18.sp,
                                 fontWeight = FontWeight.Bold, letterSpacing = (-.5).sp)
-                            Text(stringResource(R.string.sos_destination), fontSize = 12.sp,
+                            Text(if (live) (tripSummary ?: stringResource(R.string.sos_trip_details_unavailable)) else stringResource(R.string.sos_destination), fontSize = 12.sp,
                                 lineHeight = 16.sp, color = SafetyMuted, letterSpacing = (-.1).sp)
                         }
                     }
@@ -175,9 +188,9 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
-                        R.drawable.sos_frame2 to R.string.sos_location,
-                        R.drawable.sos_frame3 to R.string.sos_security,
-                        R.drawable.sos_frame4 to R.string.sos_contacts
+                        R.drawable.sos_frame2 to (if (live) R.string.sos_location_on_request else R.string.sos_location),
+                        R.drawable.sos_frame3 to (if (live) R.string.sos_manual_delivery else R.string.sos_security),
+                        R.drawable.sos_frame4 to (if (live) R.string.sos_saved_contact else R.string.sos_contacts)
                     ).forEach { (icon, text) ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Box(Modifier.size(30.dp).background(Color(0xFFFFE1D2), RoundedCornerShape(11.dp)),
@@ -190,7 +203,7 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
                 Spacer(Modifier.height(39.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
                     Button(
-                        { message(R.string.sos_demo) }, Modifier.weight(1f).height(51.dp), shape = CircleShape,
+                        { onCallEmergency?.invoke() ?: message(R.string.sos_demo) }, Modifier.weight(1f).height(51.dp), shape = CircleShape,
                         contentPadding = PaddingValues(0.dp), border = BorderStroke(1.dp, Color(0xFFC58B7D)),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE8DC), contentColor = Color(0xFFA43D26))
                     ) {
@@ -216,14 +229,15 @@ fun SosScreen(back: () -> Unit, message: (Int) -> Unit) {
                             fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA43D26))
                     }
                     Button(
-                        { message(R.string.sos_demo) }, Modifier.weight(1.2f).height(51.dp),
+                        { onPrepareMessage?.invoke() ?: message(R.string.sos_demo) }, Modifier.weight(1.2f).height(51.dp),
                         shape = CircleShape, contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                    ) { Text(stringResource(R.string.share_location), color = Color.White,
+                    ) { Text(stringResource(if (live) R.string.sos_prepare_message else R.string.share_location), color = Color.White,
                         fontFamily = FontFamily.SansSerif, fontSize = 16.sp) }
                 }
             }
         }
+        footer()
     }
 }
 

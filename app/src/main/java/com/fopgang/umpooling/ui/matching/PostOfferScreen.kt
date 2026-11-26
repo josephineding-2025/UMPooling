@@ -28,6 +28,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
+import com.fopgang.umpooling.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,7 +55,7 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Screen for drivers to post a ride offer (FR2.1 / FR3.1).
- * Enforces RM 5.00 cost cap, ISO-8601 (+08:00) timestamptz format,
+ * Loads the configurable server cost cap, ISO-8601 (+08:00) timestamptz format,
  * Haversine x 1.3 road distance estimation, and blocks unpinned locations.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +65,16 @@ fun PostOfferScreen(
     onOfferCreated: (() -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var contributionCap by remember { mutableStateOf<Double?>(null) }
+    var capFailed by remember { mutableStateOf(false) }
+    var capAttempt by remember { mutableIntStateOf(0) }
+    LaunchedEffect(repository, capAttempt) {
+        capFailed = false
+        repository.maxCostPerSeat().fold(
+            onSuccess = { contributionCap = it },
+            onFailure = { capFailed = true }
+        )
+    }
     val snackbarHostState = remember { SnackbarHostState() }
 
     var originLocation by remember { mutableStateOf<CampusLocation?>(null) }
@@ -222,7 +235,7 @@ fun PostOfferScreen(
                         value = costInput,
                         onValueChange = { costInput = it },
                         label = { Text("Cost Share Per Seat (RM)") },
-                        supportingText = { Text("Maximum RM 5.00 per seat (UM policy cap)") },
+                        supportingText = { Text(if (contributionCap == null) stringResource(R.string.booking_cap_loading) else stringResource(R.string.booking_cap_amount, contributionCap!!)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -230,9 +243,17 @@ fun PostOfferScreen(
                 }
             }
 
+            if (capFailed) androidx.compose.material3.TextButton(onClick = { capAttempt++ }) { Text(stringResource(R.string.booking_cap_retry)) }
             Button(
                 onClick = {
-                    val user = SupabaseClientProvider.client.auth.currentUserOrNull()
+                    val user = runCatching {
+                        SupabaseClientProvider.client.auth.currentUserOrNull()
+                    }.getOrElse { err ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(err.message ?: "Database not configured.")
+                        }
+                        return@Button
+                    }
                     if (user == null) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("Please sign in first.")
@@ -252,9 +273,9 @@ fun PostOfferScreen(
                         return@Button
                     }
                     val parsedCost = costInput.toDoubleOrNull()
-                    if (parsedCost == null || parsedCost < 0.0 || parsedCost > 5.0) {
+                    if (parsedCost == null || !parsedCost.isFinite() || parsedCost < 0.0 || parsedCost > (contributionCap ?: -1.0)) {
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar("Cost share must be between RM 0.00 and RM 5.00.")
+                            snackbarHostState.showSnackbar("Contribution is invalid or exceeds the configured cap.")
                         }
                         return@Button
                     }
@@ -289,7 +310,7 @@ fun PostOfferScreen(
                         )
                     }
                 },
-                enabled = !isPosting && hasValidCoordinates,
+                enabled = !isPosting && hasValidCoordinates && contributionCap != null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

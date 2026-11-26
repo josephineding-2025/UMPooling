@@ -9,6 +9,7 @@ data class TicketDetails(
     val driverName: String,
     val vehicle: String,
     val passengerName: String,
-    val costPerSeat: Double,
+    val costPerSeat: Double?,
     val canSos: Boolean,
+    val reference: String? = null,
 )

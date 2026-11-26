@@ -3,9 +3,11 @@ package com.fopgang.umpooling.booking
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,10 +18,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fopgang.umpooling.R
+import com.fopgang.umpooling.SupabaseClientProvider
+import com.fopgang.umpooling.data.CampusLocation
 import com.fopgang.umpooling.data.CampusLocationProvider
+import com.fopgang.umpooling.data.OfferStatus
 import com.fopgang.umpooling.data.TripOffer
 import com.fopgang.umpooling.data.repository.RideRepository
 import com.fopgang.umpooling.ui.matching.LocationSelectorField
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CancellationException
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -39,42 +47,58 @@ internal class LiveBookingViewModel : ViewModel() {
     var bookingId by mutableStateOf<String?>(null)
         private set
 
-    fun refresh(offerId: String, owner: String, seats: Int) {
+    var selectedPickup by mutableStateOf<CampusLocation?>(null)
+
+    fun refresh(offerId: String, owner: String) {
         if (working || bookingId != null) return
         working = true
         issue = 0
         viewModelScope.launch {
-            repository.getOpenTripOffers().fold(
-                onSuccess = { offers ->
-                    val now = Instant.now()
-                    offer = offers.firstOrNull {
-                        it.tripOfferId == offerId && it.driverId != owner &&
-                            it.availableSeats >= seats && it.departureInstant()?.isAfter(now) == true
-                    }
-                    if (offer == null) issue = R.string.live_offer_unavailable
-                },
-                onFailure = {
-                    offer = null
-                    issue = R.string.live_offer_load_failed
-                }
-            )
-            working = false
+            try {
+                val client = SupabaseClientProvider.client
+                check(client.auth.currentUserOrNull()?.id == owner)
+                val loaded = client.postgrest["trip_offers"].select {
+                    filter { eq("trip_offer_id", offerId) }
+                }.decodeSingle<TripOffer>()
+                check(client.auth.currentUserOrNull()?.id == owner)
+                offer = loaded
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                offer = null
+                issue = R.string.live_offer_load_failed
+            } finally {
+                working = false
+            }
         }
     }
 
-    fun reserve(seats: Int, longitude: Double, latitude: Double) {
-        val id = offer?.tripOfferId ?: return
-        if (working || bookingId != null || issue != 0) return
+    fun reserve(owner: String, seats: Int, longitude: Double, latitude: Double) {
+        val row = offer ?: return
+        val id = row.tripOfferId ?: return
+        if (working || bookingId != null || issue != 0 || !row.canBook(owner, seats)) return
         working = true
         viewModelScope.launch {
-            repository.bookSeat(id, seats, longitude, latitude).fold(
-                onSuccess = { bookingId = it },
-                onFailure = { issue = R.string.live_booking_failed }
-            )
-            working = false
+            try {
+                val client = SupabaseClientProvider.client
+                check(client.auth.currentUserOrNull()?.id == owner)
+                val idFromServer = repository.bookSeat(id, seats, longitude, latitude, row.quoteVersion).getOrThrow()
+                check(client.auth.currentUserOrNull()?.id == owner)
+                bookingId = idFromServer
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                issue = R.string.live_booking_failed
+            } finally {
+                working = false
+            }
         }
     }
 }
+
+private fun TripOffer.canBook(owner: String, seats: Int): Boolean =
+    tripOfferId != null && driverId != owner && status == OfferStatus.OPEN &&
+        seats > 0 && availableSeats >= seats && departureInstant()?.isAfter(Instant.now()) == true
 
 @Composable
 internal fun LiveBookingScreen(
@@ -88,20 +112,19 @@ internal fun LiveBookingScreen(
     onMyTrips: () -> Unit,
     model: LiveBookingViewModel = viewModel(),
 ) {
-    var pickupId by rememberSaveable(offerId) {
-        val origin = criteria.origin.name.trim()
-        mutableStateOf(CampusLocationProvider.allLocations.firstOrNull {
-            it.pickupLat != null && it.pickupLng != null &&
-                (it.id.equals(origin, true) || it.name.equals(origin, true))
-        }?.id)
+    var seats by rememberSaveable(offerId) { mutableIntStateOf(criteria.seats.coerceAtLeast(1)) }
+    val origin = criteria.origin.name.trim()
+    val searchPickup = CampusLocationProvider.allLocations.firstOrNull {
+        it.pickupLat != null && it.pickupLng != null &&
+            (it.id.equals(origin, true) || it.name.equals(origin, true))
     }
-    val pickup = pickupId?.let(CampusLocationProvider::findById)
+    val pickup = model.selectedPickup ?: searchPickup
+        ?: model.offer?.originZone?.let(CampusLocationProvider::findById)
     val latitude = pickup?.pickupLat
     val longitude = pickup?.pickupLng
-    val seats = criteria.seats
-    val refresh = { model.refresh(offerId, owner, seats) }
+    val refresh = { model.refresh(offerId, owner) }
 
-    LaunchedEffect(offerId) { if (model.issue == 0 && model.offer == null) refresh() }
+    LaunchedEffect(owner, offerId) { if (model.issue == 0 && model.offer == null) refresh() }
     LaunchedEffect(model.bookingId) { model.bookingId?.let(onBooked) }
     BackHandler(enabled = reviewing && model.working) { }
 
@@ -123,6 +146,7 @@ internal fun LiveBookingScreen(
                 RideAction(stringResource(R.string.live_offer_refresh), enabled = !model.working, action = refresh)
             }
             model.offer?.let { offer ->
+                val eligible = offer.canBook(owner, seats)
                 val origin = offer.originZone
                 val destination = offer.destinationZone
                 Glass {
@@ -132,19 +156,26 @@ internal fun LiveBookingScreen(
                         Text(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm").format(it.atZone(CAMPUS_ZONE)))
                     }
                     Text(stringResource(R.string.live_booking_seats, seats, offer.availableSeats))
-                    Text(stringResource(R.string.live_booking_total, offer.costPerSeat * seats))
+                    Text(stringResource(R.string.booking_total, offer.costPerSeat, offer.costPerSeat * seats))
                 }
+                if (!eligible) Text(stringResource(R.string.booking_not_open), color = MaterialTheme.colorScheme.error)
                 if (reviewing) {
-                    LocationSelectorField(stringResource(R.string.live_pickup), pickup, { pickupId = it.id })
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { seats-- }, enabled = !model.working && seats > 1) { Text("−") }
+                        OutlinedButton(onClick = { seats++ }, enabled = !model.working && seats < offer.availableSeats) { Text("+") }
+                    }
+                    LocationSelectorField(stringResource(R.string.booking_pickup), pickup, {
+                        if (!model.working) model.selectedPickup = it
+                    })
                     if (latitude == null || longitude == null) Text(stringResource(R.string.live_pickup_required))
                     else Text(pickup.pickupName)
                     RideAction(
                         stringResource(R.string.live_booking_confirm),
                         enabled = !model.working && model.issue == 0 && model.bookingId == null &&
-                            latitude != null && longitude != null,
-                    ) { if (latitude != null && longitude != null) model.reserve(seats, longitude, latitude) }
+                            eligible && latitude != null && longitude != null,
+                    ) { if (latitude != null && longitude != null) model.reserve(owner, seats, longitude, latitude) }
                 } else {
-                    RideAction(stringResource(R.string.live_booking_review), enabled = !model.working, action = onReview)
+                    RideAction(stringResource(R.string.live_booking_review), enabled = !model.working && eligible, action = onReview)
                 }
             }
         }

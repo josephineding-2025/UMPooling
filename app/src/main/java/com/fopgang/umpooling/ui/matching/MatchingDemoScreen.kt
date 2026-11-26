@@ -65,7 +65,7 @@ fun MatchingDemoScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                0 -> FeedScreen()
+                0 -> FeedScreen(allowDemoFallback = true)
                 1 -> SavedRoutesScreen()
                 2 -> PostOfferScreen()
                 3 -> PostRequestScreen()
