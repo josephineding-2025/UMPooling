@@ -71,6 +71,7 @@
     <string name="ride_history">Sejarah perjalanan</string>
     <string name="logout">Log keluar</string>
     <string name="verified_student">Pelajar UM disahkan</string>
+    <string name="verified_staff">Kakitangan UM disahkan</string>
     <string name="passenger">Penumpang</string>
     <string name="rides">Perjalanan</string>
     <string name="rating">Penilaian</string>

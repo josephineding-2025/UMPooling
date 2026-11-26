@@ -99,6 +99,7 @@
     <string name="logout">Log out</string>
     <string name="profile_name">Aina Sofea</string>
     <string name="verified_student">Verified UM student</string>
+    <string name="verified_staff">Verified UM staff</string>
     <string name="passenger">Passenger</string>
     <string name="rides">Rides</string>
     <string name="rating">Rating</string>

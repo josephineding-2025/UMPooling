@@ -305,7 +305,8 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                         LaunchedEffect(Unit) { profileViewModel.refreshImpact() }
                         ProfileScreen(navigate,unavailable,message,
                         notificationPreferences.push,{savePreferences(notificationPreferences.copy(push=it))},authViewModel::logout,
-                        name=profile.profile?.displayName,role=profile.profile?.usersRole,impact=profile.impact) }
+                        name=profile.profile?.displayName,role=profile.profile?.usersRole,impact=profile.impact,
+                        email=profile.profile?.usersEmail) }
                     composable("profile_setup") { ProfileEditScreen(profile,{profileViewModel.clearMessages();back()},profileViewModel::edit,profileViewModel::save,profileViewModel::load) }
                     composable("emergency_contacts") { EmergencyContactScreen(owner ?: "demo",profile,{profileViewModel.clearMessages();back()},profileViewModel::saveContact,profileViewModel::load) }
                     composable("saved") { SavedRoutesScreen(back,unavailable,onNavigate=navigate,initialRoutes=account.routes,showSamples=demo,onRoutesChanged=accountViewModel::saveRoutes) }

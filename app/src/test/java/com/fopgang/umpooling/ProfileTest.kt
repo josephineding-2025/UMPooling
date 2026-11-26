@@ -13,6 +13,7 @@ import com.fopgang.umpooling.profile.ProfileForm
 import com.fopgang.umpooling.profile.ProfileRules
 import com.fopgang.umpooling.profile.ProfileViewModel
 import com.fopgang.umpooling.profile.initials
+import com.fopgang.umpooling.profile.verifiedBadge
 import com.fopgang.umpooling.profile.problems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,6 +120,17 @@ class ProfileTest {
     }
 
     private fun model(gateway: FakeProfiles) = ProfileViewModel(gateway, scope)
+
+    // ---- verification badge ----
+
+    @Test fun badgeFollowsTheVerifiedUmEmailDomain() {
+        assertEquals(R.string.verified_student, verifiedBadge(" A@SISWA.UM.EDU.MY "))
+        assertEquals(R.string.verified_staff, verifiedBadge("lecturer@um.edu.my"))
+        // Lookalike domains and a profile that has not loaded yet get no badge.
+        assertNull(verifiedBadge("a@siswa.um.edu.my.evil.com"))
+        assertNull(verifiedBadge("a@notum.edu.my"))
+        assertNull(verifiedBadge(null))
+    }
 
     // ---- tier and CO2 summary ----
 

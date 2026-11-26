@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ai.GreenCommuterTier
+import com.fopgang.umpooling.data.UmAffiliation
+import com.fopgang.umpooling.data.UmEmail
 import androidx.compose.ui.res.pluralStringResource
 import com.fopgang.umpooling.ui.components.*
 import com.fopgang.umpooling.ui.theme.*
@@ -30,7 +32,8 @@ import com.fopgang.umpooling.ui.theme.*
 @Composable
 fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: (Int) -> Unit,
     notifications: Boolean = true, onNotificationsChange: (Boolean) -> Unit = {}, onLogout: () -> Unit,
-    name: String? = null, role: String? = null, impact: ImpactSummary = ImpactSummary.from(null, null)) {
+    name: String? = null, role: String? = null, impact: ImpactSummary = ImpactSummary.from(null, null),
+    email: String? = null) {
     CompositionLocalProvider(LocalTextStyle provides TextStyle(fontFamily = FontFamily.SansSerif, color = Ink),
         LocalMinimumInteractiveComponentSize provides 0.dp) {
     Box(Modifier.fillMaxSize().background(Color(0xFFFCEAE2))) {
@@ -54,10 +57,13 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
                 }
                 Text(name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_name_unset), fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(shape = RoundedCornerShape(14.dp), color = Color.White.copy(alpha = .2f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
-                        Text(stringResource(R.string.verified_student), Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                            color = Color.White, fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold)
+                    // Only verified UM accounts reach this screen, so the email domain decides the badge.
+                    verifiedBadge(email)?.let { badge ->
+                        Surface(shape = RoundedCornerShape(14.dp), color = Color.White.copy(alpha = .2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
+                            Text(stringResource(badge), Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                color = Color.White, fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                     Surface(onClick = { navigate("tier") }, color = Color(0xFFF9CAB3), shape = CircleShape) {
                         Row(Modifier.padding(horizontal = 16.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -115,6 +121,12 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
 internal fun initials(name: String?): String =
     name.orEmpty().trim().split(' ').filter { it.isNotEmpty() }.take(2)
         .joinToString("") { it.first().uppercase() }.ifEmpty { "UM" }
+
+internal fun verifiedBadge(email: String?): Int? = when (UmEmail.affiliation(email)) {
+    UmAffiliation.STUDENT -> R.string.verified_student
+    UmAffiliation.STAFF -> R.string.verified_staff
+    null -> null
+}
 
 internal fun tierName(tier: GreenCommuterTier): Int = when (tier) {
     GreenCommuterTier.NO_BADGE -> R.string.tier_name_none
