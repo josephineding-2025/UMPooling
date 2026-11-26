@@ -65,7 +65,7 @@ The backend is a Supabase project (Auth, Postgres with Row Level Security, an Ed
 
 Rules in short: change the database only with a new file in `supabase/migrations/` reviewed by Member 2, send enum labels exactly as written in `docs/schema.md`, and never commit secrets. Trip start, confirm, complete and cancel are database functions; the test for them is `supabase/checks/01_trip_lifecycle_test.sql`.
 
-## Module 5: AI Commuting Assistant & Climate Analytics (Sprint 1 & 2 Updates)
+## Module 5: AI Commuting Assistant & Climate Analytics (Sprint 1 & 2 Updates) (Just for info purpose rmb delete aft tat)
 
 This branch (`JasmineJY_Sprint2`) contains the completed Sprint 1 and Sprint 2 deliverables for **Module 5**, developed by **Jasmine Chin Jia Yee (Member 4 - AI Developer)**.
 
