@@ -138,15 +138,19 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
             if(gated in setOf("home","my_trips","notifications","profile","dashboard")) {
                 popUpTo(nav.graph.findStartDestination().id) { saveState = true }
                 restoreState = true
-            } else if(gated in setOf("find_ride","offer_ride") &&
-                nav.currentDestination?.route in setOf("find_ride","offer_ride")) {
+            } else if(gated in setOf("find_ride","offer_ride","search_rides") &&
+                nav.currentDestination?.route in setOf("find_ride","offer_ride","search_rides")) {
                 popUpTo(nav.currentDestination!!.id) { inclusive = true; saveState = true }
                 restoreState = true
             }
         }
     }
     val back: () -> Unit = { nav.popBackStack(); Unit }
-    val home: () -> Unit = { navigate("home") }
+    val home: () -> Unit = {
+        if (!nav.popBackStack("home", inclusive = false)) {
+            navigate("home")
+        }
+    }
     val openOffer: (String) -> Unit = { navigate(BookingRoute.OfferDetails(it).encode()) }
     LaunchedEffect(link,owner) {if(owner!=null && link!=null) navigate("notification_open")}
     PeachBackground {
@@ -176,34 +180,37 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                         )
                     }
                     composable("find_ride") {
-                        if (!demo) Column {
-                            Row {
-                                TextButton({ navigate("search_rides") }) { Text(stringResource(R.string.find_ride)) }
-                                TextButton({ navigate("request_future_ride") }) { Text(stringResource(R.string.booking_request)) }
-                            }
-                            FeedScreen(
-                                onOfferClicked = { offer -> offer.tripOfferId?.let(openOffer) },
-                                onBack = back,
-                            )
-                        } else FindRideScreen(back,{ navigate("offer_ride") }, {
-                            criteria=it
-                            navigate(if (!demo) "live_offers" else if (it.isImmediate()) "immediate_results" else "request_future_ride")
-                        },initialCriteria=criteria, requestText=transcript)
+                        FeedScreen(
+                            onOfferClicked = { offer -> offer.tripOfferId?.let(openOffer) },
+                            onBack = home,
+                            onNeedRide = { navigate("search_rides") },
+                            onOfferRide = { navigate("offer_ride") }
+                        )
                     }
                     composable("search_rides") {
-                        FindRideScreen(back,{ navigate("offer_ride") }, {
-                            criteria=it
-                            navigate("live_offers")
-                        },initialCriteria=criteria, requestText=transcript)
+                        FindRideScreen(
+                            back = home,
+                            onModeChange = { navigate("offer_ride") },
+                            onFind = {
+                                criteria = it
+                                navigate("live_offers")
+                            },
+                            initialCriteria = criteria,
+                            requestText = transcript,
+                            onAvailableRides = { navigate("find_ride") },
+                            onOfferRide = { navigate("offer_ride") }
+                        )
                     }
                     composable("offer_ride") {
-                        if (!demo) Column {
-                            TextButton(back) { Text(stringResource(R.string.booking_back)) }
-                            com.fopgang.umpooling.ui.matching.PostOfferScreen(onOfferCreated = { navigate("my_trips") })
-                        } else OfferRideScreen(back,{ navigate("find_ride") }, {
-                            pendingOffer=it
-                            if(demo) navigate("posted_offer") else unavailable()
-                        },initialDraft=pendingOffer)
+                        OfferRideScreen(
+                            back = home,
+                            onModeChange = { navigate("search_rides") },
+                            onPost = { pendingOffer = it; if (demo) navigate("posted_offer") },
+                            onOfferCreated = { navigate("my_trips") },
+                            initialDraft = pendingOffer,
+                            onAvailableRides = { navigate("find_ride") },
+                            onNeedRide = { navigate("search_rides") }
+                        )
                     }
                     composable("posted_offer") {
                         FlowDestination("Offer preview",back,"Demo offer only. A live post requires the ride repository.",
@@ -214,7 +221,9 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                             val now = Instant.now()
                             FeedScreen(
                                 onOfferClicked = { offer -> offer.tripOfferId?.let(openOffer) },
-                                onBack = back,
+                                onBack = home,
+                                onNeedRide = { navigate("search_rides") },
+                                onOfferRide = { navigate("offer_ride") },
                                 offerFilter = { offer ->
                                     val departure = offer.departureInstant()
                                     offer.tripOfferId != null && offer.driverId != owner &&
@@ -232,15 +241,15 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                                 "Request a ride" to unavailable))
                     }
                     composable("request_future_ride") {
-                        if (!demo) Column {
-                            TextButton(back) { Text(stringResource(R.string.booking_back)) }
-                            com.fopgang.umpooling.ui.matching.PostRequestScreen(onRequestCreated = { navigate("my_trips") })
-                        } else RequestFutureRideScreen(back,openOffer,criteria,onPendingGroup={
-                            if(demo) {
-                                pendingGroups=ArrayList((pendingGroups+it).distinct())
-                                navigate("pending_group/"+Uri.encode(it))
-                            } else unavailable()
-                        })
+                        FindRideScreen(
+                            back = home,
+                            onModeChange = { navigate("offer_ride") },
+                            onFind = { criteria = it },
+                            onRequestCreated = { navigate("my_trips") },
+                            initialCriteria = criteria,
+                            onAvailableRides = { navigate("find_ride") },
+                            onOfferRide = { navigate("offer_ride") }
+                        )
                     }
                     composable("offer_details/{id}",arguments=listOf(navArgument("id"){type=NavType.StringType})) { entry ->
                         val id=entry.arguments!!.getString("id")!!
