@@ -37,6 +37,16 @@ private val FutureFont = FontFamily(*listOf(FontWeight.Normal, FontWeight.Medium
 
 @Composable
 fun RequestFutureRideScreen(back: () -> Unit, onViewOffer: (String) -> Unit, criteria: FindRideCriteria? = null, onPendingGroup: (String) -> Unit = {}) {
+    val originArea = criteria?.origin?.name?.takeIf { it.isNotBlank() } ?: "Kolej Kediaman 11"
+    val groupingService = androidx.compose.runtime.remember { com.fopgang.umpooling.ai.CommuterGroupingService.instance }
+    val sampleGroups = androidx.compose.runtime.remember(originArea) { groupingService.getSamplePickupGroups(originArea) }
+    val bestGroup = sampleGroups.firstOrNull()
+    val ridersCount = bestGroup?.riderCount?.let { (it + 3).toString() } ?: "6"
+    val bestWindow = bestGroup?.recommendedWindowLabel ?: "08:05–\n08:25"
+    val bestCost = bestGroup?.let { "RM " + String.format(java.util.Locale.US, "%.2f", it.estimatedCostPerRiderSen / 100.0) } ?: "RM 2.60"
+    val pickupName = bestGroup?.clusterPickupName ?: "$originArea, main lobby"
+    val destName = criteria?.destination?.name?.takeIf { it.isNotBlank() } ?: bestGroup?.destinationName ?: "FSKTM, Block A"
+
     ProvideTextStyle(TextStyle(fontFamily = FutureFont, fontSize = 14.sp, lineHeight = 19.sp, color = FutureInk)) {
         Column(Modifier.fillMaxSize().background(Color(0xFFFCEBE3)).drawWithCache {
             val white = Brush.radialGradient(listOf(Color.White, Color.Transparent), Offset.Zero, size.width * .85f)
@@ -58,7 +68,7 @@ fun RequestFutureRideScreen(back: () -> Unit, onViewOffer: (String) -> Unit, cri
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FeatureIcon(FeatureSymbol.Pin, Modifier.size(16.dp), tint = Color.White)
-                    Text("Your area: Kolej Kediaman 11", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Your area: $originArea", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(Modifier.height(11.dp))
@@ -69,11 +79,11 @@ fun RequestFutureRideScreen(back: () -> Unit, onViewOffer: (String) -> Unit, cri
             Spacer(Modifier.height(15.dp))
             FutureCard {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 17.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FutureStat("6", "riders nearby", Modifier.weight(1f))
+                    FutureStat(ridersCount, "riders nearby", Modifier.weight(1f))
                     VerticalDivider(Modifier.height(32.dp), color = Color(0xFFF0CBBB))
-                    FutureStat("08:05–\n08:25", "best window", Modifier.weight(1f))
+                    FutureStat(bestWindow, "best window", Modifier.weight(1f))
                     VerticalDivider(Modifier.height(32.dp), color = Color(0xFFF0CBBB))
-                    FutureStat("RM 2.60", "each, if 4 share", Modifier.weight(1f))
+                    FutureStat(bestCost, "each, if 4 share", Modifier.weight(1f))
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -87,7 +97,8 @@ fun RequestFutureRideScreen(back: () -> Unit, onViewOffer: (String) -> Unit, cri
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         Surface(shape = CircleShape, color = Color.Transparent) {
-                            Text("Best match · 92%", Modifier.background(Brush.verticalGradient(listOf(Color(0xFFF9B7A1), Color(0xFFF18D72))))
+                            val matchScore = bestGroup?.matchScorePercentage ?: 92
+                            Text("Best match · $matchScore%", Modifier.background(Brush.verticalGradient(listOf(Color(0xFFF9B7A1), Color(0xFFF18D72))))
                                 .padding(horizontal = 12.dp, vertical = 5.dp), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                         Text("Mon – Fri", fontSize = 13.sp, color = FutureMuted, fontWeight = FontWeight.Bold)
@@ -102,15 +113,15 @@ fun RequestFutureRideScreen(back: () -> Unit, onViewOffer: (String) -> Unit, cri
                             Box(Modifier.size(12.dp).background(Color(0xFFF28C72), RoundedCornerShape(4.dp)))
                         }
                         Column {
-                            FutureStop("PICKUP POINT", "Kolej Kediaman 11, main lobby")
+                            FutureStop("PICKUP POINT", pickupName)
                             Spacer(Modifier.height(10.dp))
-                            FutureStop("DESTINATION", "FSKTM, Block A")
+                            FutureStop("DESTINATION", destName)
                         }
                     }
                     Spacer(Modifier.height(15.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Departure window", color = FutureMuted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                        Text("08:05 – 08:25", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF973D29))
+                        Text(bestGroup?.recommendedWindowLabel ?: "08:05 – 08:25", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF973D29))
                     }
                     Spacer(Modifier.height(7.dp))
                     Row(Modifier.fillMaxWidth().height(10.dp).background(Color(0xFFF6DFD3), CircleShape)) {

@@ -38,13 +38,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fopgang.umpooling.R
+import com.fopgang.umpooling.booking.CAMPUS_ZONE
+import com.fopgang.umpooling.booking.FindRideCriteria
+import com.fopgang.umpooling.booking.RideLocation
 import com.fopgang.umpooling.ui.components.FigmaIcon
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
-fun VoiceRequestScreen(back: () -> Unit, unavailable: () -> Unit, message: (Int) -> Unit, onManual: (String) -> Unit = { unavailable() }) {
+fun VoiceRequestScreen(
+    back: () -> Unit,
+    unavailable: () -> Unit,
+    message: (Int) -> Unit,
+    onManual: (String) -> Unit = { unavailable() },
+    onConfirmCriteria: ((FindRideCriteria, String) -> Unit)? = null
+) {
     val example = stringResource(R.string.ai_sample)
     var request by rememberSaveable { mutableStateOf(example) }
+    var isParsing by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val parserRepository = remember { RideParserRepository() }
     ProvideTextStyle(TextStyle(fontFamily = FontFamily.SansSerif, color = Color.White, fontSize = 15.sp)) {
         Box(Modifier.fillMaxSize().imePadding()) {
             VoiceBackdrop()
@@ -109,9 +124,65 @@ fun VoiceRequestScreen(back: () -> Unit, unavailable: () -> Unit, message: (Int)
                         Spacer(Modifier.height(5.dp))
                         Surface(Modifier.align(Alignment.End), shape = CircleShape,
                             color = Color(0xFFCAC5C1).copy(alpha = .92f)) {
-                            IconButton({ message(R.string.not_connected) }, Modifier.size(52.dp, 30.dp)) {
-                                FigmaIcon(R.drawable.voice_frame3, Modifier.size(22.dp),
-                                    description = stringResource(R.string.send_request))
+                            IconButton(
+                                onClick = {
+                                    if (isParsing) return@IconButton
+                                    if (request.isBlank()) {
+                                        message(R.string.voice_request)
+                                        return@IconButton
+                                    }
+                                    scope.launch {
+                                        isParsing = true
+                                        try {
+                                            val result = parserRepository.parseRideRequest(request)
+                                            val uiState = result.getOrNull() ?: parserRepository.fallbackHeuristicParse(request)
+
+                                            val date = uiState.departureDate?.let {
+                                                runCatching { LocalDate.parse(it) }.getOrNull()
+                                            } ?: LocalDate.now(CAMPUS_ZONE).plusDays(1)
+
+                                            val time = uiState.departureTime?.let {
+                                                runCatching { LocalTime.parse(it) }.getOrNull()
+                                            } ?: LocalTime.of(8, 15)
+
+                                            val orig = uiState.origin?.let { RideLocation(it) } ?: RideLocation("")
+                                            val dest = uiState.destination?.let { RideLocation(it) } ?: RideLocation("")
+
+                                            val parsedCriteria = FindRideCriteria(
+                                                origin = orig,
+                                                destination = dest,
+                                                departureDate = date,
+                                                departureTime = time,
+                                                seats = uiState.seats
+                                            )
+
+                                            if (onConfirmCriteria != null) {
+                                                onConfirmCriteria(parsedCriteria, request)
+                                            } else {
+                                                onManual(request)
+                                            }
+                                        } catch (_: Exception) {
+                                            onManual(request)
+                                        } finally {
+                                            isParsing = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.size(52.dp, 30.dp),
+                                enabled = !isParsing
+                            ) {
+                                if (isParsing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    FigmaIcon(
+                                        R.drawable.voice_frame3, Modifier.size(22.dp),
+                                        description = stringResource(R.string.send_request)
+                                    )
+                                }
                             }
                         }
                     }

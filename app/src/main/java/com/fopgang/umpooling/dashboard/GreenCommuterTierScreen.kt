@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -34,6 +34,31 @@ private val TierFont = FontFamily(*listOf(FontWeight.Normal, FontWeight.Medium, 
 
 @Composable
 fun GreenCommuterTierScreen(back: () -> Unit) {
+    val impactRepo = androidx.compose.runtime.remember { com.fopgang.umpooling.data.repository.ImpactRepository() }
+    val analyticsService = androidx.compose.runtime.remember { com.fopgang.umpooling.ai.ImpactAnalyticsService.instance }
+    var personalImpact by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<com.fopgang.umpooling.data.repository.PersonalImpact?>(null) }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        impactRepo.personal().onSuccess { personalImpact = it }
+    }
+
+    val effectiveImpact = personalImpact ?: androidx.compose.runtime.remember { analyticsService.getDemoPersonalImpact() }
+    val totalTrips = effectiveImpact.totalTrips ?: 0
+    val totalCo2 = effectiveImpact.co2Kg ?: 0.0
+
+    val earnedTier = androidx.compose.runtime.remember(totalTrips, totalCo2) {
+        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeGreenCommuterTier(totalTrips, totalCo2)
+    }
+    // Respect server rule: user holds highest tier where both thresholds are met, and it never downgrades
+    val effectiveLevel = maxOf(effectiveImpact.tierLevel, earnedTier.level)
+    val tier = remember(effectiveLevel, earnedTier) {
+        if (effectiveLevel == earnedTier.level) earnedTier
+        else com.fopgang.umpooling.ai.GreenCommuterTier.fromLevel(effectiveLevel)
+    }
+    val progress = androidx.compose.runtime.remember(totalTrips, totalCo2) {
+        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeTierProgress(totalTrips, totalCo2)
+    }
+
     ProvideTextStyle(androidx.compose.ui.text.TextStyle(fontFamily = TierFont, color = PoolDesign.Text)) {
         Column(Modifier.fillMaxSize().background(Color(0xFFFFF2EA)).drawWithCache {
             val top = Brush.radialGradient(listOf(Color(0xFFF5C3B0), Color.Transparent), Offset.Zero, size.width * .65f)
@@ -60,55 +85,61 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Column {
                             Text(stringResource(R.string.four_your_tier), fontSize = 13.sp, lineHeight = 18.sp, color = Color(0xFFE8C4B5), fontWeight = FontWeight.SemiBold)
-                            Text(stringResource(R.string.four_sprout), fontSize = 28.sp, lineHeight = 34.sp, color = Color.White, fontWeight = FontWeight.ExtraBold)
+                            Text(tier.badgeName, fontSize = 28.sp, lineHeight = 34.sp, color = Color.White, fontWeight = FontWeight.ExtraBold)
                         }
                         SeedlingIllustration(Modifier.size(55.dp))
                         Spacer(Modifier.weight(1f))
                         Surface(shape = CircleShape, color = Color(0xFFF9C3AC)) {
-                            Text(stringResource(R.string.four_level), Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            Text(stringResource(R.string.four_tier_level_format, tier.level), Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Spacer(Modifier.height(14.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(stringResource(R.string.four_next), fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text(stringResource(R.string.four_tier_progress), fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        val nextLabel = progress.nextTier?.let {
+                            stringResource(R.string.four_tier_next_format, it.badgeName)
+                        } ?: stringResource(R.string.four_tier_max_achieved)
+                        Text(nextLabel, fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        val pctLabel = "${(progress.progressFraction * 100).toInt()}%"
+                        Text(pctLabel, fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                     Spacer(Modifier.height(6.dp))
-                    GradientProgress(13f / 15f, stringResource(R.string.four_tier_progress_label), dark = true)
+                    GradientProgress(progress.progressFraction, stringResource(R.string.four_tier_progress_label), dark = true)
                 }
             }
             Spacer(Modifier.height(20.dp))
             Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 val names = listOf(R.string.four_seedling, R.string.four_sprout, R.string.four_sapling, R.string.four_tree, R.string.four_forest)
                 val thresholds = listOf(R.string.four_threshold1, R.string.four_threshold2, R.string.four_threshold3, R.string.four_threshold4, R.string.four_threshold5)
+                val currentLevel = tier.level
                 names.forEachIndexed { index, name ->
-                    val current = index == 1
-                    val locked = index > 1
+                    val isCurrent = (index + 1) == currentLevel
+                    val isUnlocked = (index + 1) <= currentLevel
+                    val isLocked = !isUnlocked
                     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(27.dp),
-                        color = Color.White.copy(alpha = if (current) .4f else .72f),
-                        border = BorderStroke(if (current) 1.5.dp else 1.dp, if (current) Color(0xFFF3AC95) else Color(0xFFF3D7CC)),
+                        color = Color.White.copy(alpha = if (isCurrent) .4f else if (isUnlocked) .8f else .5f),
+                        border = BorderStroke(if (isCurrent) 1.5.dp else 1.dp, if (isCurrent) Color(0xFFF3AC95) else Color(0xFFF3D7CC)),
                         shadowElevation = 3.dp) {
                         Row(Modifier.heightIn(min = 63.dp).padding(horizontal = 17.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Box(Modifier.size(38.dp).background(
-                                if (index == 0) PoolDesign.Strong else if (current) Color(0xFFF4A38A) else Color(0xFFF4E5DD), CircleShape),
+                                if (isCurrent) Color(0xFFF4A38A) else if (isUnlocked) PoolDesign.Strong else Color(0xFFF4E5DD), CircleShape),
                                 contentAlignment = Alignment.Center) {
                                 Text((index + 1).toString(), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold,
-                                    color = if (index == 0) Color.White else if (locked) Color(0xFF91817A) else PoolDesign.Text)
+                                    color = if (index == 0) Color.White else if (isLocked) Color(0xFF91817A) else PoolDesign.Text)
                             }
                             Column(Modifier.weight(1f)) {
                                 Text(stringResource(name), fontSize = 16.sp, lineHeight = 19.sp, fontWeight = FontWeight.ExtraBold,
-                                    color = if (locked) Color(0xFF544F4C) else PoolDesign.Text, letterSpacing = (-.4).sp)
+                                    color = if (isLocked) Color(0xFF544F4C) else PoolDesign.Text, letterSpacing = (-.4).sp)
                                 Text(stringResource(thresholds[index]), fontSize = 13.sp, lineHeight = 16.sp,
-                                    fontWeight = FontWeight.SemiBold, color = if (locked) Color(0xFF93837A) else PoolDesign.Secondary)
+                                    fontWeight = FontWeight.SemiBold, color = if (isLocked) Color(0xFF93837A) else PoolDesign.Secondary)
                             }
-                            if (current) Surface(shape = CircleShape, color = PoolDesign.Strong) {
+                            if (isCurrent) Surface(shape = CircleShape, color = PoolDesign.Strong) {
                                 Text(stringResource(R.string.four_you_here), Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            } else FeatureIcon(if (locked) FeatureSymbol.Lock else FeatureSymbol.Check, Modifier.size(16.dp),
-                                description = stringResource(if (locked) R.string.four_locked else R.string.four_achieved),
-                                tint = if (locked) Color(0xFF544F4C) else PoolDesign.Strong)
+                            } else FeatureIcon(if (isLocked) FeatureSymbol.Lock else FeatureSymbol.Check, Modifier.size(16.dp),
+                                description = stringResource(if (isLocked) R.string.four_locked else R.string.four_achieved),
+                                tint = if (isLocked) Color(0xFF544F4C) else PoolDesign.Strong)
                         }
                     }
                 }
@@ -124,4 +155,4 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
 @Preview(name = "Tier compact large text", widthDp = 320, heightDp = 720, fontScale = 1.5f)
 @Preview(name = "Tier wide", widthDp = 600, heightDp = 900)
 @Composable
-private fun TierPreview() { UMPoolingTheme { GreenCommuterTierScreen({}) } }
+private fun TierPreview() { UMPoolingTheme { GreenCommuterTierScreen {} } }
