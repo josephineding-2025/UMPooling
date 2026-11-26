@@ -267,7 +267,19 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                     composable("profile_setup") { ProfileEditScreen(profile,{profileViewModel.clearMessages();back()},profileViewModel::edit,profileViewModel::save,profileViewModel::load) }
                     composable("emergency_contacts") { EmergencyContactScreen(owner ?: "demo",profile,{profileViewModel.clearMessages();back()},profileViewModel::saveContact,profileViewModel::load) }
                     composable("saved") { SavedRoutesScreen(back,unavailable,onNavigate=navigate,initialRoutes=account.routes,showSamples=demo,onRoutesChanged=accountViewModel::saveRoutes) }
-                    composable("voice") { VoiceRequestScreen(back,unavailable,message,onManual={transcript=it;navigate("find_ride")}) }
+                    composable("voice") {
+                        VoiceRequestScreen(
+                            back = back,
+                            unavailable = unavailable,
+                            message = message,
+                            onManual = { transcript = it; navigate("find_ride") },
+                            onConfirmCriteria = { newCriteria, query ->
+                                transcript = query
+                                criteria = newCriteria
+                                navigate("find_ride")
+                            }
+                        )
+                    }
                     listOf("chat","chat/offer/{id}","chat/booking/{id}").forEach { path ->
                         composable(path) { entry ->
                             if(!demo && owner!=null && path=="chat/booking/{id}") LiveChatScreen(owner,ConversationKind.BOOKING,entry.arguments!!.getString("id")!!,back)
