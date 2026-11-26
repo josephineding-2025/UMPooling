@@ -20,6 +20,8 @@ interface ProfileGateway {
     suspend fun load(): Result<UserProfile>
     suspend fun save(form: ProfileForm): Result<Unit>
     suspend fun saveEmergencyContact(contact: EmergencyContact?): Result<Unit>
+    /** Trip and CO2 totals; null until the first completed trip. */
+    suspend fun impact(): Result<PersonalImpact?>
 }
 
 /** Blank text becomes null so a cleared field is cleared in the database. */
@@ -45,8 +47,10 @@ internal fun ProfileForm.toUpdate(): JsonObject {
  * columns listed in supabase/migrations/20261115000005_role_profile_cost_cap.sql, and the role
  * changes only through the set_my_role function.
  */
-class ProfileRepository : ProfileGateway {
+class ProfileRepository(private val impacts: ImpactRepository = ImpactRepository()) : ProfileGateway {
     private val client get() = SupabaseClientProvider.client
+
+    override suspend fun impact(): Result<PersonalImpact?> = impacts.personal()
 
     private fun userId(): String =
         client.auth.currentUserOrNull()?.id ?: error("Not signed in")

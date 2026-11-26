@@ -99,7 +99,7 @@
     <string name="logout">Log out</string>
     <string name="profile_name">Aina Sofea</string>
     <string name="verified_student">Verified UM student</string>
-    <string name="tier_level">Sprout · Lv 2</string>
+    <string name="verified_staff">Verified UM staff</string>
     <string name="passenger">Passenger</string>
     <string name="rides">Rides</string>
     <string name="rating">Rating</string>
@@ -172,9 +172,6 @@
     <string name="confirm">Confirm</string>
     <string name="demo">Preview</string>
     <string name="rating_value">%1$d out of 5 stars</string>
-    <string name="sample_stat_rides">12</string>
-    <string name="sample_stat_rating">4.9</string>
-    <string name="sample_stat_co2">22.8</string>
     <string name="four_chat_status">Driver · Mon 08:15 · Confirmed</string>
     <string name="four_pickup_point">PICKUP POINT</string>
     <string name="four_pickup_title">Kolej 11 main lobby</string>
@@ -384,4 +381,21 @@
     <string name="sos_location_on_request">Location is requested only when you activate SOS and grant permission.</string>
     <string name="sos_manual_delivery">The app prepares a message; it does not send it automatically or notify campus security.</string>
     <string name="sos_dialer_error">Unable to open the phone dialer.</string>
+    <string name="tier_chip">%1$s · Lv %2$d</string>
+    <string name="tier_name_none">No badge yet</string>
+    <string name="tier_name_seedling">Seedling</string>
+    <string name="tier_name_sprout">Sprout</string>
+    <string name="tier_name_sapling">Sapling</string>
+    <string name="tier_name_tree">Tree</string>
+    <string name="tier_name_forest">Forest Guardian</string>
+    <plurals name="tier_progress_both">
+        <item quantity="one">%1$d more trip and %2$s kg CO₂ to reach %3$s</item>
+        <item quantity="other">%1$d more trips and %2$s kg CO₂ to reach %3$s</item>
+    </plurals>
+    <plurals name="tier_progress_trips">
+        <item quantity="one">%1$d more trip to reach %2$s</item>
+        <item quantity="other">%1$d more trips to reach %2$s</item>
+    </plurals>
+    <string name="tier_progress_co2">%1$s kg more CO₂ saved to reach %2$s</string>
+    <string name="tier_progress_top">You have reached the top tier. Thank you for commuting green.</string>
 </resources>

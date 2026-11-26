@@ -22,13 +22,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fopgang.umpooling.R
+import com.fopgang.umpooling.ai.GreenCommuterTier
+import com.fopgang.umpooling.data.UmAffiliation
+import com.fopgang.umpooling.data.UmEmail
+import androidx.compose.ui.res.pluralStringResource
 import com.fopgang.umpooling.ui.components.*
 import com.fopgang.umpooling.ui.theme.*
 
 @Composable
 fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: (Int) -> Unit,
     notifications: Boolean = true, onNotificationsChange: (Boolean) -> Unit = {}, onLogout: () -> Unit,
-    name: String? = null, role: String? = null) {
+    name: String? = null, role: String? = null, impact: ImpactSummary = ImpactSummary.from(null, null),
+    email: String? = null) {
     CompositionLocalProvider(LocalTextStyle provides TextStyle(fontFamily = FontFamily.SansSerif, color = Ink),
         LocalMinimumInteractiveComponentSize provides 0.dp) {
     Box(Modifier.fillMaxSize().background(Color(0xFFFCEAE2))) {
@@ -52,15 +57,18 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
                 }
                 Text(name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_name_unset), fontSize = 24.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(shape = RoundedCornerShape(14.dp), color = Color.White.copy(alpha = .2f),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
-                        Text(stringResource(R.string.verified_student), Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                            color = Color.White, fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold)
+                    // Only verified UM accounts reach this screen, so the email domain decides the badge.
+                    verifiedBadge(email)?.let { badge ->
+                        Surface(shape = RoundedCornerShape(14.dp), color = Color.White.copy(alpha = .2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = .6f))) {
+                            Text(stringResource(badge), Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                color = Color.White, fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                     Surface(onClick = { navigate("tier") }, color = Color(0xFFF9CAB3), shape = CircleShape) {
                         Row(Modifier.padding(horizontal = 16.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             FigmaIcon(R.drawable.profile_frame8, Modifier.size(14.dp))
-                            Text(stringResource(R.string.tier_level), fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF463027))
+                            Text(stringResource(R.string.tier_chip, stringResource(tierName(impact.tier)), impact.tier.level), fontSize = 13.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF463027))
                         }
                     }
                 }
@@ -71,12 +79,17 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
             }
             GlassCard(Modifier.fillMaxWidth(), opacity = .9f) {
                 Row(Modifier.padding(vertical = 18.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    ProfileStat(R.string.sample_stat_rides, R.string.rides, Modifier.weight(1f))
+                    ProfileStat(impact.tripsText, R.string.rides, Modifier.weight(1f))
                     VerticalDivider(Modifier.height(34.dp), color = Color(0xFFF4CBBB))
-                    ProfileStat(R.string.sample_stat_rating, R.string.rating, Modifier.weight(1f))
+                    ProfileStat(impact.ratingText, R.string.rating, Modifier.weight(1f))
                     VerticalDivider(Modifier.height(34.dp), color = Color(0xFFF4CBBB))
-                    ProfileStat(R.string.sample_stat_co2, R.string.co2_saved, Modifier.weight(1f))
+                    ProfileStat(impact.co2Text, R.string.co2_saved, Modifier.weight(1f))
                 }
+                HorizontalDivider(Modifier.padding(horizontal = 18.dp), color = Color(0xFFF4CBBB))
+                Text(tierProgressText(impact), Modifier.fillMaxWidth().clickable { navigate("tier") }
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
+                    fontSize = 13.sp, lineHeight = 17.sp, fontWeight = FontWeight.Medium, color = Muted,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
             GlassCard(Modifier.fillMaxWidth(), opacity = .85f, radius = 30.dp) {
                 ProfileRow(R.drawable.profile_frame, R.string.personal_details) { navigate("profile_setup") }
@@ -109,6 +122,36 @@ internal fun initials(name: String?): String =
     name.orEmpty().trim().split(' ').filter { it.isNotEmpty() }.take(2)
         .joinToString("") { it.first().uppercase() }.ifEmpty { "UM" }
 
+internal fun verifiedBadge(email: String?): Int? = when (UmEmail.affiliation(email)) {
+    UmAffiliation.STUDENT -> R.string.verified_student
+    UmAffiliation.STAFF -> R.string.verified_staff
+    null -> null
+}
+
+internal fun tierName(tier: GreenCommuterTier): Int = when (tier) {
+    GreenCommuterTier.NO_BADGE -> R.string.tier_name_none
+    GreenCommuterTier.SEEDLING -> R.string.tier_name_seedling
+    GreenCommuterTier.SPROUT -> R.string.tier_name_sprout
+    GreenCommuterTier.SAPLING -> R.string.tier_name_sapling
+    GreenCommuterTier.TREE -> R.string.tier_name_tree
+    GreenCommuterTier.FOREST_GUARDIAN -> R.string.tier_name_forest
+}
+
+@Composable
+private fun tierProgressText(impact: ImpactSummary): String {
+    val next = impact.next ?: return stringResource(R.string.tier_progress_top)
+    val nextName = stringResource(tierName(next))
+    return when {
+        impact.tripsToNext > 0 && impact.co2KgToNext > 0.0 -> pluralStringResource(
+            R.plurals.tier_progress_both, impact.tripsToNext, impact.tripsToNext,
+            String.format(java.util.Locale.US, "%.1f", impact.co2KgToNext), nextName)
+        impact.tripsToNext > 0 -> pluralStringResource(
+            R.plurals.tier_progress_trips, impact.tripsToNext, impact.tripsToNext, nextName)
+        else -> stringResource(R.string.tier_progress_co2,
+            String.format(java.util.Locale.US, "%.1f", impact.co2KgToNext), nextName)
+    }
+}
+
 internal fun roleLabel(role: String?): Int = when (role) {
     "drivers" -> R.string.role_drivers
     "both" -> R.string.role_both
@@ -117,9 +160,9 @@ internal fun roleLabel(role: String?): Int = when (role) {
 }
 
 @Composable
-private fun ProfileStat(value: Int, label: Int, modifier: Modifier) {
+private fun ProfileStat(value: String, label: Int, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(value), fontSize = 22.sp, lineHeight = 24.sp, fontWeight = FontWeight.ExtraBold)
+        Text(value, fontSize = 22.sp, lineHeight = 24.sp, fontWeight = FontWeight.ExtraBold)
         Text(stringResource(label), fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.Bold, color = Muted)
     }
 }
