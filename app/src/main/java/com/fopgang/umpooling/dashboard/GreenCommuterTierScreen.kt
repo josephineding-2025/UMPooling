@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -34,12 +34,29 @@ private val TierFont = FontFamily(*listOf(FontWeight.Normal, FontWeight.Medium, 
 
 @Composable
 fun GreenCommuterTierScreen(back: () -> Unit) {
-    val impactStats = androidx.compose.runtime.remember { com.fopgang.umpooling.ai.ImpactRepository.instance.getDemoUserImpactStats() }
-    val tier = androidx.compose.runtime.remember(impactStats) {
-        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeGreenCommuterTier(impactStats.totalTrips, impactStats.totalCo2SavedKg)
+    val impactRepo = androidx.compose.runtime.remember { com.fopgang.umpooling.data.repository.ImpactRepository() }
+    val analyticsService = androidx.compose.runtime.remember { com.fopgang.umpooling.ai.ImpactAnalyticsService.instance }
+    var personalImpact by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<com.fopgang.umpooling.data.repository.PersonalImpact?>(null) }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        impactRepo.personal().onSuccess { personalImpact = it }
     }
-    val progress = androidx.compose.runtime.remember(impactStats) {
-        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeTierProgress(impactStats.totalTrips, impactStats.totalCo2SavedKg)
+
+    val effectiveImpact = personalImpact ?: androidx.compose.runtime.remember { analyticsService.getDemoPersonalImpact() }
+    val totalTrips = effectiveImpact.totalTrips ?: 0
+    val totalCo2 = effectiveImpact.co2Kg ?: 0.0
+
+    val earnedTier = androidx.compose.runtime.remember(totalTrips, totalCo2) {
+        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeGreenCommuterTier(totalTrips, totalCo2)
+    }
+    // Respect server rule: user holds highest tier where both thresholds are met, and it never downgrades
+    val effectiveLevel = maxOf(effectiveImpact.tierLevel, earnedTier.level)
+    val tier = remember(effectiveLevel, earnedTier) {
+        if (effectiveLevel == earnedTier.level) earnedTier
+        else com.fopgang.umpooling.ai.GreenCommuterTier.fromLevel(effectiveLevel)
+    }
+    val progress = androidx.compose.runtime.remember(totalTrips, totalCo2) {
+        com.fopgang.umpooling.ai.Co2CalculationService.instance.computeTierProgress(totalTrips, totalCo2)
     }
 
     ProvideTextStyle(androidx.compose.ui.text.TextStyle(fontFamily = TierFont, color = PoolDesign.Text)) {
@@ -73,13 +90,15 @@ fun GreenCommuterTierScreen(back: () -> Unit) {
                         SeedlingIllustration(Modifier.size(55.dp))
                         Spacer(Modifier.weight(1f))
                         Surface(shape = CircleShape, color = Color(0xFFF9C3AC)) {
-                            Text("Level ${tier.level}", Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            Text(stringResource(R.string.four_tier_level_format, tier.level), Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Spacer(Modifier.height(14.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        val nextLabel = progress.nextTier?.let { "Next: ${it.badgeName}" } ?: "Maximum Tier Achieved"
+                        val nextLabel = progress.nextTier?.let {
+                            stringResource(R.string.four_tier_next_format, it.badgeName)
+                        } ?: stringResource(R.string.four_tier_max_achieved)
                         Text(nextLabel, fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         val pctLabel = "${(progress.progressFraction * 100).toInt()}%"
                         Text(pctLabel, fontSize = 12.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)

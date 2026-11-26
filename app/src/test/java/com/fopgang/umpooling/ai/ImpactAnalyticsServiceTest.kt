@@ -4,13 +4,13 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-class ImpactRepositoryTest {
+class ImpactAnalyticsServiceTest {
 
-    private lateinit var impactRepo: ImpactRepository
+    private lateinit var analyticsService: ImpactAnalyticsService
 
     @Before
     fun setUp() {
-        impactRepo = ImpactRepository()
+        analyticsService = ImpactAnalyticsService()
     }
 
     @Test
@@ -25,7 +25,7 @@ class ImpactRepositoryTest {
             currentTierName = "Sprout"
         )
 
-        val insight = impactRepo.generatePersonalInsights(stats)
+        val insight = analyticsService.generatePersonalInsights(stats)
 
         assertEquals("Active Green Commuter", insight.headline)
         assertTrue(insight.body.contains("22.8 kg"))
@@ -36,14 +36,14 @@ class ImpactRepositoryTest {
 
     @Test
     fun facultyAndCollegeLeaderboards_strictlyNonIndividual() {
-        val facultyLeaderboard = impactRepo.getFacultyLeaderboard()
+        val facultyLeaderboard = analyticsService.getFacultyLeaderboard()
         assertFalse(facultyLeaderboard.isEmpty())
         // Verify all entries are faculties, sorted descending by CO2
         assertTrue(facultyLeaderboard.all { it.category == "faculty" })
         assertEquals("Computer Science (FSKTM)", facultyLeaderboard.first().name)
         assertTrue(facultyLeaderboard[0].totalCo2SavedKg >= facultyLeaderboard[1].totalCo2SavedKg)
 
-        val collegeLeaderboard = impactRepo.getCollegeLeaderboard()
+        val collegeLeaderboard = analyticsService.getCollegeLeaderboard()
         assertFalse(collegeLeaderboard.isEmpty())
         assertTrue(collegeLeaderboard.all { it.category == "college" })
         assertEquals("Kolej Kediaman 12 (KK12)", collegeLeaderboard.first().name)
@@ -87,7 +87,7 @@ class ImpactRepositoryTest {
             )
         )
 
-        val protected = impactRepo.applyKAnonymity(rawAggregates)
+        val protected = analyticsService.applyKAnonymity(rawAggregates)
 
         // agg-1 (12 users): Not masked
         assertFalse(protected[0].isMasked)
@@ -107,7 +107,7 @@ class ImpactRepositoryTest {
 
     @Test
     fun getDemoUserImpactStats_computesValidTier() {
-        val demo = impactRepo.getDemoUserImpactStats("demo")
+        val demo = analyticsService.getDemoUserImpactStats("demo")
         assertEquals(14, demo.totalTrips)
         assertEquals(22.8, demo.totalCo2SavedKg, 0.001)
         // 14 trips, 22.8 kg -> Sprout (Level 2) because Sapling requires 15 trips

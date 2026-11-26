@@ -44,15 +44,35 @@ private val DashboardFont = FontFamily(
 @Composable
 fun SustainabilityDashboardScreen(navigate: (String) -> Unit, unavailable: () -> Unit) {
     var monthly by rememberSaveable { mutableStateOf(false) }
-    val impactRepo = remember { com.fopgang.umpooling.ai.ImpactRepository.instance }
-    val userStats = remember { impactRepo.getDemoUserImpactStats() }
-    val personalInsight = remember(userStats) { impactRepo.generatePersonalInsights(userStats) }
-    var campusSummary by remember { mutableStateOf(impactRepo.getDemoCampusImpactSummary()) }
+    val impactRepo = remember { com.fopgang.umpooling.data.repository.ImpactRepository() }
+    val analyticsService = remember { com.fopgang.umpooling.ai.ImpactAnalyticsService.instance }
+
+    var personalImpact by remember { mutableStateOf<com.fopgang.umpooling.data.repository.PersonalImpact?>(null) }
+    var staffCells by remember { mutableStateOf<List<com.fopgang.umpooling.data.repository.StaffImpactCell>>(emptyList()) }
+
     LaunchedEffect(Unit) {
-        impactRepo.getCampusImpactSummary().onSuccess { campusSummary = it }
+        impactRepo.personal().onSuccess { personalImpact = it }
+        impactRepo.staffCells().onSuccess { staffCells = it }
     }
-    val facultyLeaderboard = remember { impactRepo.getFacultyLeaderboard() }
-    val collegeLeaderboard = remember { impactRepo.getCollegeLeaderboard() }
+
+    val demoStats = remember { analyticsService.getDemoUserImpactStats() }
+    val userStats = remember(personalImpact) {
+        personalImpact?.let {
+            com.fopgang.umpooling.ai.UserImpactStats(
+                userId = it.userId,
+                totalTrips = it.totalTrips ?: 0,
+                totalDistanceKm = it.distanceKm ?: 0.0,
+                totalCo2SavedKg = it.co2Kg ?: 0.0,
+                currentTierLevel = it.tierLevel,
+                currentTierName = it.tierName
+            )
+        } ?: demoStats
+    }
+
+    val personalInsight = remember(userStats) { analyticsService.generatePersonalInsights(userStats) }
+    val campusSummary = remember { analyticsService.getDemoCampusImpactSummary() }
+    val facultyLeaderboard = remember { analyticsService.getFacultyLeaderboard() }
+    val collegeLeaderboard = remember { analyticsService.getCollegeLeaderboard() }
 
     val base = MaterialTheme.typography
     fun androidx.compose.ui.text.TextStyle.dashboardStyle() = copy(fontFamily = DashboardFont)
