@@ -3,7 +3,10 @@ package com.fopgang.umpooling
 import com.fopgang.umpooling.data.EmergencyContact
 import com.fopgang.umpooling.data.UserProfile
 import com.fopgang.umpooling.data.UserRole
+import com.fopgang.umpooling.ai.GreenCommuterTier
+import com.fopgang.umpooling.data.repository.PersonalImpact
 import com.fopgang.umpooling.data.repository.ProfileGateway
+import com.fopgang.umpooling.profile.ImpactSummary
 import com.fopgang.umpooling.data.repository.toUpdate
 import com.fopgang.umpooling.profile.ProfileField
 import com.fopgang.umpooling.profile.ProfileForm
@@ -105,6 +108,8 @@ class ProfileTest {
         var saved: ProfileForm? = null
         var contactSaved: EmergencyContact? = EmergencyContact(phone = "untouched")
         var loads = 0
+        var impactResult: Result<PersonalImpact?> = Result.success(null)
+        override suspend fun impact() = impactResult
         override suspend fun load(): Result<UserProfile> { loads++; return loadResult ?: Result.success(profile) }
         override suspend fun save(form: ProfileForm): Result<Unit> { saved = form; return saveResult }
         override suspend fun saveEmergencyContact(contact: EmergencyContact?): Result<Unit> {
@@ -114,6 +119,77 @@ class ProfileTest {
     }
 
     private fun model(gateway: FakeProfiles) = ProfileViewModel(gateway, scope)
+
+    // ---- tier and CO2 summary ----
+
+    private fun impact(trips: Int, co2: Double, level: Int = 0) =
+        PersonalImpact(userId = "u1", totalTrips = trips, co2Kg = co2, tierLevel = level)
+
+    @Test fun newUserHasNoBadgeAndNeedsOneTripForSeedling() {
+        val s = ImpactSummary.from(null, null)
+        assertEquals(GreenCommuterTier.NO_BADGE, s.tier)
+        assertEquals(GreenCommuterTier.SEEDLING, s.next)
+        assertEquals(1, s.tripsToNext)
+        assertEquals(0.5, s.co2KgToNext, 1e-9)
+        assertEquals("0", s.tripsText)
+        assertEquals("0.0", s.co2Text)
+        assertEquals("-", s.ratingText)
+    }
+
+    @Test fun tierNeedsBothTripsAndCo2() {
+        // 5 trips but only 4 kg: still Seedling, 1 kg short of Sprout.
+        val s = ImpactSummary.from(impact(5, 4.0), 4.86)
+        assertEquals(GreenCommuterTier.SEEDLING, s.tier)
+        assertEquals(GreenCommuterTier.SPROUT, s.next)
+        assertEquals(0, s.tripsToNext)
+        assertEquals(1.0, s.co2KgToNext, 1e-9)
+        assertEquals("4.9", s.ratingText)
+    }
+
+    @Test fun storedTierIsNeverShownLowerThanTheServerKeptIt() {
+        // The server never lowers a tier; show Sapling even if totals were corrected down.
+        val s = ImpactSummary.from(impact(10, 8.0, level = 3), null)
+        assertEquals(GreenCommuterTier.SAPLING, s.tier)
+        assertEquals(GreenCommuterTier.TREE, s.next)
+    }
+
+    @Test fun topTierHasNoNextStep() {
+        val s = ImpactSummary.from(impact(90, 150.0), null)
+        assertEquals(GreenCommuterTier.FOREST_GUARDIAN, s.tier)
+        assertNull(s.next)
+        assertEquals(0, s.tripsToNext)
+    }
+
+    @Test fun badServerNumbersAreClampedAndUnratedShowsADash() {
+        val s = ImpactSummary.from(impact(-3, -1.0), 0.0)
+        assertEquals(0, s.trips)
+        assertEquals(0.0, s.co2Kg, 0.0)
+        assertEquals("-", s.ratingText)
+    }
+
+    @Test fun impactAndRatingReachTheProfileState() {
+        val gateway = FakeProfiles(UserProfile("u1", "a@siswa.um.edu.my", trustRating = 4.5))
+        gateway.impactResult = Result.success(impact(6, 5.5))
+        val state = model(gateway).state.value
+        assertEquals(GreenCommuterTier.SPROUT, state.impact.tier)
+        assertEquals("4.5", state.impact.ratingText)
+        assertFalse(state.impactFailed)
+    }
+
+    @Test fun failedImpactRefreshKeepsTheLastTotals() {
+        val gateway = FakeProfiles()
+        gateway.impactResult = Result.success(impact(6, 5.5))
+        val vm = model(gateway)
+        gateway.impactResult = Result.failure(RuntimeException("offline"))
+        vm.refreshImpact()
+        assertTrue(vm.state.value.impactFailed)
+        assertEquals(6, vm.state.value.impact.trips)
+        // A later trip shows up on the next refresh.
+        gateway.impactResult = Result.success(impact(7, 6.7))
+        vm.refreshImpact()
+        assertEquals(7, vm.state.value.impact.trips)
+        assertFalse(vm.state.value.impactFailed)
+    }
 
     @Test fun loadsTheProfileIntoTheForm() {
         val gateway = FakeProfiles(UserProfile(

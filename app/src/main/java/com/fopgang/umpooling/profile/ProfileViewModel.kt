@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.fopgang.umpooling.data.EmergencyContact
 import com.fopgang.umpooling.data.UserProfile
 import com.fopgang.umpooling.data.UserRole
+import com.fopgang.umpooling.data.repository.PersonalImpact
 import com.fopgang.umpooling.data.repository.ProfileGateway
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,8 @@ data class ProfileUiState(
     val contact: EmergencyContact? = null,
     val contactInvalid: Boolean = false,
     val contactSaved: Boolean = false,
+    val impact: ImpactSummary = ImpactSummary.from(null, null),
+    val impactFailed: Boolean = false,
 )
 
 /** Loads, edits and saves the signed-in user's profile and emergency contact (FR1.3). */
@@ -37,7 +40,7 @@ class ProfileViewModel(
     private val mutable = MutableStateFlow(ProfileUiState())
     val state: StateFlow<ProfileUiState> = mutable.asStateFlow()
 
-    init { load() }
+    init { load(); refreshImpact() }
 
     fun load() {
         mutable.update { it.copy(loading = true, loadFailed = false) }
@@ -45,12 +48,33 @@ class ProfileViewModel(
             gateway.load()
                 .onSuccess { p ->
                     mutable.update {
-                        it.copy(loading = false, profile = p, form = p.toForm(), contact = p.emergencyContact)
+                        it.copy(loading = false, profile = p, form = p.toForm(), contact = p.emergencyContact,
+                            impact = ImpactSummary.from(lastImpact, p.trustRating))
                     }
                 }
                 .onFailure { e ->
                     if (e is CancellationException) throw e
                     mutable.update { it.copy(loading = false, loadFailed = true) }
+                }
+        }
+    }
+
+    private var lastImpact: PersonalImpact? = null
+
+    /** Called whenever the profile screen opens, so totals from a trip just completed appear. */
+    fun refreshImpact() {
+        scope.launch {
+            gateway.impact()
+                .onSuccess { impact ->
+                    lastImpact = impact
+                    mutable.update {
+                        it.copy(impactFailed = false, impact = ImpactSummary.from(impact, it.profile?.trustRating))
+                    }
+                }
+                .onFailure { e ->
+                    if (e is CancellationException) throw e
+                    // Keep the last totals on screen; only flag that they may be out of date.
+                    mutable.update { it.copy(impactFailed = true) }
                 }
         }
     }
@@ -137,4 +161,7 @@ class DemoProfileGateway : ProfileGateway {
         profile = profile.copy(emergencyContact = contact)
         return Result.success(Unit)
     }
+    override suspend fun impact() = Result.success<PersonalImpact?>(
+        PersonalImpact(userId = "demo", totalTrips = 12, distanceKm = 61.0, co2Kg = 12.2, tierLevel = 2, tierName = "Sprout"),
+    )
 }

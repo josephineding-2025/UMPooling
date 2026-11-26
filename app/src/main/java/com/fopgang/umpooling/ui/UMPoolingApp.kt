@@ -301,9 +301,11 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                         }
                     }
                     composable("chat/trip/{id}") {entry->if(owner!=null) LiveChatScreen(owner,ConversationKind.TRIP,entry.arguments!!.getString("id")!!,back)}
-                    composable("profile") { ProfileScreen(navigate,unavailable,message,
+                    composable("profile") {
+                        LaunchedEffect(Unit) { profileViewModel.refreshImpact() }
+                        ProfileScreen(navigate,unavailable,message,
                         notificationPreferences.push,{savePreferences(notificationPreferences.copy(push=it))},authViewModel::logout,
-                        name=profile.profile?.displayName,role=profile.profile?.usersRole) }
+                        name=profile.profile?.displayName,role=profile.profile?.usersRole,impact=profile.impact) }
                     composable("profile_setup") { ProfileEditScreen(profile,{profileViewModel.clearMessages();back()},profileViewModel::edit,profileViewModel::save,profileViewModel::load) }
                     composable("emergency_contacts") { EmergencyContactScreen(owner ?: "demo",profile,{profileViewModel.clearMessages();back()},profileViewModel::saveContact,profileViewModel::load) }
                     composable("saved") { SavedRoutesScreen(back,unavailable,onNavigate=navigate,initialRoutes=account.routes,showSamples=demo,onRoutesChanged=accountViewModel::saveRoutes) }
