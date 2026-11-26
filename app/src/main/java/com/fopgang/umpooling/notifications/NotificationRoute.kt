@@ -48,12 +48,20 @@ internal fun inboxCards(inbox: InboxSnapshot, now: Instant = Instant.now(), zone
         }
         val message = p.containsKey("message_id")
         val booking = p.containsKey("booking_id")
-        val match = p.containsKey("trip_offer_id") && !booking && !p.containsKey("trip_id")
+        val requestMatch = p.containsKey("request_id")
+        val match = requestMatch || (p.containsKey("trip_offer_id") && !booking && !p.containsKey("trip_id"))
+        val requestSummary = if (requestMatch) {
+            val dep = p["departure_time"] ?: "Soon"
+            val dest = p["destination"] ?: "UM Campus"
+            val seats = p["available_seats"] ?: "1"
+            val co2 = p["estimated_co2_kg"] ?: "1.00"
+            "Departs $dep to $dest • $seats seat(s) • ~$co2 kg CO₂ saved"
+        } else null
         NotificationItem(id,
-            when { message -> "New conversation update"; booking -> "Booking update"; match -> "Ride offer update"; p.containsKey("alert_id") -> "Trip safety update"; else -> "Trip update" },
-            when { message -> "Open your booking or trip conversation."; booking -> "View the latest status of your booking."; match -> "View the latest ride offer details."; else -> "Open your trip for current details." },
+            when { message -> "New conversation update"; booking -> "Booking update"; requestMatch -> "Overlapping Ride Request"; match -> "Ride offer update"; p.containsKey("alert_id") -> "Trip safety update"; else -> "Trip update" },
+            when { message -> "Open your booking or trip conversation."; booking -> "View the latest status of your booking."; requestSummary != null -> requestSummary; match -> "View the latest ride offer details."; else -> "Open your trip for current details." },
             when { message -> NotificationCategory.Messages; match -> NotificationCategory.Matches; else -> NotificationCategory.Bookings },
             when { message -> NotificationGlyph.Message; match -> NotificationGlyph.Group; else -> NotificationGlyph.Check },
             time = time, earlier = earlier, unread = id !in inbox.read,
-            action = when { message -> "Open messages"; booking -> "View booking"; match -> "View offer"; else -> "View trip" })
+            action = when { message -> "Open messages"; booking -> "View booking"; requestMatch -> "View match"; match -> "View offer"; else -> "View trip" })
     }

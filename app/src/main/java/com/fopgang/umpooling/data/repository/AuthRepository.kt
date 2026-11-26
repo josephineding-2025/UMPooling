@@ -68,6 +68,30 @@ class AuthRepository : AuthGateway {
         auth.resendEmail(OtpType.Email.SIGNUP, UmEmail.normalize(email))
     }
 
+    override suspend fun requestPasswordReset(email: String): Result<Unit> = request {
+        requireUmEmail(email)
+        // The result is the same whether or not the account exists, so this never reveals who is registered.
+        auth.resetPasswordForEmail(UmEmail.normalize(email))
+    }
+
+    override suspend fun resetPassword(email: String, code: String, newPassword: String): Result<Unit> = request {
+        requireUmEmail(email)
+        auth.verifyEmailOtp(OtpType.Email.RECOVERY, UmEmail.normalize(email), code)
+        try {
+            auth.updateUser { password = newPassword }
+        } finally {
+            // The recovery code signs the user in. End that session so a normal sign-in is required,
+            // whether or not the password change worked.
+            try {
+                auth.signOut()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                auth.clearSession()
+            }
+        }
+    }
+
     override suspend fun refreshUser(): Result<AuthUser> = request {
         auth.retrieveUserForCurrentSession(updateSession = true).toAuthUser()
     }

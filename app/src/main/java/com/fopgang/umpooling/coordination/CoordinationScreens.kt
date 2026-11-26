@@ -13,14 +13,28 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fopgang.umpooling.booking.*
+import androidx.compose.ui.res.stringResource
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.chat.*
 import com.fopgang.umpooling.safety.LiveSosPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.fopgang.umpooling.data.EmergencyContact
 
 @Composable
-fun LiveTripsScreen(owner:String,back:()->Unit,navigate:(String)->Unit,bookingId:String?=null,tripId:String?=null,sos:Boolean=false,offerId:String?=null,sosPrepared:Boolean=false) {
+
+fun LiveTripsScreen(
+    owner: String,
+    back: () -> Unit,
+    navigate: (String) -> Unit,
+    bookingId: String? = null,
+    tripId: String? = null,
+    sos: Boolean = false,
+    offerId: String? = null,
+    sosPrepared: Boolean = false,
+    emergencyContact: EmergencyContact? = null
+) {
  val repo=remember(owner){CoordinationRepository(owner)}
  val vm:CoordinationViewModel=viewModel(factory=object:ViewModelProvider.Factory {
   override fun <T:ViewModel> create(modelClass:Class<T>):T { @Suppress("UNCHECKED_CAST") return CoordinationViewModel(repo) as T }
@@ -44,12 +58,13 @@ fun LiveTripsScreen(owner:String,back:()->Unit,navigate:(String)->Unit,bookingId
     {if(active) navigate("sos_trip/${trip!!.id}")},reservedSeats=booking.seats,
     details=TicketDetails(
      status=trip?.status ?: booking.status,
-     departure=tripDeparture(offer.departureTime),
-     pickup=offer.originZone ?: "Pickup unavailable",destination=offer.destinationZone ?: "Destination unavailable",
+     departure=booking.departureSnapshot?.let(::tripDeparture) ?: "Departure snapshot unavailable",
+     pickup=booking.originSnapshot ?: "Pickup unavailable",destination=booking.destinationSnapshot ?: "Destination unavailable",
      driverName="Driver details unavailable",vehicle=trip?.plate ?: "Vehicle details unavailable",
      passengerName=if(booking.passengerId==owner) "You" else "Passenger",
-     costPerSeat=offer.costPerSeat,canSos=active),
-    onTripControls=trip?.let {{navigate("trip/${it.id}")}},loading=state.loading,error=state.error)
+     costPerSeat=booking.costSnapshot,canSos=active,reference=booking.reference),
+    onTripControls=trip?.let {{navigate("trip/${it.id}")}},loading=state.loading || state.busy,error=state.error,
+    onCancelBooking=if(booking.tripId==null && booking.status=="confirmed" && booking.passengerId==owner) {{vm.cancelBooking(booking.id)}} else null)
    return
   }
  }
@@ -71,8 +86,16 @@ fun LiveTripsScreen(owner:String,back:()->Unit,navigate:(String)->Unit,bookingId
        Text("${offer.originZone ?: "Pickup"} → ${offer.destinationZone ?: "Destination"}")
        Text("Departure: ${offer.departureTime}")
        Text("Status: ${trip?.status ?: booking?.status ?: offer.status}")
-       booking?.let {Text("${it.seats} seat(s) · RM ${offer.costPerSeat} per seat · Total RM ${offer.costPerSeat*it.seats}");Text("Booking: ${it.id}")}
-       trip?.let {Text("Trip: ${it.id}");Text("Vehicle: ${it.plate ?: "Not available"}")}
+       booking?.let {
+        if (it.costSnapshot==null) Text(stringResource(R.string.booking_snapshot_missing))
+        else Text(stringResource(R.string.booking_snapshot_total,it.costSnapshot))
+        Text("Booking: ${it.reference ?: it.id}")
+       }
+       trip?.let {
+        Text("Trip: ${it.id}");Text("Vehicle: ${it.plate ?: "Not available"}")
+        if (it.status=="completed" && it.distanceKm!=null && it.passengerCount!=null && it.co2SavedKg!=null)
+         Text(stringResource(R.string.booking_completed_impact,it.distanceKm,it.passengerCount,it.co2SavedKg))
+       }
       }
       permittedActions(owner,offer,booking,trip).forEach {action->
        RideAction(when(action){TripAction.START->"Start trip";TripAction.CONFIRM_END->"Confirm trip ended";TripAction.COMPLETE->"Finalize completed trip";TripAction.CANCEL->"Cancel active trip"},
@@ -83,7 +106,16 @@ fun LiveTripsScreen(owner:String,back:()->Unit,navigate:(String)->Unit,bookingId
       if(trip!=null) RideAction("Trip conversation"){navigate("chat/trip/${trip.id}")}
       else booking?.let {RideAction("Message driver"){navigate("chat/booking/${it.id}")}}
       if(trip?.status=="in_progress" && (trip.driverId==owner || booking?.passengerId==owner)) {
-       if(sos) LiveSosPanel(repo,trip,offer,back,prepared=sosPrepared)
+       if (sos) {
+    LiveSosPanel(
+        repository = repo,
+        trip = trip,
+        offer = offer,
+        back = back,
+        prepared = sosPrepared,
+        emergencyContact = emergencyContact
+    )
+}
        else RideAction("SOS"){navigate("sos_trip/${trip.id}")}
       } else if(sos) Text("SOS is available only during an active trip.")
      }

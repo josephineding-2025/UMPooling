@@ -8,6 +8,14 @@
 | `functions/swift-worker/` | The push notification Edge Function (dashboard name: send-push-notification). |
 | `checks/` | Read-only inspection queries and explicitly labelled rollback-based staging tests. |
 
+## Sprint 2 additions (not deployed)
+
+The new migrations 9–12, matching/notification source, booking integration and
+staff reporting are described in [Member 2 handoff](../docs/sprint2-member2-handoff.md).
+Use that handoff for staging order and tests; do not replay migrations 1–8.
+The previous status below describes the earlier baseline, not proof of current
+live migration state.
+
 ## Status
 
 - Migrations 1 to 6 are already applied to the live project. Migration 7 (trip lifecycle) is written but not applied; test it with `checks/01_trip_lifecycle_test.sql` (1 to 4 were applied from Member 2's

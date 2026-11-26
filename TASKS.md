@@ -3,7 +3,7 @@
 One line per requirement. The owner ticks the box in the commit that finishes it. Member numbers match docs/Task_Division.md. Requirement text is in docs/UMPooling.md.
 
 ## Module 1: Authentication and Green Commuter Profile
-- [ ] FR1.1 UM email domain restriction (Member 1)
+- [x] FR1.1 UM email domain restriction (Member 1)
 - [ ] FR1.2 Email verification, access blocked until verified (Member 1)
 - [ ] FR1.3 Commuter profile, verification badge, Green Commuter Tier (Member 1)
 
@@ -32,11 +32,11 @@ One line per requirement. The owner ticks the box in the commit that finishes it
 - [ ] NFR2 Security and privacy (RLS policies: Member 2, tests: Member 6)
 
 ## Shared interfaces (docs by Wed 11 Nov)
-- [ ] Trip lifecycle states (Member 6 defines, Member 2 implements)
-- [ ] CO2 function `estimateCo2` and stub by Sun 15 Nov (Member 4)
-- [ ] impactStats data structure (Member 4)
-- [ ] Roles: passenger, driver, both, staff analyst (Member 2)
-- [ ] Green Commuter Tier names and thresholds (Members 1 and 4)
+- [x] Trip lifecycle states (Member 6 defines, Member 2 implements)
+- [x] CO2 function `estimateCo2` and stub by Sun 15 Nov (Member 4)
+- [x] impactStats data structure (Member 4)
+- [x] Roles: passenger, driver, both, staff analyst (Member 2)
+- [x] Green Commuter Tier names and thresholds (Members 1 and 4)
 
 ## Milestones
 - [ ] Validation done, Thu 5 Nov

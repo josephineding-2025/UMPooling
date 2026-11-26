@@ -16,13 +16,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /** Process-scoped work: token callbacks must outlive individual Compose screens. */
 object FcmTokenSync {
     private const val TAG = "FcmTokenSync"
-    // Matches UserProfile. This must be the column containing auth.users.id.
-    private const val USER_ID_COLUMN = "usersId"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncMutex = Mutex()
     private val configured: Boolean
@@ -58,9 +57,7 @@ object FcmTokenSync {
             val userId = client.auth.currentUserOrNull()?.id
             if (userId != null) {
                 try {
-                    client.postgrest["users"].update(mapOf("fcm_token" to null as String?)) {
-                        filter { eq(USER_ID_COLUMN, userId) }
-                    }
+                    client.postgrest.rpc("unregister_fcm_token")
                 } catch (cancelled: CancellationException) { throw cancelled }
                 catch (_: Exception) { Log.w(TAG, "Remote token cleanup unavailable during logout.") }
             }
@@ -80,13 +77,7 @@ object FcmTokenSync {
                 val token = refreshedToken ?: FirebaseMessaging.getInstance().token.await()
                 // An account can change while Firebase fetches its token.
                 if (client.auth.currentUserOrNull()?.id != userId) return
-                val updatedRows = client.postgrest["users"].update(mapOf("fcm_token" to token)) {
-                    filter { eq(USER_ID_COLUMN, userId) }
-                    select()
-                }.decodeList<JsonObject>()
-                check(updatedRows.size == 1) {
-                    "Expected one user profile: check profile creation, ID column and RLS policies."
-                }
+                client.postgrest.rpc("register_fcm_token", buildJsonObject { put("p_token", token) })
             }
         } catch (cancelled: CancellationException) {
             throw cancelled

@@ -98,7 +98,8 @@ data class TripOffer(
     @SerialName("origin_zone") val originZone: String? = null,
     @SerialName("destination_zone") val destinationZone: String? = null,
     @SerialName("distance_km") val distanceKm: Double? = null,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("quote_version") val quoteVersion: Long = 0
 )
 
 // Insert payload for trip_offers. origin_geo and destination_geo are NOT NULL in the database
@@ -136,7 +137,8 @@ data class NewRideRequest(
     @SerialName("pickup_geo") val pickupGeo: String,
     @SerialName("destination_geo") val destinationGeo: String? = null,
     @SerialName("preferred_time") val preferredTime: String? = null,
-    @SerialName("trip_offer_id") val tripOfferId: String? = null
+    @SerialName("trip_offer_id") val tripOfferId: String? = null,
+    @SerialName("requested_seats") val requestedSeats: Int = 1
 )
 
 // Table: messages. A message targets a booking or a trip (the database requires at least one,

@@ -359,8 +359,8 @@
             "Foundation in Science",
             "Centre for Foundation Studies"
           ],
-          "lat": 3.1192,
-          "lng": 101.6538,
+          "lat": 3.1229,
+          "lng": 101.6591,
           "type": "institute",
           "cluster": "central_campus",
           "verification": {
@@ -462,8 +462,8 @@
             "Fifth College",
             "Kolej Kelima"
           ],
-          "lat": 3.119,
-          "lng": 101.652,
+          "lat": 3.1286,
+          "lng": 101.6605,
           "type": "college",
           "cluster": "central_south_campus",
           "verification": {
@@ -481,8 +481,8 @@
             "Sixth College",
             "Kolej Keenam"
           ],
-          "lat": 3.1198,
-          "lng": 101.6502,
+          "lat": 3.1145,
+          "lng": 101.6543,
           "type": "college",
           "cluster": "central_west_campus",
           "verification": {
@@ -520,8 +520,8 @@
             "Eighth College",
             "Kolej Kelapan"
           ],
-          "lat": 3.1175,
-          "lng": 101.6445,
+          "lat": 3.1299,
+          "lng": 101.6493,
           "type": "college",
           "cluster": "west_campus",
           "verification": {
@@ -539,8 +539,8 @@
             "Ninth College",
             "Kolej Kesembilan"
           ],
-          "lat": 3.116,
-          "lng": 101.643,
+          "lat": 3.1209,
+          "lng": 101.6457,
           "type": "college",
           "cluster": "west_campus",
           "verification": {
@@ -559,8 +559,8 @@
             "Tenth College",
             "Kolej Kesepuluh"
           ],
-          "lat": 3.115,
-          "lng": 101.6455,
+          "lat": 3.1308,
+          "lng": 101.6503,
           "type": "college",
           "cluster": "west_campus",
           "verification": {
@@ -578,8 +578,8 @@
             "Eleventh College",
             "Kolej Kesebelas"
           ],
-          "lat": 3.1182,
-          "lng": 101.6535,
+          "lat": 3.1295,
+          "lng": 101.6605,
           "type": "college",
           "cluster": "central_south_campus",
           "verification": {
@@ -874,8 +874,8 @@
             "Pintu Masuk Jalan Universiti",
             "Pintu Seksyen 11"
           ],
-          "lat": 3.1185,
-          "lng": 101.6492,
+          "lat": 3.1156,
+          "lng": 101.6508,
           "type": "gate",
           "notes": "West Entrance facing Jalan Universiti / Petaling Jaya Section 11 & UMMC",
           "verification": {
@@ -892,8 +892,8 @@
             "Lingkungan Budi Gate",
             "PASUM Gate"
           ],
-          "lat": 3.1285,
-          "lng": 101.6535,
+          "lat": 3.1359,
+          "lng": 101.6577,
           "type": "gate",
           "notes": "North Entrance connecting towards Pusat Asasi Sains, Sprint Highway & Damansara",
           "verification": {

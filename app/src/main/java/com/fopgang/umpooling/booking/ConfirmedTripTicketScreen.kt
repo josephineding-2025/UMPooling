@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
+import com.fopgang.umpooling.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 private fun TicketMap(pickup:String="UM\n(Main\nCampus)",destination:String="Mid Valley\nMegamall") {
@@ -131,7 +133,7 @@ private fun TicketMap(pickup:String="UM\n(Main\nCampus)",destination:String="Mid
 
 @Composable
 fun ConfirmedTripTicketScreen(bookingId: String, back: () -> Unit, messageDriver: (String) -> Unit, sos: (String) -> Unit, reservedSeats: Int = 1,
-    details: TicketDetails? = null, onTripControls: (() -> Unit)? = null, loading:Boolean=false,error:String?=null) {
+    details: TicketDetails? = null, onTripControls: (() -> Unit)? = null, loading:Boolean=false,error:String?=null,onCancelBooking:(()->Unit)?=null) {
     RidePage {
         Box(Modifier.padding(horizontal = 20.dp)) { RideHeader("Trip Details",back,true) }
         if(loading) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -158,7 +160,10 @@ fun ConfirmedTripTicketScreen(bookingId: String, back: () -> Unit, messageDriver
                         TicketPerson(if(details==null) "AS" else "P",details?.passengerName ?: "Aina Sofea (you)",if(details==null) "Passenger · Faculty of Engineering" else "Passenger",true,verified=details==null)
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Glass(Modifier.weight(1f)) { Text("Seat",color = RideMuted,fontSize = 12.sp); Text(if(details==null && reservedSeats==1) "1 of 3 · Rear left" else "$reservedSeats seats reserved",fontSize = 16.sp,fontWeight = FontWeight.ExtraBold) }
-                            Glass(Modifier.weight(1f)) { Text("Suggested contribution",color = Color(0xFFA34E36),fontSize = 12.sp,fontWeight = FontWeight.Bold); Text("RM ${String.format(java.util.Locale.getDefault(),"%.2f",details?.costPerSeat ?: 4.0)}",fontSize = 18.sp,fontWeight = FontWeight.ExtraBold); Text("Total RM ${String.format(java.util.Locale.getDefault(),"%.2f",reservedSeats*(details?.costPerSeat ?: 4.0))}",fontSize=12.sp) }
+                            Glass(Modifier.weight(1f)) { Text("Suggested contribution",color = Color(0xFFA34E36),fontSize = 12.sp,fontWeight = FontWeight.Bold); if (details != null && details.costPerSeat == null) Text(stringResource(R.string.booking_snapshot_missing)) else {
+                                Text("RM ${String.format(java.util.Locale.getDefault(),"%.2f",details?.costPerSeat ?: 4.0)}",fontSize = 18.sp,fontWeight = FontWeight.ExtraBold)
+                                Text("Total RM ${String.format(java.util.Locale.getDefault(),"%.2f",reservedSeats*(details?.costPerSeat ?: 4.0))}",fontSize=12.sp)
+                            } }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically,horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Canvas(Modifier.weight(1f).height(36.dp)) {
@@ -171,7 +176,7 @@ fun ConfirmedTripTicketScreen(bookingId: String, back: () -> Unit, messageDriver
                                     index++
                                 }
                             }
-                            Text(bookingId,color = RideMuted,fontSize = 12.sp,fontWeight = FontWeight.Bold)
+                            Text(details?.reference ?: bookingId,color = RideMuted,fontSize = 12.sp,fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -179,6 +184,7 @@ fun ConfirmedTripTicketScreen(bookingId: String, back: () -> Unit, messageDriver
                     RideAction("Message driver",Modifier.weight(1.7f)) { messageDriver(bookingId) }
                     OutlinedButton({ sos(bookingId) },enabled=details?.canSos ?: true,modifier=Modifier.weight(1f).heightIn(min = 54.dp),shape = CircleShape,border = BorderStroke(1.dp,RideAccent)) { Text("SOS",color = Color(0xFFAB4934),fontSize = 17.sp,fontWeight = FontWeight.ExtraBold) }
                 }
+                onCancelBooking?.let { RideAction(stringResource(R.string.booking_cancel), enabled = !loading, action = it) }
                 onTripControls?.let { RideAction("Trip controls",action=it) }
                 Spacer(Modifier.height(8.dp))
             }
