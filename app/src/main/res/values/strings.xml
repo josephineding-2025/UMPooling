@@ -22,6 +22,9 @@
     <string name="mid_valley">Mid Valley Megamall</string>
     <string name="sample_date">Mon, Nov 3</string>
     <string name="good_morning">Good Morning,</string>
+    <string name="good_afternoon">Good Afternoon,</string>
+    <string name="good_evening">Good Evening,</string>
+    <string name="good_day">Good Day,</string>
     <string name="sample_name">Nisha!</string>
     <string name="today_nov">Today, Nov 3</string>
     <string name="seat_count">%1$d seat(s)</string>
@@ -327,6 +330,49 @@
     <string name="live_pickup_required">Choose a pickup location with a designated pickup point.</string>
     <string name="live_booking_seats">Seats requested: %1$d · Available: %2$d</string>
     <string name="live_booking_total">Total: RM %1$.2f</string>
+    <string name="seats">Seats</string>
+    <string name="booking_date">Date</string>
+    <string name="live_departure">Departure</string>
+
+    <!-- 3-Mode Filter Chips & Navigation -->
+    <string name="need_a_ride">Need a ride</string>
+    <string name="offer_a_ride">Offer a ride</string>
+    <string name="post_a_ride">Post a ride</string>
+    <string name="rides_match_count">%1$d rides match</string>
+    <string name="rides_available_count">%1$d ride(s) available</string>
+
+    <!-- Available Rides Feed Filters & Controls -->
+    <string name="near_pickup_proximity">Near Pickup (Proximity)</string>
+    <string name="destination_filter">Destination Filter</string>
+    <string name="all_times">All Times</string>
+    <string name="morning_time_window">Morning (6AM–12PM)</string>
+    <string name="afternoon_time_window">Afternoon (12PM–6PM)</string>
+    <string name="evening_time_window">Evening (6PM–11PM)</string>
+    <string name="sort_nearest_pickup">Nearest Pickup</string>
+    <string name="sort_earliest_time">Earliest Time</string>
+    <string name="sort_most_co2_saved">Most CO₂ Saved</string>
+    <string name="sort_lowest_cost">Lowest Cost</string>
+    <string name="no_matching_rides_title">No rides match your filters</string>
+    <string name="no_matching_rides_subtitle">Try clearing your destination or departure window filter to see all %1$d open rides.</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="reset_filters">Reset (%1$d)</string>
+    <string name="load_more_rides">Load more rides</string>
+    <string name="load_more_rides_remaining">Load more rides (%1$d left)</string>
+    <string name="per_seat">per seat</string>
+
+    <!-- Need a Ride / Find Ride Form -->
+    <string name="find_a_ride">Find a ride</string>
+    <string name="voice_request_label">Voice request · Review and fill in fields</string>
+    <string name="confirm_and_find_rides">Confirm &amp; Find Rides  →</string>
+    <string name="posting_request">Posting Request…</string>
+    <string name="fewer_seats">Fewer seats</string>
+    <string name="more_seats">More seats</string>
+
+    <!-- Offer a Ride Form -->
+    <string name="available_seats_label">Available seats</string>
+    <string name="suggested_contribution_label">Suggested contribution</string>
+    <string name="confirm_and_post_offer">Confirm &amp; Post Offer  →</string>
+    <string name="publishing_offer">Publishing Offer…</string>
 
     <string name="profile_name_unset">Add your name</string>
     <string name="profile_edit_title">Commuter profile</string>

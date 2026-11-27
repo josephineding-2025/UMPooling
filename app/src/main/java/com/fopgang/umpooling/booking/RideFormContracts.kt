@@ -76,4 +76,4 @@ fun OfferRideDraft.validate(policy: RideFormPolicy = RideFormPolicy(), clock: Cl
         if (contributionSen !in 0..policy.maxContributionSen) listOf(RideFormIssue.INVALID_CONTRIBUTION) else emptyList()
 
 fun FindRideCriteria.validate(policy: RideFormPolicy = RideFormPolicy(), clock: Clock = Clock.system(CAMPUS_ZONE)): List<RideFormIssue> =
-    validateRide(origin, destination, departure(), seats, policy.copy(maxSeats = minOf(3, policy.maxSeats)), clock)
+    validateRide(origin, destination, departure(), seats, policy.copy(maxSeats = minOf(4, policy.maxSeats)), clock)

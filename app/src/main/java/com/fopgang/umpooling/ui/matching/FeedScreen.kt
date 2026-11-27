@@ -466,7 +466,7 @@ private fun FeedFilterPanel(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         LocationSelectorField(
-            label = "Near Pickup (Proximity)",
+            label = stringResource(R.string.near_pickup_proximity),
             selectedLocation = criteria.referenceOrigin,
             onLocationSelected = { loc ->
                 onCriteriaChange(
@@ -479,7 +479,7 @@ private fun FeedFilterPanel(
         )
 
         LocationSelectorField(
-            label = "Destination Filter",
+            label = stringResource(R.string.destination_filter),
             selectedLocation = criteria.destinationLocation,
             onLocationSelected = { loc ->
                 onCriteriaChange(criteria.copy(destinationLocation = loc))
@@ -501,7 +501,7 @@ private fun FeedFilterPanel(
                     shadowElevation = if (selected) 4.dp else 0.dp
                 ) {
                     Text(
-                        text = window.label,
+                        text = stringResource(window.labelRes),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (selected) Color.White else RideInk,
@@ -544,7 +544,7 @@ private fun FeedFilterPanel(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = option.label,
+                                text = stringResource(option.labelRes),
                                 fontSize = 12.sp,
                                 fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,
                                 color = if (selected) RideInk else if (enabled) RideInk else RideMuted.copy(alpha = 0.5f),

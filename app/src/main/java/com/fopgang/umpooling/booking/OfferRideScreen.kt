@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.TextAlign
@@ -206,7 +207,7 @@ fun OfferRideScreen(
                         }
                     }
                     Text(
-                        "Offer a ride",
+                        stringResource(R.string.offer_a_ride),
                         modifier = Modifier.weight(1f),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -227,7 +228,7 @@ fun OfferRideScreen(
                         .padding(vertical = 6.dp)
                 ) {
                     Row(Modifier.fillMaxWidth().padding(5.dp)) {
-                        listOf("Available Rides", "Need a ride", "Offer a ride").forEachIndexed { index, title ->
+                        listOf(stringResource(R.string.available_rides), stringResource(R.string.need_a_ride), stringResource(R.string.offer_a_ride)).forEachIndexed { index, title ->
                             val selected = index == 2
                             Surface(
                                 onClick = {
@@ -282,7 +283,7 @@ fun OfferRideScreen(
                         }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(11.dp)) {
                             LocationSelectorField(
-                                label = "Origin",
+                                label = stringResource(R.string.from),
                                 selectedLocation = originLocation,
                                 onLocationSelected = { loc ->
                                     originLocation = loc
@@ -290,7 +291,7 @@ fun OfferRideScreen(
                                 }
                             )
                             LocationSelectorField(
-                                label = "Destination",
+                                label = stringResource(R.string.to),
                                 selectedLocation = destinationLocation,
                                 onLocationSelected = { loc ->
                                     destinationLocation = loc
@@ -302,7 +303,7 @@ fun OfferRideScreen(
                 }
                 Spacer(Modifier.height(13.dp))
                 Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OfferChoice("Date", draft.departureDate.rideLabel(multiline = true), Modifier.weight(1f), false, enabled) {
+                    OfferChoice(stringResource(R.string.booking_date), draft.departureDate.rideLabel(multiline = true), Modifier.weight(1f), false, enabled) {
                         DatePickerDialog(
                             context,
                             { _, y, m, d ->
@@ -313,7 +314,7 @@ fun OfferRideScreen(
                             draft.departureDate.dayOfMonth
                         ).show()
                     }
-                    OfferChoice("Departure", draft.departureTime.rideLabel(), Modifier.weight(1f), false, enabled) {
+                    OfferChoice(stringResource(R.string.live_departure), draft.departureTime.rideLabel(), Modifier.weight(1f), false, enabled) {
                         TimePickerDialog(
                             context,
                             { _, h, m -> draft = draft.copy(departureTime = LocalTime.of(h, m)) },
@@ -330,7 +331,7 @@ fun OfferRideScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Available seats", fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(stringResource(R.string.available_seats_label), fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.ExtraBold)
                         Row(Modifier.widthIn(max = 106.dp).fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             repeat(screenState.policy.maxSeats) { Box(Modifier.weight(1f).height(8.dp).background(if (it < seats) OfferInk else Color(0xFFFCE1D5), CircleShape)) }
                         }
@@ -350,10 +351,10 @@ fun OfferRideScreen(
                 }
                 Spacer(Modifier.height(13.dp))
                 Column(Modifier.fillMaxWidth().offerSurface().padding(horizontal = 19.dp, vertical = 17.dp)) {
-                    Text("Suggested contribution", fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.suggested_contribution_label), fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold)
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(String.format(Locale.ENGLISH, "RM %.2f", amount), fontSize = 30.sp, lineHeight = 39.sp, fontWeight = FontWeight.ExtraBold)
-                        Text(" per seat", Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = OfferMuted)
+                        Text(" " + stringResource(R.string.per_seat), Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = OfferMuted)
                         Box(Modifier.background(Color.White, CircleShape).padding(horizontal = 12.dp, vertical = 5.dp)) {
                             Text(
                                 estimatedDistanceKm?.let { String.format(Locale.US, "%.1f km", it) } ?: "12.4 km",
@@ -389,7 +390,7 @@ fun OfferRideScreen(
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                 ) {
-                    Text(if (isPosting) "Posting ride..." else "Post ride", fontFamily = OfferFont, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(if (isPosting) stringResource(R.string.publishing_offer) else stringResource(R.string.confirm_and_post_offer), fontFamily = OfferFont, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Spacer(Modifier.width(12.dp))
                     Canvas(Modifier.size(17.dp)) {
                         val path = Path().apply {

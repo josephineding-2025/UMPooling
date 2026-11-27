@@ -117,12 +117,29 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                     )
                 }
                 Spacer(Modifier.height(22.dp))
+                val greetingRes = remember(today) {
+                    val hour = ZonedDateTime.now(CAMPUS_ZONE).hour
+                    when (hour) {
+                        in 5..11 -> R.string.good_morning
+                        in 12..16 -> R.string.good_afternoon
+                        in 17..20 -> R.string.good_evening
+                        else -> R.string.good_day
+                    }
+                }
+                val userDisplayName = remember(profileName) {
+                    if (!profileName.isNullOrBlank()) {
+                        val name = profileName.trim().split(" ").firstOrNull { it.isNotBlank() } ?: profileName.trim()
+                        if (name.endsWith("!")) name else "$name!"
+                    } else {
+                        null
+                    }
+                }
                 Text(headerDate, Modifier.padding(start = 3.dp),
                     fontSize = 15.sp, lineHeight = 19.sp, color = Color(0xFF3D3D3D))
                 Spacer(Modifier.height(6.dp))
-                Text(stringResource(R.string.good_morning), Modifier.padding(start = 3.dp),
+                Text(stringResource(greetingRes), Modifier.padding(start = 3.dp),
                     fontSize = 36.sp, lineHeight = 35.sp, letterSpacing = (-.3).sp, fontWeight = FontWeight.ExtraBold)
-                Text(stringResource(R.string.sample_name), Modifier.padding(start = 3.dp),
+                Text(userDisplayName ?: stringResource(R.string.sample_name), Modifier.padding(start = 3.dp),
                     fontFamily = FontFamily.Serif, fontSize = 34.sp, lineHeight = 35.sp, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(17.dp))
                 Surface(
@@ -173,7 +190,7 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                             }
                             SmallField(Modifier.weight(1f), R.drawable.home_frame4,
                                 pluralStringResource(R.plurals.home_seats, seats, seats)) {
-                                seats = seats % 3 + 1
+                                seats = seats % 4 + 1
                             }
                         }
                         Spacer(Modifier.height(9.dp))

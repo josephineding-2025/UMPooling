@@ -19,6 +19,9 @@
     <string name="to">Ke</string>
     <string name="um_campus">UM (Kampus Utama)</string>
     <string name="good_morning">Selamat Pagi,</string>
+    <string name="good_afternoon">Selamat Tengah Hari,</string>
+    <string name="good_evening">Selamat Petang,</string>
+    <string name="good_day">Selamat Hari,</string>
     <string name="today_nov">Hari ini, 3 Nov</string>
     <string name="seat_count">%1$d tempat duduk</string>
     <string name="find_carpool">Cari Perkongsian Kereta</string>
@@ -269,6 +272,49 @@
     <string name="live_pickup_required">Pilih lokasi yang mempunyai tempat pengambilan yang ditetapkan.</string>
     <string name="live_booking_seats">Tempat duduk diminta: %1$d · Tersedia: %2$d</string>
     <string name="live_booking_total">Jumlah: RM %1$.2f</string>
+    <string name="seats">Tempat duduk</string>
+    <string name="booking_date">Tarikh</string>
+    <string name="live_departure">Masa Berlepas</string>
+
+    <!-- 3-Mode Filter Chips & Navigation -->
+    <string name="need_a_ride">Need a ride</string>
+    <string name="offer_a_ride">Offer a ride</string>
+    <string name="post_a_ride">Hantar Perjalanan</string>
+    <string name="rides_match_count">%1$d perjalanan sepadan</string>
+    <string name="rides_available_count">%1$d perjalanan tersedia</string>
+
+    <!-- Available Rides Feed Filters & Controls -->
+    <string name="near_pickup_proximity">Pengambilan Berhampiran (Proksimiti)</string>
+    <string name="destination_filter">Penapis Destinasi</string>
+    <string name="all_times">Semua Masa</string>
+    <string name="morning_time_window">Pagi (6PG–12TGH)</string>
+    <string name="afternoon_time_window">Tengah Hari (12TGH–6PTG)</string>
+    <string name="evening_time_window">Malam (6PTG–11MLM)</string>
+    <string name="sort_nearest_pickup">Pengambilan Terdekat</string>
+    <string name="sort_earliest_time">Masa Terawal</string>
+    <string name="sort_most_co2_saved">Jimat CO₂ Terbanyak</string>
+    <string name="sort_lowest_cost">Kos Terendah</string>
+    <string name="no_matching_rides_title">Tiada perjalanan yang sepadan dengan penapis anda</string>
+    <string name="no_matching_rides_subtitle">Cuba kosongkan penapis destinasi atau julat masa berlepas anda untuk melihat kesemua %1$d perjalanan terbuka.</string>
+    <string name="clear_filters">Kosongkan Penapis</string>
+    <string name="reset_filters">Set Semula (%1$d)</string>
+    <string name="load_more_rides">Muat lagi perjalanan</string>
+    <string name="load_more_rides_remaining">Muat lagi perjalanan (%1$d baki)</string>
+    <string name="per_seat">setiap tempat duduk</string>
+
+    <!-- Need a Ride / Find Ride Form -->
+    <string name="find_a_ride">Cari Perjalanan</string>
+    <string name="voice_request_label">Permintaan suara · Semak dan isi medan</string>
+    <string name="confirm_and_find_rides">Sahkan &amp; Cari Perjalanan  →</string>
+    <string name="posting_request">Menghantar Permintaan…</string>
+    <string name="fewer_seats">Kurang tempat duduk</string>
+    <string name="more_seats">Lebih tempat duduk</string>
+
+    <!-- Offer a Ride Form -->
+    <string name="available_seats_label">Tempat duduk tersedia</string>
+    <string name="suggested_contribution_label">Sumbangan dicadangkan</string>
+    <string name="confirm_and_post_offer">Sahkan &amp; Hantar Tawaran  →</string>
+    <string name="publishing_offer">Menerbitkan Tawaran…</string>
 
     <string name="profile_name_unset">Tambah nama anda</string>
     <string name="profile_edit_title">Profil komuter</string>

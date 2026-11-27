@@ -16,12 +16,14 @@ import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.SupabaseClientProvider
 import com.fopgang.umpooling.data.CampusLocation
 import com.fopgang.umpooling.data.CampusLocationProvider
@@ -72,15 +74,15 @@ fun FindRideScreen(
     var isPosting by remember { mutableStateOf(false) }
     var submissionState by remember { mutableStateOf(screenState.submission) }
 
-    val issues = if (attempted) criteria.validate(screenState.policy.copy(maxSeats = minOf(3, screenState.policy.maxSeats))) else emptyList()
+    val issues = if (attempted) criteria.validate(screenState.policy.copy(maxSeats = minOf(4, screenState.policy.maxSeats))) else emptyList()
     val enabled = !screenState.isLoading && !isPosting && submissionState != RideSubmissionState.Success
     val seats = criteria.seats
-    val passengerLimit = minOf(3, screenState.policy.maxSeats)
+    val passengerLimit = minOf(4, screenState.policy.maxSeats)
 
     val submit: () -> Unit = {
         if (enabled) {
             attempted = true
-            val validationIssues = criteria.validate(screenState.policy.copy(maxSeats = minOf(3, screenState.policy.maxSeats)))
+            val validationIssues = criteria.validate(screenState.policy.copy(maxSeats = minOf(4, screenState.policy.maxSeats)))
             if (validationIssues.isEmpty()) {
                 val user = SupabaseClientProvider.client.auth.currentUserOrNull()
                 val pick = pickupLocation ?: CampusLocationProvider.allLocations.firstOrNull { it.name.equals(criteria.origin.name, ignoreCase = true) }
@@ -166,7 +168,7 @@ fun FindRideScreen(
                     }
                 }
                 Text(
-                    "Need a ride",
+                    stringResource(R.string.need_a_ride),
                     modifier = Modifier.weight(1f),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -177,10 +179,10 @@ fun FindRideScreen(
                 )
                 Spacer(Modifier.size(44.dp))
             }
-            if (requestText.isNotBlank()) OutlinedTextField(requestText, {}, readOnly = true, label = { Text("Voice request · Review and fill in fields") }, modifier = Modifier.fillMaxWidth())
+            if (requestText.isNotBlank()) OutlinedTextField(requestText, {}, readOnly = true, label = { Text(stringResource(R.string.voice_request_label)) }, modifier = Modifier.fillMaxWidth())
             Surface(shape = CircleShape, color = Color.White.copy(alpha = .65f), border = BorderStroke(1.dp, Color.White), shadowElevation = 0.dp) {
                 Row(Modifier.fillMaxWidth().padding(5.dp)) {
-                    listOf("Available Rides", "Need a ride", "Offer a ride").forEachIndexed { index, title ->
+                    listOf(stringResource(R.string.available_rides), stringResource(R.string.need_a_ride), stringResource(R.string.offer_a_ride)).forEachIndexed { index, title ->
                         val selected = index == 1
                         Surface(
                             onClick = {
@@ -225,7 +227,7 @@ fun FindRideScreen(
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         LocationSelectorField(
-                            label = "Origin",
+                            label = stringResource(R.string.from),
                             selectedLocation = pickupLocation,
                             onLocationSelected = { loc ->
                                 pickupLocation = loc
@@ -233,7 +235,7 @@ fun FindRideScreen(
                             }
                         )
                         LocationSelectorField(
-                            label = "Destination",
+                            label = stringResource(R.string.to),
                             selectedLocation = destinationLocation,
                             onLocationSelected = { loc ->
                                 destinationLocation = loc
@@ -244,7 +246,7 @@ fun FindRideScreen(
                 }
             }
             Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FormChoice("Date", criteria.departureDate.rideLabel(), Icons.Default.DateRange, Modifier.weight(1f), enabled) {
+                FormChoice(stringResource(R.string.booking_date), criteria.departureDate.rideLabel(), Icons.Default.DateRange, Modifier.weight(1f), enabled) {
                     DatePickerDialog(
                         context,
                         { _, y, m, d ->
@@ -255,7 +257,7 @@ fun FindRideScreen(
                         criteria.departureDate.dayOfMonth
                     ).show()
                 }
-                FormChoice("Departure", criteria.departureTime.rideLabel(), Icons.Default.DateRange, Modifier.weight(1f), enabled) {
+                FormChoice(stringResource(R.string.live_departure), criteria.departureTime.rideLabel(), Icons.Default.DateRange, Modifier.weight(1f), enabled) {
                     TimePickerDialog(
                         context,
                         { _, h, m -> criteria = criteria.copy(departureTime = LocalTime.of(h, m)) },
@@ -265,10 +267,12 @@ fun FindRideScreen(
                     ).show()
                 }
             }
+            val fewerSeatsLabel = stringResource(R.string.fewer_seats)
+            val moreSeatsLabel = stringResource(R.string.more_seats)
             Glass {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text("Seats", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(stringResource(R.string.seats), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                     }
                     FilledIconButton(
                         { criteria = criteria.copy(seats = (seats - 1).coerceAtLeast(1)) },
@@ -276,7 +280,7 @@ fun FindRideScreen(
                         enabled = enabled && seats > 1,
                         colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.White, contentColor = RideInk)
                     ) {
-                        Text("−", fontSize = 26.sp, modifier = Modifier.semantics { contentDescription = "Fewer seats" })
+                        Text("−", fontSize = 26.sp, modifier = Modifier.semantics { contentDescription = fewerSeatsLabel })
                     }
                     Text("$seats", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
                     FilledIconButton(
@@ -285,14 +289,14 @@ fun FindRideScreen(
                         enabled = enabled && seats < passengerLimit,
                         colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color.Black)
                     ) {
-                        Icon(Icons.Default.Add, "More seats")
+                        Icon(Icons.Default.Add, moreSeatsLabel)
                     }
                 }
             }
             Spacer(Modifier.height(40.dp))
             RideFormFeedback(issues, submissionState)
             RideAction(
-                if (isPosting) "Posting Request..." else "Confirm & Find Rides  →",
+                if (isPosting) stringResource(R.string.posting_request) else stringResource(R.string.confirm_and_find_rides),
                 enabled = enabled,
                 action = submit
             )
@@ -305,7 +309,7 @@ private fun FormChoice(label: String, value: String, icon: androidx.compose.ui.g
     Surface(onClick = click, enabled = enabled, modifier = modifier.fillMaxHeight(), shape = RoundedCornerShape(28.dp), color = Color.White.copy(alpha = .65f), border = BorderStroke(1.dp, Color.White), shadowElevation = 0.dp) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Box(Modifier.size(40.dp).background(Color(0xFFFDE0D2), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-                if (label == "Departure") Canvas(Modifier.size(20.dp)) {
+                if (label == "Departure" || label == stringResource(R.string.live_departure)) Canvas(Modifier.size(20.dp)) {
                     drawCircle(RideInk, style = Stroke(1.5.dp.toPx()))
                     drawLine(RideInk, Offset(size.width / 2, size.height / 2), Offset(size.width / 2, size.height * .2f), 1.5.dp.toPx())
                     drawLine(RideInk, Offset(size.width / 2, size.height / 2), Offset(size.width * .7f, size.height * .65f), 1.5.dp.toPx())
