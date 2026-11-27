@@ -131,7 +131,7 @@ The following are **reusable component candidates inferred from the 19 screens**
 
 **Navigation:** consistent icons, selected-state label, clear current destination, and back behavior matching Figma's prototype intent.
 
-**Trip ticket:** departure, pickup, destination, driver/passenger details, seat allocation, contribution, verification and booking reference.
+**Trip ticket** shows departure, pickup, destination, driver and vehicle, reserved seats, contribution and booking reference from the booking identified by its ID. Show a confirmed state after a successful reservation. See the [user flow](User_Flow.md).
 
 ### State rules
 
@@ -181,7 +181,7 @@ ui/
     LoginScreen.kt
     HomeScreen.kt
     OfferRideScreen.kt
-    FindRideScreen.kt
+    ScheduleRideScreen.kt
     TripDetailsScreen.kt
     TicketScreen.kt
     NotificationsScreen.kt

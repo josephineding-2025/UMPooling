@@ -40,7 +40,7 @@ import java.time.LocalTime
 import java.util.Locale
 
 @Composable
-fun FindRideScreen(
+fun ScheduleRideScreen(
     back: () -> Unit = {},
     onModeChange: () -> Unit = {},
     onFind: (FindRideCriteria) -> Unit = {},
@@ -207,11 +207,13 @@ fun FindRideScreen(
                             ) {
                                 Text(
                                     title,
-                                    fontSize = 13.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (selected) Color.White else RideInk,
                                     textAlign = TextAlign.Center,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -323,13 +325,13 @@ private fun FormChoice(label: String, value: String, icon: androidx.compose.ui.g
     }
 }
 
-@Preview(name = "Find phone", widthDp = 390, heightDp = 844)
-@Preview(name = "Find landscape", widthDp = 840, heightDp = 400)
+@Preview(name = "Schedule phone", widthDp = 390, heightDp = 844)
+@Preview(name = "Schedule landscape", widthDp = 840, heightDp = 400)
 @Composable
-fun FindRidePreview() { UMPoolingTheme { FindRideScreen({}, {}, {}) } }
+fun ScheduleRidePreview() { UMPoolingTheme { ScheduleRideScreen({}, {}, {}) } }
 
 @Preview(name = "Submission error", widthDp = 390, heightDp = 1000)
 @Composable
-private fun FindRideErrorPreview() {
-    UMPoolingTheme { FindRideScreen({}, {}, {}, screenState = RideFormScreenState(RideSubmissionState.Error("Unable to find rides. Try again."))) }
+private fun ScheduleRideErrorPreview() {
+    UMPoolingTheme { ScheduleRideScreen({}, {}, {}, screenState = RideFormScreenState(RideSubmissionState.Error("Unable to find rides. Try again."))) }
 }

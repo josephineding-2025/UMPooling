@@ -22,7 +22,7 @@ Firebase: used only for FCM push delivery (no Analytics, no Firebase auth or dat
 
 ## 2. Components
 
-Client ownership and remaining UI work are documented in [UI handoff](ui-handoff.md). Bottom navigation is shared through CommuterNavigation. NotificationRoute delegates to NotificationViewModel/NotificationRepository; AccountViewModel owns settings and saved-label writes. My Trips and shared live/demo ticket presentation belong to booking; chat state belongs to chat.
+Client ownership and remaining UI work are documented in [UI handoff](design/ui-handoff.md). Bottom navigation is shared through CommuterNavigation. NotificationRoute delegates to NotificationViewModel/NotificationRepository; AccountViewModel owns settings and saved-label writes. My Trips and shared live/demo ticket presentation belong to booking; chat state belongs to chat.
 
 | Component | Technology | Notes |
 |---|---|---|
@@ -55,7 +55,7 @@ What leaves the system: only the notification title, a message preview of at mos
 
 ## 5. AI data flow (Planned, Member 4)
 
-The app sends only the typed sentence to an Edge Function. The function holds the LLM key as a secret, adds the current date and time zone, validates the returned JSON against a schema, and returns it to the app to pre-fill the form. The user confirms or edits it. If the model fails or returns incomplete fields, the app falls back to manual entry. No personal data is sent to the model.
+The app sends only the typed sentence to an Edge Function. The function holds the LLM key as a secret, adds the current date and time zone, validates the returned JSON against a schema, and returns it to the app to pre-fill the form. The user reviews or edits it and confirms to search. The reservation uses a separate confirmation. See the [target user flow](design/User_Flow.md). If the model fails or returns incomplete fields, the app falls back to manual entry. No personal data is sent to the model.
 
 ## 6. Trip lifecycle
 

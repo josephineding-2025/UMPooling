@@ -36,7 +36,7 @@ The parser operates as a secure Supabase Edge Function (`supabase/functions/pars
 [Edge Post-Processor & UM Zone Lexicon Mapper (locations.json)]
        │
        ▼ (Validated JSON with confidence & missing/ambiguous flags)
-[Android Client: RideParserRepository -> Request Form Pre-fill]
+[Android Client: RideParserRepository -> LiveBookingScreen Review Booking Form]
 ```
 
 ### 2.2 System Prompt Specification (`parser prompt v0`)
@@ -100,7 +100,8 @@ Return raw JSON only, enclosed in ```json ... ``` without extra commentary.
 When the Android client receives the parsed response:
 1. If `missing_fields` or `ambiguous_fields` is non-empty, the corresponding form inputs in Compose are flagged with an amber outline and assistive hint (e.g., *"Please select your destination"*).
 2. If network fails, API returns an error, or confidence $< 0.40$, the app displays a soft warning toast: *"Could not fully parse speech. Please complete the form below."* and populates whatever partial tokens were recovered.
-3. The user must always press the physical **"Confirm & Request Ride"** button before any database row is committed.
+3. In the target flow, **Fill in manually** opens the same editable Review Booking Form. Validate the requested seat count against the passenger UI range of 1–3 even if the parser returns a larger value.
+4. **Confirm** in the Review Booking Form starts a search. An eligible match opens the offer review. **Confirm Booking** there submits the reservation. See the [user flow](design/User_Flow.md).
 
 ---
 

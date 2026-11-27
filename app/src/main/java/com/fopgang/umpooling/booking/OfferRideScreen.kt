@@ -262,11 +262,13 @@ fun OfferRideScreen(
                                 ) {
                                     Text(
                                         title,
-                                        fontSize = 13.sp,
+                                        fontSize = 11.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = if (selected) Color.White else OfferInk,
                                         textAlign = TextAlign.Center,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
                                 }
                             }

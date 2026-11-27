@@ -1,6 +1,6 @@
 # UI handoff — cleanup status
 
-This is a code-cleanup handoff, not certification that every Member 3 deliverable is complete.
+This handoff records the code cleanup. The [target user flow](User_Flow.md) specifies the passenger experience, including voice review, a scheduled-request prompt when no ride matches, notification-based matching, and the booking-to-ticket handoff.
 
 ## Ownership and entry points
 
@@ -41,7 +41,7 @@ This is a code-cleanup handoff, not certification that every Member 3 deliverabl
 
 ## Integration dependencies
 
-No Supabase migrations were deployed. Lifecycle migration 7 and participant offer-read migration 8 still require backend-owner review and staging checks. The signed-in reservation flow calls the existing booking RPC and requires a two-account staging check. Live posting, automatic current location, server SOS audit records, ratings persistence, impact data and cross-device settings/routes are separate integrations.
+No Supabase migrations were deployed during the cleanup. The signed-in reservation flow requires a two-account staging check with the relevant lifecycle, participant access, contribution cap and ticket migrations applied. The current offer form and schedule form have repository calls for posting and request submission. Verify the complete posting, matching, push and ticket flow on staging. Ratings persistence, impact data and cross-device settings/routes are separate integrations.
 
 ## Reviewer checks
 

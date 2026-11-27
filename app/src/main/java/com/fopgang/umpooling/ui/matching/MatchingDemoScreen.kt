@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.fopgang.umpooling.booking.FindRideScreen
+import com.fopgang.umpooling.booking.ScheduleRideScreen
 import com.fopgang.umpooling.booking.OfferRideScreen
 import com.fopgang.umpooling.matching.SavedRoutesScreen
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
@@ -71,7 +71,7 @@ fun MatchingDemoScreen(
                 0 -> FeedScreen(allowDemoFallback = true)
                 1 -> SavedRoutesScreen()
                 2 -> OfferRideScreen()
-                3 -> FindRideScreen()
+                3 -> ScheduleRideScreen()
             }
         }
     }

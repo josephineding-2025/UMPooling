@@ -16,7 +16,7 @@ import com.fopgang.umpooling.booking.DemoRideIds
 import com.fopgang.umpooling.booking.RideMatchScreen
 import com.fopgang.umpooling.booking.BookingConfirmationScreen
 import com.fopgang.umpooling.booking.OfferRideScreen
-import com.fopgang.umpooling.booking.FindRideScreen
+import com.fopgang.umpooling.booking.ScheduleRideScreen
 import com.fopgang.umpooling.booking.ConfirmedTripTicketScreen
 import com.fopgang.umpooling.booking.RequestFutureRideScreen
 import com.fopgang.umpooling.home.HomeScreen
@@ -188,7 +188,7 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                         )
                     }
                     composable("search_rides") {
-                        FindRideScreen(
+                        ScheduleRideScreen(
                             back = home,
                             onModeChange = { navigate("offer_ride") },
                             onFind = {
@@ -241,7 +241,7 @@ private fun UMPoolingContent(authViewModel: AuthViewModel, authState: AuthUiStat
                                 "Request a ride" to unavailable))
                     }
                     composable("request_future_ride") {
-                        FindRideScreen(
+                        ScheduleRideScreen(
                             back = home,
                             onModeChange = { navigate("offer_ride") },
                             onFind = { criteria = it },

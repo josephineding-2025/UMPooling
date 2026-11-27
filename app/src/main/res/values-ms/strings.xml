@@ -265,7 +265,7 @@
     <string name="live_offer_empty_hint">Cuba tarikh lain atau kurangkan bilangan tempat duduk.</string>
     <string name="live_offer_unavailable">Perjalanan ini tidak lagi tersedia untuk bilangan tempat duduk yang diminta.</string>
     <string name="live_booking_review">Semak tempahan</string>
-    <string name="live_booking_confirm">Sahkan tempahan</string>
+    <string name="live_booking_confirm">Sahkan</string>
     <string name="live_booking_failed">Tempahan tidak dapat disahkan. Semak Perjalanan Saya sebelum mencuba lagi. Perjalanan mungkin sudah penuh.</string>
     <string name="live_pickup">Lokasi pengambilan</string>
     <string name="live_destination">Destinasi</string>
@@ -277,7 +277,7 @@
     <string name="live_departure">Masa Berlepas</string>
 
     <!-- 3-Mode Filter Chips & Navigation -->
-    <string name="need_a_ride">Need a ride</string>
+    <string name="need_a_ride">Jadualkan Perjalanan</string>
     <string name="offer_a_ride">Offer a ride</string>
     <string name="post_a_ride">Hantar Perjalanan</string>
     <string name="rides_match_count">%1$d perjalanan sepadan</string>

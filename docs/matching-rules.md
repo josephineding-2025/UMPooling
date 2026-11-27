@@ -141,8 +141,12 @@ Edge Function reads fcm_token from public.users and dispatches FCM payload
 }
 ```
 
+### Passenger match notifications
+
+The target passenger flow checks new offers against saved recurring routes and pending schedule requests using pickup, destination, departure and sufficient seats where requested. Respect push preferences and include the offer ID plus the request ID when there is one. Opening a notification takes the passenger to RideMatchScreen, where current availability is rechecked before offer review. See the [user flow](design/User_Flow.md).
+
 ### 4.3 FR2.3 — Filterable Feed
-The feed presents open trip offers to passengers, sorted by route proximity and departure time:
+The feed presents open, upcoming offers from other drivers. When the passenger submits criteria, apply pickup, destination, departure and requested-seat filters and sort the eligible offers by route proximity and departure time. Schedule results can also show compatible pickup groups. If the search returns no match, save a pending request only when the passenger chooses **Continue**.
 
 * **Database Filter:** 
   ```kotlin

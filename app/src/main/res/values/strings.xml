@@ -323,7 +323,7 @@
     <string name="live_offer_empty_hint">Try a different date or request fewer seats.</string>
     <string name="live_offer_unavailable">This ride is no longer available for your requested seats.</string>
     <string name="live_booking_review">Review booking</string>
-    <string name="live_booking_confirm">Confirm booking</string>
+    <string name="live_booking_confirm">Confirm</string>
     <string name="live_booking_failed">Couldn’t confirm your booking. Check My Trips before trying again. The ride may have filled up.</string>
     <string name="live_pickup">Pickup location</string>
     <string name="live_destination">Destination</string>
@@ -335,7 +335,7 @@
     <string name="live_departure">Departure</string>
 
     <!-- 3-Mode Filter Chips & Navigation -->
-    <string name="need_a_ride">Need a ride</string>
+    <string name="need_a_ride">Schedule a Ride</string>
     <string name="offer_a_ride">Offer a ride</string>
     <string name="post_a_ride">Post a ride</string>
     <string name="rides_match_count">%1$d rides match</string>

@@ -294,7 +294,7 @@ fun FeedScreen(
                     .padding(horizontal = 24.dp, vertical = 6.dp)
             ) {
                 Row(Modifier.fillMaxWidth().padding(5.dp)) {
-                    listOf("Available Rides", "Need a ride", "Offer a ride").forEachIndexed { index, title ->
+                    listOf(stringResource(R.string.available_rides), stringResource(R.string.need_a_ride), stringResource(R.string.offer_a_ride)).forEachIndexed { index, title ->
                         val selected = index == 0
                         Surface(
                             onClick = {
@@ -327,11 +327,13 @@ fun FeedScreen(
                             ) {
                                 Text(
                                     title,
-                                    fontSize = 13.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (selected) Color.White else RideInk,
                                     textAlign = TextAlign.Center,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                             }
                         }
