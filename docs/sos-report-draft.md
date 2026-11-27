@@ -6,6 +6,8 @@
 
 ## Design paragraph (may be used after team review)
 
+The [target SOS flow](design/User_Flow.md#62-active-trip-sos) adds a call path after the three-second hold. Releasing early cancels the hold. After preparation the passenger can cancel or open the dialer and place the call.
+
 UMPooling's Emergency SOS function is designed as a safety-support feature for authenticated participants in an active carpool trip. The proposed interaction requires a deliberate press-and-hold action before preparing a message containing available trip information and current location, where permission is granted. The design proposes SMS and WhatsApp as external messaging channels; the user reviews and sends the message manually. This approach does not constitute an automated emergency dispatch service, and opening a messaging composer alone does not demonstrate successful message delivery. To protect trip-related information, any optional SOS database record should be subject to server-side checks of the user's identity, trip participation and active-trip status. The intended recipient, record-logging rules and fallback procedures remain subject to team approval.
 
 ### Implementation paragraph

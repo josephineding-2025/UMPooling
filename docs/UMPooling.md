@@ -61,19 +61,19 @@ AI is used only where it removes a real problem. All AI calls go through a backe
 
 **Module 3: Booking, Cost-Sharing and Coordination**
 - 13.3 link: lowers the cost barrier to carpooling (behaviour change) and gives trip-end CO2 feedback based on verified occupancy.
-- FR3.1: The driver shall be able to suggest a cost-share per passenger, limited by a community cap based on shared fuel cost. Payment is settled outside the app.
-- FR3.2: The passenger shall be able to accept an offer and reserve a seat, producing a confirmed trip ticket. The system shall update the remaining seats so the same seat cannot be booked twice. When the trip ends, the system shall record the confirmed passenger count and distance and show the CO2 saved to the driver and passengers.
+- FR3.1: The offer form shall read and display the per-seat contribution cap from backend configuration. The backend shall enforce the cap when saving an offer. Contributions are settled outside the app.
+- FR3.2: A passenger shall be able to review a filtered offer and confirm a reservation. The backend shall reserve the seats and update availability in a single transaction. After success, the app shall load the confirmed trip ticket by booking ID. At trip end, the system records confirmed passenger count and distance and displays estimated CO₂ savings.
 - FR3.3: The matched driver and passenger shall be able to chat in the app to agree on the pickup location and departure time.
 
 **Module 4: Commuter Safety and Emergency**
 - 13.3 link: enabling only. Trust and safety are needed for people to share rides. Not claimed as a direct contribution.
 - FR4.1: The system shall store a trip record (trip ID, vehicle registration number, origin and destination zones, driver and passenger IDs, start and end time) for safety and accountability, accessible only to the trip participants and authorised admins.
-- FR4.2: The user shall be able to trigger an SOS during an active trip that opens a pre-filled message (trip details and current location) in SMS or WhatsApp, addressed to the user's emergency contacts or UM Security.
+- FR4.2: During an active trip, a three-second SOS hold shall prepare a cancellable emergency action. The passenger can open the system dialer to call the authorised responder or use SMS/WhatsApp to review and send a prefilled message with trip details and available location to an emergency contact or UM Security.
 - FR4.3: The user shall be able to rate and review the other party after a trip, and the ratings shall form the community trust rating.
 
 **Module 5: AI Commuting Assistant and Climate Impact Analytics (AI module)**
 - 13.3 link: direct. Builds individual awareness through CO2 insights and builds UM's capacity through aggregated data.
-- FR5.1: The system shall use a cloud language model to turn a natural-language request into origin, destination, departure time and seats, and pre-fill the booking form for the user to confirm.
+- FR5.1: The system shall transcribe speech and use a cloud language model to extract origin, destination, departure date and time, and seats. The passenger reviews or enters the fields manually and confirms to search. The reservation requires a separate confirmation. See the [user flow](design/User_Flow.md).
 - FR5.2: The system shall recommend pickup groupings and departure windows for passengers from the same residential area, to increase the number of passengers per vehicle.
 - FR5.3: The system shall provide a sustainability dashboard that shows: (a) CO2 avoided per trip and the user's cumulative total, with personalised insights and short low-carbon commuting tips; (b) community totals and leaderboards by faculty or residential college (never by individual); and (c) an anonymised aggregate view by faculty, college and week for authorised UM staff.
 

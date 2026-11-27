@@ -22,6 +22,9 @@
     <string name="mid_valley">Mid Valley Megamall</string>
     <string name="sample_date">Mon, Nov 3</string>
     <string name="good_morning">Good Morning,</string>
+    <string name="good_afternoon">Good Afternoon,</string>
+    <string name="good_evening">Good Evening,</string>
+    <string name="good_day">Good Day,</string>
     <string name="sample_name">Nisha!</string>
     <string name="today_nov">Today, Nov 3</string>
     <string name="seat_count">%1$d seat(s)</string>
@@ -312,6 +315,65 @@
     <string name="auth_verified_sign_in">Already verified using the email link? Sign in</string>
     <string name="auth_demo_banner">Demo mode · Sample data</string>
     <string name="auth_exit_demo">Exit demo</string>
+
+    <string name="live_offer_feed">Available rides</string>
+    <string name="live_offer_refresh">Refresh offers</string>
+    <string name="live_offer_load_failed">Couldn’t load ride offers. Try refreshing.</string>
+    <string name="live_offer_empty">No rides available</string>
+    <string name="live_offer_empty_hint">Try a different date or request fewer seats.</string>
+    <string name="live_offer_unavailable">This ride is no longer available for your requested seats.</string>
+    <string name="live_booking_review">Review booking</string>
+    <string name="live_booking_confirm">Confirm</string>
+    <string name="live_booking_failed">Couldn’t confirm your booking. Check My Trips before trying again. The ride may have filled up.</string>
+    <string name="live_pickup">Pickup location</string>
+    <string name="live_destination">Destination</string>
+    <string name="live_pickup_required">Choose a pickup location with a designated pickup point.</string>
+    <string name="live_booking_seats">Seats requested: %1$d · Available: %2$d</string>
+    <string name="live_booking_total">Total: RM %1$.2f</string>
+    <string name="seats">Seats</string>
+    <string name="booking_date">Date</string>
+    <string name="live_departure">Departure</string>
+
+    <!-- 3-Mode Filter Chips & Navigation -->
+    <string name="need_a_ride">Schedule a Ride</string>
+    <string name="offer_a_ride">Offer a ride</string>
+    <string name="post_a_ride">Post a ride</string>
+    <string name="rides_match_count">%1$d rides match</string>
+    <string name="rides_available_count">%1$d ride(s) available</string>
+
+    <!-- Available Rides Feed Filters & Controls -->
+    <string name="near_pickup_proximity">Near Pickup (Proximity)</string>
+    <string name="destination_filter">Destination Filter</string>
+    <string name="all_times">All Times</string>
+    <string name="morning_time_window">Morning (6AM–12PM)</string>
+    <string name="afternoon_time_window">Afternoon (12PM–6PM)</string>
+    <string name="evening_time_window">Evening (6PM–11PM)</string>
+    <string name="sort_nearest_pickup">Nearest Pickup</string>
+    <string name="sort_earliest_time">Earliest Time</string>
+    <string name="sort_most_co2_saved">Most CO₂ Saved</string>
+    <string name="sort_lowest_cost">Lowest Cost</string>
+    <string name="no_matching_rides_title">No rides match your filters</string>
+    <string name="no_matching_rides_subtitle">Try clearing your destination or departure window filter to see all %1$d open rides.</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="reset_filters">Reset (%1$d)</string>
+    <string name="load_more_rides">Load more rides</string>
+    <string name="load_more_rides_remaining">Load more rides (%1$d left)</string>
+    <string name="per_seat">per seat</string>
+
+    <!-- Need a Ride / Find Ride Form -->
+    <string name="find_a_ride">Find a ride</string>
+    <string name="voice_request_label">Voice request · Review and fill in fields</string>
+    <string name="confirm_and_find_rides">Confirm &amp; Find Rides  →</string>
+    <string name="posting_request">Posting Request…</string>
+    <string name="fewer_seats">Fewer seats</string>
+    <string name="more_seats">More seats</string>
+
+    <!-- Offer a Ride Form -->
+    <string name="available_seats_label">Available seats</string>
+    <string name="suggested_contribution_label">Suggested contribution</string>
+    <string name="confirm_and_post_offer">Confirm &amp; Post Offer  →</string>
+    <string name="publishing_offer">Publishing Offer…</string>
+
     <string name="profile_name_unset">Add your name</string>
     <string name="profile_edit_title">Commuter profile</string>
     <string name="profile_name_label">Display name</string>
@@ -349,6 +411,17 @@
     <string name="contact_saved">Contact saved.</string>
     <string name="contact_invalid">Enter a valid phone number.</string>
     <string name="contact_remove">Remove contact</string>
+
+    <string name="loading">Loading…</string>
+    <string name="ride_price">RM %1$.2f</string>
+    <plurals name="home_seats">
+        <item quantity="one">%1$d seat</item>
+        <item quantity="other">%1$d seats</item>
+    </plurals>
+    <plurals name="live_seats_left">
+        <item quantity="one">%1$d seat left</item>
+        <item quantity="other">%1$d seats left</item>
+    </plurals>
     <string name="booking_cap_loading">Loading contribution cap…</string>
     <string name="booking_cap_amount">Maximum RM %1$.2f per seat</string>
     <string name="booking_cap_retry">Retry loading contribution cap</string>
@@ -387,4 +460,100 @@
     <string name="sos_location_on_request">Location is requested only when you activate SOS and grant permission.</string>
     <string name="sos_manual_delivery">The app prepares a message; it does not send it automatically or notify campus security.</string>
     <string name="sos_dialer_error">Unable to open the phone dialer.</string>
+
+    <string name="ui_all">All</string>
+    <string name="ui_details">Details</string>
+    <string name="ui_view_details">View details</string>
+    <string name="ui_view_trip">View trip</string>
+    <string name="trips_pending">Pending</string>
+    <string name="trips_active">Active</string>
+    <string name="trips_completed">Completed</string>
+    <string name="trips_cancelled">Cancelled</string>
+    <string name="trips_empty">No trips yet</string>
+    <string name="trips_empty_all">Your bookings and ride offers will appear here.</string>
+    <string name="trips_empty_filter">No trips in this category.</string>
+    <string name="trips_active_label">Active trip</string>
+    <string name="trips_confirmed_label">Confirmed booking</string>
+    <string name="trips_completed_label">Completed trip</string>
+    <string name="trips_cancelled_label">Cancelled trip</string>
+    <string name="trips_pending_booking">Pending booking</string>
+    <string name="trips_pending_group">Pending group request</string>
+    <string name="trips_your_offer">Your ride offer</string>
+    <string name="trips_your_trip">Your trip</string>
+    <string name="trips_awaiting_booking">Awaiting booking confirmation</string>
+    <string name="trips_pickup_missing">Pickup unavailable</string>
+    <string name="trips_destination_missing">Destination unavailable</string>
+    <string name="trips_pickup_route">Pickup: %1$s → %2$s</string>
+    <string name="trips_price_breakdown">%1$s · RM%2$s × %3$d =</string>
+    <string name="trips_offer_summary">%1$s · RM%2$s per seat</string>
+    <string name="trips_message_driver">Message driver</string>
+    <string name="trips_ticket">Ticket</string>
+    <string name="trips_contribution_note">Contribution is settled directly with the driver, outside the app.</string>
+    <string name="trips_review_offer">Review offer</string>
+    <string name="trips_manage_offer">Manage your offer and start your trip from its details.</string>
+    <string name="trips_no_seat_reserved">No seat reserved until a driver offer is confirmed.</string>
+    <string name="trips_hold_sos">Hold SOS for 3 seconds</string>
+    <string name="trips_open_sos">Open SOS controls</string>
+    <string name="trips_keep_holding">Keep holding…</string>
+    <string name="notif_matches">Matches</string>
+    <string name="notif_bookings">Bookings</string>
+    <string name="notif_messages">Messages</string>
+    <string name="notif_empty">You’re all caught up</string>
+    <string name="notif_empty_all">Your ride updates will appear here.</string>
+    <string name="notif_empty_category">No notifications in this category.</string>
+    <string name="notif_today">Today</string>
+    <string name="notif_earlier">Earlier</string>
+    <string name="notif_mark_all_read">Mark all as read</string>
+    <string name="notif_now">Now</string>
+    <string name="notif_minutes">%1$d min</string>
+    <string name="notif_hours">%1$d hr</string>
+    <string name="notif_soon">Soon</string>
+    <string name="notif_campus">UM Campus</string>
+    <string name="notif_request_summary">Departs %1$s to %2$s • %3$s • ~%4$s kg CO₂ saved</string>
+    <string name="notif_message_title">New conversation update</string>
+    <string name="notif_booking_title">Booking update</string>
+    <string name="notif_request_title">Overlapping ride request</string>
+    <string name="notif_offer_title">Ride offer update</string>
+    <string name="notif_safety_title">Trip safety update</string>
+    <string name="notif_trip_title">Trip update</string>
+    <string name="notif_message_body">Open your booking or trip conversation.</string>
+    <string name="notif_booking_body">View the latest status of your booking.</string>
+    <string name="notif_offer_body">View the latest ride offer details.</string>
+    <string name="notif_trip_body">Open your trip for current details.</string>
+    <string name="notif_open_messages">Open messages</string>
+    <string name="notif_view_booking">View booking</string>
+    <string name="notif_view_match">View match</string>
+    <string name="notif_view_offer">View offer</string>
+    <string name="notif_view_request">View request</string>
+    <string name="notif_yesterday">Yesterday</string>
+    <string name="notif_demo_group">Driver found for your group</string>
+    <string name="notif_demo_saved">New ride on your saved route</string>
+    <string name="notif_demo_request">Passenger request on your route</string>
+    <string name="notif_demo_booking">Booking confirmed · UMP–2841</string>
+    <string name="notif_demo_review">Rate your trip with Dorsett</string>
+    <string name="notif_demo_group_body">Kolej Kediaman 10 → FSKTM · Thu 8:00 AM</string>
+    <string name="notif_demo_saved_body">Kolej Kediaman 10 → Fac. of Engineering · Wed 8:15 AM</string>
+    <string name="notif_demo_request_body">Pantai Dalam → UM · Fri 8:00 AM</string>
+    <string name="notif_demo_booking_body">2 seats × RM4 = RM8 · Wed 8:15 AM</string>
+    <string name="notif_demo_review_body">Trip completed · 2.4 kg CO₂ saved so far this week</string>
+    <string name="notif_demo_saved_badge">3 seats · RM4</string>
+    <string name="trips_demo_started">Started 8:05 AM · Driver: Dorsett Tan</string>
+    <string name="trips_demo_wed">Wed 8:15 AM</string>
+    <string name="trips_demo_thu">Thu 8:00–8:30 AM</string>
+    <string name="trips_demo_summary">3 passengers · No driver assigned yet</string>
+    <string name="trips_demo_faculty">Faculty of Engineering</string>
+    <string name="notif_demo_monday">Mon</string>
+    <string name="notif_error_load">Unable to load notifications.</string>
+    <string name="notif_error_save">Unable to save notification on this device.</string>
+    <string name="notif_error_read">Unable to save read status.</string>
+    <string name="notif_error_unavailable">Notification unavailable or access denied.</string>
+    <string name="trips_error_load">Unable to load trip records. Check your connection and retry.</string>
+    <string name="trips_error_update">Trip update failed. The server may reject this transition or its lifecycle RPC may not be installed. Refresh and retry.</string>
+    <string name="trips_error_cancel">Cancellation failed. Refresh the ticket and retry.</string>
+    <plurals name="trips_seats_available">
+        <item quantity="one">%1$d seat available</item>
+        <item quantity="other">%1$d seats available</item>
+    </plurals>
+    <string name="trips_pickup_group">Pickup group</string>
+    <string name="trips_no_driver">No driver assigned yet</string>
 </resources>

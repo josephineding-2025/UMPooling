@@ -27,6 +27,8 @@ import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ui.components.FigmaIcon
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -64,8 +66,9 @@ fun NotificationScreen(
     error: String? = null,
     modifier: Modifier = Modifier,
 ) {
-    var selected by rememberSaveable { mutableStateOf("All") }
-    val filtered = entries.filter { selected == "All" || it.category.name == selected }
+    var selected by rememberSaveable { mutableStateOf<NotificationCategory?>(null) }
+    val settingsLabel = stringResource(R.string.four_notification_settings)
+    val filtered = entries.filter { selected == null || it.category == selected }
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp, LocalTextStyle provides LocalTextStyle.current.copy(
         fontFamily = RideFont, color = Ink, fontSize = 13.sp, lineHeight = 17.sp)) {
         Box(modifier.fillMaxSize().background(Color(0xFFFCE9E0)).drawWithCache {
@@ -83,13 +86,13 @@ fun NotificationScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     item {
                         Box(Modifier.fillMaxWidth().heightIn(min = 46.dp), contentAlignment = Alignment.Center) {
-                            Text("Notifications", fontSize = 19.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.notifications), fontSize = 19.sp, fontWeight = FontWeight.Bold)
                             Surface(onClick = back, modifier = Modifier.align(Alignment.CenterStart).size(46.dp),
                                 shape = CircleShape, color = Color.White.copy(alpha = .82f), border = BorderStroke(1.dp, Color.White)) {
-                                Box(contentAlignment = Alignment.Center) { FeatureIcon(FeatureSymbol.Back, description = "Back") }
+                                Box(contentAlignment = Alignment.Center) { FeatureIcon(FeatureSymbol.Back, description = stringResource(R.string.back)) }
                             }
                             Surface(onClick = { navigate("notification_settings") },
-                                modifier = Modifier.align(Alignment.CenterEnd).size(46.dp).semantics {contentDescription = "Notification settings"},
+                                modifier = Modifier.align(Alignment.CenterEnd).size(46.dp).semantics {contentDescription = settingsLabel},
                                 shape = CircleShape, color = Color.White.copy(alpha = .25f), border = BorderStroke(1.dp, Color.White)) {
                                 Box(contentAlignment = Alignment.Center) { SettingsGlyph() }
                             }
@@ -97,13 +100,19 @@ fun NotificationScreen(
                         Spacer(Modifier.height(16.dp))
                         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf("All", "Matches", "Bookings", "Messages").forEach { label ->
-                                Surface(onClick = { selected = label }, shape = CircleShape,
-                                    color = if(selected == label) Ink else Color.White.copy(alpha = .48f),
-                                    border = if(selected == label) null else BorderStroke(1.dp, Color.White)) {
+                            (listOf(null) + NotificationCategory.entries).forEach { category ->
+                                val label = stringResource(when (category) {
+                                    null -> R.string.ui_all
+                                    NotificationCategory.Matches -> R.string.notif_matches
+                                    NotificationCategory.Bookings -> R.string.notif_bookings
+                                    NotificationCategory.Messages -> R.string.notif_messages
+                                })
+                                Surface(onClick = { selected = category }, shape = CircleShape,
+                                    color = if(selected == category) Ink else Color.White.copy(alpha = .48f),
+                                    border = if(selected == category) null else BorderStroke(1.dp, Color.White)) {
                                     Box(Modifier.heightIn(min = 36.dp).padding(horizontal = 16.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
                                         Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                                            color = if(selected == label) Color.White else Ink)
+                                            color = if(selected == category) Color.White else Ink)
                                     }
                                 }
                             }
@@ -113,8 +122,8 @@ fun NotificationScreen(
                     if(filtered.isEmpty()) item {
                         Surface(shape = RoundedCornerShape(24.dp), color = Color.White.copy(alpha = .65f)) {
                             Column(Modifier.fillMaxWidth().padding(24.dp)) {
-                                Text("You're all caught up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text(if(entries.isEmpty()) "Your ride updates will appear here." else "No notifications in this category.",
+                                Text(stringResource(R.string.notif_empty), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(stringResource(if (entries.isEmpty()) R.string.notif_empty_all else R.string.notif_empty_category),
                                     color = Muted)
                             }
                         }
@@ -125,16 +134,16 @@ fun NotificationScreen(
                         item {
                             FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalArrangement = Arrangement.Center) {
-                                Text("Today", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 2.dp))
+                                Text(stringResource(R.string.notif_today), fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 2.dp))
                                 TextButton(markAllRead, modifier = Modifier.height(24.dp), enabled = entries.any { it.unread }, contentPadding = PaddingValues(0.dp)) {
-                                    Text("Mark all as read", color = Color(0xFFCB492D), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(stringResource(R.string.notif_mark_all_read), color = Color(0xFFCB492D), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
                         items(today, key = {it.id}) { NotificationCard(it) {open(it)} }
                     }
                     if(earlier.isNotEmpty()) {
-                        item { Text("Earlier", Modifier.padding(top = 14.dp), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                        item { Text(stringResource(R.string.notif_earlier), Modifier.padding(top = 14.dp), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
                         items(earlier, key = {it.id}) { NotificationCard(it) {open(it)} }
                     }
                 }
@@ -246,12 +255,13 @@ fun DemoNotificationScreen(back: () -> Unit, navigate: (String) -> Unit) {
     },{read=true})
 }
 
+@Composable
 private fun demoNotifications() = listOf(
-    NotificationItem("group","Driver found for your group","Kolej Kediaman 10 → FSKTM · Thu 8:00 AM",NotificationCategory.Matches,NotificationGlyph.Group,"2m",unread=true,action="Confirm reservation",badge="2 seats left"),
-    NotificationItem("saved","New ride on your saved route","Kolej Kediaman 10 → Fac. of Engineering · Wed 8:15 AM",NotificationCategory.Matches,NotificationGlyph.Heart,"14m",unread=true,action="View offer",badge="3 seats · RM4"),
-    NotificationItem("request","Passenger request on your route","Pantai Dalam → UM · Fri 8:00 AM",NotificationCategory.Bookings,NotificationGlyph.Car,"1h",action="View request",badge="1 seat requested"),
-    NotificationItem("booking","Booking confirmed · UMP–2841","2 seats × RM4 = RM8 · Wed 8:15 AM",NotificationCategory.Bookings,NotificationGlyph.Check,"Yesterday",earlier=true),
-    NotificationItem("review","Rate your trip with Dorsett","Trip completed · 2.4 kg CO₂ saved so far this week",NotificationCategory.Bookings,NotificationGlyph.Star,"Mon",earlier=true),
+    NotificationItem("group",stringResource(R.string.notif_demo_group),stringResource(R.string.notif_demo_group_body),NotificationCategory.Matches,NotificationGlyph.Group,stringResource(R.string.notif_minutes, 2),unread=true,action=stringResource(R.string.booking_reserve),badge=pluralStringResource(R.plurals.live_seats_left, 2, 2)),
+    NotificationItem("saved",stringResource(R.string.notif_demo_saved),stringResource(R.string.notif_demo_saved_body),NotificationCategory.Matches,NotificationGlyph.Heart,stringResource(R.string.notif_minutes, 14),unread=true,action=stringResource(R.string.notif_view_offer),badge=stringResource(R.string.notif_demo_saved_badge)),
+    NotificationItem("request",stringResource(R.string.notif_demo_request),stringResource(R.string.notif_demo_request_body),NotificationCategory.Bookings,NotificationGlyph.Car,stringResource(R.string.notif_hours, 1),action=stringResource(R.string.notif_view_request),badge=stringResource(R.string.booking_seats, 1)),
+    NotificationItem("booking",stringResource(R.string.notif_demo_booking),stringResource(R.string.notif_demo_booking_body),NotificationCategory.Bookings,NotificationGlyph.Check,stringResource(R.string.notif_yesterday),earlier=true),
+    NotificationItem("review",stringResource(R.string.notif_demo_review),stringResource(R.string.notif_demo_review_body),NotificationCategory.Bookings,NotificationGlyph.Star,stringResource(R.string.notif_demo_monday),earlier=true),
 )
 
 @Preview(name="Notifications",widthDp=390,heightDp=844)

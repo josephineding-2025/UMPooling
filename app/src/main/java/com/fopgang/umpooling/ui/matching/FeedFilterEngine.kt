@@ -1,5 +1,6 @@
 package com.fopgang.umpooling.ui.matching
 
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ai.Co2CalculationService
 import com.fopgang.umpooling.ai.Co2EstimateResult
 import com.fopgang.umpooling.ai.ICo2CalculationService
@@ -9,18 +10,18 @@ import com.fopgang.umpooling.data.Haversine
 import com.fopgang.umpooling.data.TripOffer
 import java.util.Locale
 
-enum class FeedTimeWindow(val label: String) {
-    ALL("All Times"),
-    MORNING("Morning (6AM–12PM)"),
-    AFTERNOON("Afternoon (12PM–6PM)"),
-    EVENING("Evening (6PM–11PM)")
+enum class FeedTimeWindow(val label: String, val labelRes: Int) {
+    ALL("All Times", R.string.all_times),
+    MORNING("Morning (6AM–12PM)", R.string.morning_time_window),
+    AFTERNOON("Afternoon (12PM–6PM)", R.string.afternoon_time_window),
+    EVENING("Evening (6PM–11PM)", R.string.evening_time_window)
 }
 
-enum class FeedSortOption(val label: String) {
-    PROXIMITY("Nearest Pickup"),
-    DEPARTURE_TIME("Earliest Time"),
-    CO2_SAVED("Most CO₂ Saved"),
-    LOWEST_COST("Lowest Cost")
+enum class FeedSortOption(val label: String, val labelRes: Int) {
+    PROXIMITY("Nearest Pickup", R.string.sort_nearest_pickup),
+    DEPARTURE_TIME("Earliest Time", R.string.sort_earliest_time),
+    CO2_SAVED("Most CO₂ Saved", R.string.sort_most_co2_saved),
+    LOWEST_COST("Lowest Cost", R.string.sort_lowest_cost)
 }
 
 data class FeedFilterCriteria(

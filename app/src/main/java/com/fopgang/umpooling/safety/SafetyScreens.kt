@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ui.components.FigmaIcon
+import com.fopgang.umpooling.ui.theme.PoolDesign
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -320,7 +321,7 @@ fun ReviewScreen(back: () -> Unit, message: (Int) -> Unit, onSubmit: () -> Unit 
                             lineHeight = 19.sp, color = SafetyInk), cursorBrush = SolidColor(SafetyInk),
                         decorationBox = { inner ->
                             if (review.isEmpty()) Text(stringResource(R.string.review_hint), fontSize = 14.sp,
-                                lineHeight = 19.sp, color = Color(0xFF858585))
+                                lineHeight = 19.sp, color = PoolDesign.Placeholder)
                             inner()
                         })
                 }

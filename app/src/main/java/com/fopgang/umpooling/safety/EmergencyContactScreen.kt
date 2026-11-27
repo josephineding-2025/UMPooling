@@ -22,7 +22,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.fopgang.umpooling.data.EmergencyContact
+import com.fopgang.umpooling.ui.theme.PoolDesign
+import com.fopgang.umpooling.ui.theme.UMPoolingTheme
 import com.fopgang.umpooling.R
 import com.fopgang.umpooling.booking.RideAction
 import com.fopgang.umpooling.booking.RideHeader
@@ -85,7 +89,7 @@ fun EmergencyContactScreen(
                         phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) }, Modifier.fillMaxWidth(),
                         enabled = !state.saving, singleLine = true, isError = state.contactInvalid,
                         label = { Text(stringResource(R.string.contact_phone)) },
-                        supportingText = { Text(stringResource(R.string.contact_phone_hint)) },
+                        supportingText = { Text(stringResource(R.string.contact_phone_hint), color = PoolDesign.Placeholder) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     )
                     when {
@@ -104,3 +108,21 @@ fun EmergencyContactScreen(
         }
     }
 }
+
+@Preview(widthDp = 390, heightDp = 844)
+@Composable
+private fun EmergencyContactPreview() {
+    UMPoolingTheme {
+        EmergencyContactScreen(
+            owner = "demo",
+            state = ProfileUiState(
+                loading = false,
+                contact = EmergencyContact("Mum", "+60123456789")
+            ),
+            back = {},
+            onSave = { _, _ -> },
+            onRetry = {}
+        )
+    }
+}
+

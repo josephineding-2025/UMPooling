@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fopgang.umpooling.R
@@ -43,9 +44,7 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
         PageColumn(Modifier.padding(top = 25.dp)) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box {
-                Surface(shape = CircleShape, color = Apricot, border = androidx.compose.foundation.BorderStroke(3.dp, Color.White.copy(alpha = .8f)), shadowElevation = 10.dp) {
-                    Box(Modifier.size(94.dp), contentAlignment = Alignment.Center) { Text(initials(name), fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF321C13)) }
-                }
+                ProfileAvatar(name)
                 Surface(Modifier.align(Alignment.BottomEnd), shape = CircleShape, color = Color(0xFFF8C4B0), border = androidx.compose.foundation.BorderStroke(2.dp, Ink)) {
                     FigmaIcon(R.drawable.profile_frame7, Modifier.padding(6.dp).size(14.dp))
                 }
@@ -102,6 +101,24 @@ fun ProfileScreen(navigate: (String) -> Unit, unavailable: () -> Unit, message: 
         }
         CommuterNavigation("profile", navigate, Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp).padding(bottom = 30.dp))
     }
+    }
+}
+
+@Composable
+internal fun ProfileAvatar(name: String?, modifier: Modifier = Modifier, size: Dp = 94.dp) {
+    val scale = size.value / 94f
+    val fontSize = (34 * scale).sp
+    Surface(
+        modifier = modifier.size(size),
+        shape = CircleShape,
+        color = Apricot,
+        border = androidx.compose.foundation.BorderStroke(3.dp * scale, Color.White.copy(alpha = .8f)),
+        shadowElevation = 10.dp * scale,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(initials(name), fontSize = fontSize, lineHeight = fontSize,
+                fontWeight = FontWeight.ExtraBold, color = Color(0xFF321C13))
+        }
     }
 }
 

@@ -1,6 +1,8 @@
 package com.fopgang.umpooling.notifications
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
+import com.fopgang.umpooling.R
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -9,7 +11,7 @@ import kotlinx.coroutines.flow.*
 data class NotificationState(
     val inbox: InboxSnapshot = InboxSnapshot(),
     val busy: Boolean = false,
-    val error: String? = null,
+    @StringRes val error: Int? = null,
 )
 
 /** Owns inbox operations; route effects are consumed once rather than replayed on rotation. */
@@ -26,14 +28,14 @@ class NotificationViewModel(
 
     init {
         repository.observe().onEach { inbox -> mutable.update { it.copy(inbox = inbox) } }
-            .catch { mutable.update { it.copy(error = "Unable to load notifications.") } }
+            .catch { mutable.update { it.copy(error = R.string.notif_error_load) } }
             .launchIn(scope)
     }
     fun accept(payload: Map<String, String>) {
         if (!handled.add(payload.toMap())) return
         scope.launch {
             repository.record(payload).onFailure {
-                mutable.update { it.copy(error = "Unable to save notification on this device.") }
+                mutable.update { it.copy(error = R.string.notif_error_save) }
             }
             open(payload)
         }
@@ -45,11 +47,11 @@ class NotificationViewModel(
             try {
                 repository.resolve(payload).fold({ route ->
                     repository.markRead(setOf(notificationIdentity(payload))).onFailure {
-                        mutable.update { it.copy(error = "Unable to save read status.") }
+                        mutable.update { it.copy(error = R.string.notif_error_read) }
                     }
                     destinations.send(route)
                 }, {
-                    mutable.update { it.copy(error = "Notification unavailable or access denied.") }
+                    mutable.update { it.copy(error = R.string.notif_error_unavailable) }
                 })
             } finally {
                 mutable.update { it.copy(busy = false) }
@@ -60,7 +62,7 @@ class NotificationViewModel(
         val ids = state.value.inbox.entries.map(::notificationIdentity).toSet()
         scope.launch {
             repository.markRead(ids).onFailure {
-                mutable.update { it.copy(error = "Unable to save read status.") }
+                mutable.update { it.copy(error = R.string.notif_error_read) }
             }
         }
     }

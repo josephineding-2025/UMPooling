@@ -16,13 +16,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -32,12 +36,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.fopgang.umpooling.R
+import com.fopgang.umpooling.booking.CAMPUS_ZONE
+import com.fopgang.umpooling.profile.ProfileAvatar
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 import com.fopgang.umpooling.ui.components.*
 import com.fopgang.umpooling.ui.theme.*
-import java.util.Calendar
-import java.util.Locale
-import java.text.SimpleDateFormat
 
 data class RidePreview(val initials: String, val route: String, val details: String, val price: String,
     val offerId: String = com.fopgang.umpooling.booking.DemoRideIds.HOME_OFFER)
@@ -51,16 +62,29 @@ private val HomeText = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 1
 
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier: Modifier = Modifier,
-    onSearch: (com.fopgang.umpooling.booking.FindRideCriteria) -> Unit = { onNavigate("find_ride") }) {
+    onSearch: (com.fopgang.umpooling.booking.FindRideCriteria) -> Unit = { onNavigate("find_ride") },
+    showSampleRide: Boolean = true,
+    profileName: String? = null,
+) {
     val campus = stringResource(R.string.um_campus)
     val mall = stringResource(R.string.mid_valley)
     var origin by rememberSaveable { mutableStateOf(campus) }
     var destination by rememberSaveable { mutableStateOf(mall) }
+    var originIsDefault by rememberSaveable { mutableStateOf(true) }
+    var destinationIsDefault by rememberSaveable { mutableStateOf(true) }
     var seats by rememberSaveable { mutableIntStateOf(1) }
-    var date by rememberSaveable { mutableStateOf("") }
-    var selectedDay by rememberSaveable { mutableLongStateOf(java.time.LocalDate.now(com.fopgang.umpooling.booking.CAMPUS_ZONE).plusDays(1).toEpochDay()) }
+    var selectedEpochDay by rememberSaveable { mutableStateOf<Long?>(null) }
     val context = LocalContext.current
     val ride = sampleRide()
+    val today = rememberCampusDate()
+    val locale = LocalConfiguration.current.locales[0]
+    val selectedDate = selectedEpochDay?.let(LocalDate::ofEpochDay) ?: today
+    val dateFormatter = remember(locale) {
+        val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEMMMd")
+        DateTimeFormatter.ofPattern(pattern, locale)
+    }
+    val headerDate = today.format(dateFormatter)
+    val profileLabel = stringResource(R.string.profile)
     CompositionLocalProvider(LocalTextStyle provides HomeText, LocalMinimumInteractiveComponentSize provides 0.dp) {
         Box(modifier.fillMaxSize().background(Color(0xFFFCEAE2)).drawWithCache {
             val white = Brush.radialGradient(listOf(Color.White, Color.Transparent), Offset.Zero, size.width * .9f)
@@ -84,22 +108,38 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                             FigmaIcon(R.drawable.home_frame10, Modifier.size(13.dp))
                         }
                     }
-                    Surface(onClick = { onNavigate("profile") }, shape = CircleShape, color = Color.Transparent,
-                        border = BorderStroke(2.dp, Color.White)) {
-                        Box(Modifier.size(48.dp).background(
-                            Brush.linearGradient(listOf(Color(0xFFC79C81), Color(0xFF976449))), CircleShape),
-                            contentAlignment = Alignment.Center) {
-                            Text("NS", color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
+                    ProfileAvatar(
+                        name = profileName,
+                        modifier = Modifier.clip(CircleShape)
+                            .clickable(role = Role.Button) { onNavigate("profile") }
+                            .semantics { contentDescription = profileLabel },
+                        size = 48.dp,
+                    )
                 }
                 Spacer(Modifier.height(22.dp))
-                Text(stringResource(R.string.sample_date), Modifier.padding(start = 3.dp),
+                val greetingRes = remember(today) {
+                    val hour = ZonedDateTime.now(CAMPUS_ZONE).hour
+                    when (hour) {
+                        in 5..11 -> R.string.good_morning
+                        in 12..16 -> R.string.good_afternoon
+                        in 17..20 -> R.string.good_evening
+                        else -> R.string.good_day
+                    }
+                }
+                val userDisplayName = remember(profileName) {
+                    if (!profileName.isNullOrBlank()) {
+                        val name = profileName.trim().split(" ").firstOrNull { it.isNotBlank() } ?: profileName.trim()
+                        if (name.endsWith("!")) name else "$name!"
+                    } else {
+                        null
+                    }
+                }
+                Text(headerDate, Modifier.padding(start = 3.dp),
                     fontSize = 15.sp, lineHeight = 19.sp, color = Color(0xFF3D3D3D))
                 Spacer(Modifier.height(6.dp))
-                Text(stringResource(R.string.good_morning), Modifier.padding(start = 3.dp),
+                Text(stringResource(greetingRes), Modifier.padding(start = 3.dp),
                     fontSize = 36.sp, lineHeight = 35.sp, letterSpacing = (-.3).sp, fontWeight = FontWeight.ExtraBold)
-                Text(stringResource(R.string.sample_name), Modifier.padding(start = 3.dp),
+                Text(userDisplayName ?: stringResource(R.string.sample_name), Modifier.padding(start = 3.dp),
                     fontFamily = FontFamily.Serif, fontSize = 34.sp, lineHeight = 35.sp, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(17.dp))
                 Surface(
@@ -112,34 +152,52 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                         Spacer(Modifier.height(9.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                                RouteInput(stringResource(R.string.from), origin, { origin = it }, campus, R.drawable.home_frame)
-                                RouteInput(stringResource(R.string.to), destination, { destination = it }, mall, R.drawable.home_frame1)
+                                RouteInput(
+                                    stringResource(R.string.from), origin,
+                                    { origin = it; originIsDefault = false },
+                                    campus, R.drawable.home_frame, originIsDefault,
+                                )
+                                RouteInput(
+                                    stringResource(R.string.to), destination,
+                                    { destination = it; destinationIsDefault = false },
+                                    mall, R.drawable.home_frame1, destinationIsDefault,
+                                )
                             }
-                            IconButton({ val from = origin; origin = destination; destination = from }, Modifier.width(44.dp)) {
+                            IconButton({
+                                val previousOrigin = origin
+                                val previousOriginIsDefault = originIsDefault
+                                origin = destination
+                                originIsDefault = destinationIsDefault
+                                destination = previousOrigin
+                                destinationIsDefault = previousOriginIsDefault
+                            }, Modifier.width(44.dp)) {
                                 FigmaIcon(R.drawable.home_swap_locations, Modifier.size(22.dp), stringResource(R.string.swap_locations))
                             }
                         }
                         Spacer(Modifier.height(7.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             SmallField(Modifier.weight(1.05f), R.drawable.home_frame2,
-                                date.ifEmpty { java.time.LocalDate.ofEpochDay(selectedDay).format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())) }) {
-                                val today = Calendar.getInstance()
-                                DatePickerDialog(context, { _, y, m, d ->
-                                    val chosen = Calendar.getInstance().apply { set(y, m, d) }
-                                    date = SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(chosen.time)
-                                    selectedDay = java.time.LocalDate.of(y,m+1,d).toEpochDay()
-                                }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)).show()
+                                selectedDate.format(dateFormatter)) {
+                                DatePickerDialog(
+                                    context,
+                                    { _, year, month, day ->
+                                        selectedEpochDay = LocalDate.of(year, month + 1, day).toEpochDay()
+                                    },
+                                    selectedDate.year,
+                                    selectedDate.monthValue - 1,
+                                    selectedDate.dayOfMonth,
+                                ).show()
                             }
                             SmallField(Modifier.weight(1f), R.drawable.home_frame4,
-                                stringResource(R.string.seat_count, seats).replace("(s)", if (seats == 1) "" else "s")) {
-                                seats = seats % 3 + 1
+                                pluralStringResource(R.plurals.home_seats, seats, seats)) {
+                                seats = seats % 4 + 1
                             }
                         }
                         Spacer(Modifier.height(9.dp))
                         Button({ onSearch(com.fopgang.umpooling.booking.FindRideCriteria(
                             origin=com.fopgang.umpooling.booking.RideLocation(origin), destination=com.fopgang.umpooling.booking.RideLocation(destination),
-                            departureDate=java.time.LocalDate.ofEpochDay(selectedDay), seats=seats)) }, Modifier.fillMaxWidth().height(40.dp), shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(0.dp),
+                            departureDate=selectedDate, seats=seats)) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(16.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
                             FigmaIcon(R.drawable.home_frame5, Modifier.size(19.dp))
                             Spacer(Modifier.width(13.dp))
@@ -153,7 +211,7 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                 Spacer(Modifier.height(6.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                     QuickAction(stringResource(R.string.offer_ride), R.drawable.home_frame6, Modifier.weight(1f)) { onNavigate("offer_ride") }
-                    Surface(onClick = { onNavigate("dashboard") }, Modifier.weight(1f).height(62.dp),
+                    Surface(onClick = { onNavigate("dashboard") }, Modifier.weight(1f).heightIn(min = 62.dp),
                         shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             Box(Modifier.size(26.dp, 22.dp)) {
@@ -167,9 +225,18 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
                     QuickAction(stringResource(R.string.saved), R.drawable.home_frame8, Modifier.weight(1f)) { onNavigate("saved") }
                 }
                 Spacer(Modifier.height(22.dp))
-                SectionTitle(stringResource(R.string.available_rides), stringResource(R.string.nearby))
-                Spacer(Modifier.height(10.dp))
-                RideCard(ride) { onNavigate(com.fopgang.umpooling.booking.BookingRoute.OfferDetails(ride.offerId).encode()) }
+                if (showSampleRide) {
+                    SectionTitle(stringResource(R.string.available_rides), stringResource(R.string.nearby))
+                    Spacer(Modifier.height(10.dp))
+                    RideCard(ride) { onNavigate(com.fopgang.umpooling.booking.BookingRoute.OfferDetails(ride.offerId).encode()) }
+                } else {
+                    TextButton(
+                        onClick = { onNavigate("find_ride") },
+                        contentPadding = PaddingValues(horizontal = 3.dp),
+                    ) {
+                        SectionHeading(stringResource(R.string.available_rides))
+                    }
+                }
             }
             CommuterNavigation("home", onNavigate,
                 Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp).padding(bottom = 30.dp))
@@ -178,15 +245,26 @@ fun HomeScreen(onNavigate: (String) -> Unit, onUnavailable: () -> Unit, modifier
 }
 
 @Composable
-private fun RouteInput(label: String, value: String, onChange: (String) -> Unit, hint: String, icon: Int) {
+private fun RouteInput(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+    hint: String,
+    icon: Int,
+    isDefault: Boolean,
+) {
     Surface(shape = RoundedCornerShape(16.dp), color = HomeWhite.copy(alpha = .88f)) {
         Row(Modifier.heightIn(min = 44.dp).padding(horizontal = 15.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             FigmaIcon(icon, Modifier.size(14.dp))
             Text(label, fontSize = 14.sp, color = Color(0xFF606060))
             BasicTextField(value, onChange, Modifier.weight(1f).semantics { contentDescription = label },
-                singleLine = true, textStyle = HomeText,
-                decorationBox = { inner -> if (value.isEmpty()) Text(hint); inner() })
+                singleLine = true,
+                textStyle = if (isDefault) HomeText.copy(color = PoolDesign.Placeholder) else HomeText,
+                decorationBox = { inner ->
+                    if (value.isEmpty()) Text(hint, color = PoolDesign.Placeholder)
+                    inner()
+                })
         }
     }
 }
@@ -205,18 +283,39 @@ private fun SmallField(modifier: Modifier, icon: Int, label: String, action: () 
 }
 
 @Composable
+private fun rememberCampusDate(): LocalDate {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val date by produceState(LocalDate.now(CAMPUS_ZONE), lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                val now = ZonedDateTime.now(CAMPUS_ZONE)
+                value = now.toLocalDate()
+                val midnight = value.plusDays(1).atStartOfDay(CAMPUS_ZONE)
+                delay(Duration.between(now, midnight).toMillis().coerceAtLeast(1L))
+            }
+        }
+    }
+    return date
+}
+
+@Composable
+private fun SectionHeading(title: String, modifier: Modifier = Modifier) {
+    Text(title, modifier, fontSize = 21.sp, lineHeight = 25.sp,
+        fontWeight = FontWeight.Bold, letterSpacing = (-.5).sp)
+}
+
+@Composable
 private fun SectionTitle(title: String, more: String, action: (() -> Unit)? = null) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 3.dp).heightIn(min = 25.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(title, Modifier.weight(1f), fontSize = 21.sp, lineHeight = 25.sp,
-            fontWeight = FontWeight.Bold, letterSpacing = (-.5).sp)
+        SectionHeading(title, Modifier.weight(1f))
         Text(more, if (action != null) Modifier.clickable(onClick = action) else Modifier,
-            fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9D8C85))
+            fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PoolDesign.Placeholder)
     }
 }
 
 @Composable
 private fun QuickAction(label: String, icon: Int, modifier: Modifier, onClick: () -> Unit) {
-    Surface(onClick, modifier.height(62.dp), shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
+    Surface(onClick, modifier.heightIn(min = 62.dp), shape = RoundedCornerShape(19.dp), color = HomeWhite.copy(alpha = .9f)) {
         Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterVertically)) {
             FigmaIcon(icon, Modifier.size(20.dp, 19.dp))

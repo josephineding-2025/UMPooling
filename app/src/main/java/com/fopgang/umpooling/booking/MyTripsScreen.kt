@@ -1,5 +1,6 @@
 package com.fopgang.umpooling.booking
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,8 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -25,25 +28,32 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fopgang.umpooling.booking.*
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.ui.components.*
 import com.fopgang.umpooling.ui.theme.UMPoolingTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-enum class MyTripStatus { Pending, Confirmed, Active, Completed, Cancelled }
+enum class MyTripStatus(@StringRes val labelRes: Int) {
+    Pending(R.string.trips_pending),
+    Confirmed(R.string.confirmed),
+    Active(R.string.trips_active),
+    Completed(R.string.trips_completed),
+    Cancelled(R.string.trips_cancelled),
+}
 data class MyTripItem(
     val id: String,
     val status: MyTripStatus,
-    val origin: String,
-    val destination: String,
+    val origin: String?,
+    val destination: String?,
     val departure: String = "",
     val reference: String = "",
     val vehicle: String = "",
     val seats: Int? = null,
     val costPerSeat: Double? = null,
-    val statusLabel: String? = null,
+    @StringRes val statusLabelRes: Int? = null,
     val summary: String = "",
+    val availableSeats: Int? = null,
     val detailRoute: String,
     val chatRoute: String? = null,
     val sosRoute: String? = null,
@@ -60,8 +70,8 @@ fun MyTripsScreen(
     error: String? = null,
     refresh: (() -> Unit)? = null,
 ) {
-    var filter by rememberSaveable {mutableStateOf("All")}
-    val visible=trips.filter {filter=="All" || it.status.name==filter}
+    var filter by rememberSaveable { mutableStateOf<MyTripStatus?>(null) }
+    val visible=trips.filter {filter == null || it.status == filter}
         .sortedBy {when(it.status) {MyTripStatus.Active->0;MyTripStatus.Confirmed->1;MyTripStatus.Pending->2;else->3}}
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp,
         LocalTextStyle provides LocalTextStyle.current.copy(fontFamily=RideFont,fontSize=13.sp,lineHeight=18.sp,color=TripsInk)) {
@@ -76,11 +86,11 @@ fun MyTripsScreen(
                     verticalArrangement=Arrangement.spacedBy(10.dp)) {
                     item {
                         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-                            Text("My Trips",Modifier.weight(1f),fontSize=29.sp,lineHeight=36.sp,fontWeight=FontWeight.ExtraBold)
+                            Text(stringResource(R.string.my_trips),Modifier.weight(1f),fontSize=29.sp,lineHeight=36.sp,fontWeight=FontWeight.ExtraBold)
                             Surface(onClick={navigate("notifications")},modifier=Modifier.size(46.dp),
                                 shape=CircleShape,color=Color.White.copy(alpha=.25f),border=BorderStroke(1.dp,Color.White)) {
                                 Box(contentAlignment=Alignment.Center) {
-                                    FeatureIcon(FeatureSymbol.Bell,description="Notifications")
+                                    FeatureIcon(FeatureSymbol.Bell,description=stringResource(R.string.notifications))
                                     Box(Modifier.align(Alignment.TopEnd).padding(top=11.dp,end=12.dp)
                                         .size(9.dp).background(Color(0xFFF36955),RoundedCornerShape(3.dp))
                                         .border(1.dp,Color.White,RoundedCornerShape(3.dp)))
@@ -90,15 +100,17 @@ fun MyTripsScreen(
                         Spacer(Modifier.height(14.dp))
                         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                            (listOf("All")+MyTripStatus.entries.filter {s->s in listOf(MyTripStatus.Pending,MyTripStatus.Confirmed,MyTripStatus.Active) || trips.any {it.status==s}}.map {it.name}).forEach {label->
-                                val count=trips.count {it.status.name==label}
-                                Surface(onClick={filter=label},shape=CircleShape,
-                                    color=if(filter==label) TripsInk else Color.White.copy(alpha=.5f),
-                                    border=if(filter==label) null else BorderStroke(1.dp,Color.White)) {
+                            (listOf(null) + MyTripStatus.entries.filter { status ->
+                                status in listOf(MyTripStatus.Pending, MyTripStatus.Confirmed, MyTripStatus.Active) || trips.any { it.status == status }
+                            }).forEach { status ->
+                                val count=trips.count {it.status == status}
+                                Surface(onClick={filter = status},shape=CircleShape,
+                                    color=if(filter == status) TripsInk else Color.White.copy(alpha=.5f),
+                                    border=if(filter == status) null else BorderStroke(1.dp,Color.White)) {
                                     Row(Modifier.heightIn(min=34.dp).padding(horizontal=16.dp,vertical=8.dp),
                                         verticalAlignment=Alignment.CenterVertically) {
-                                        Text(label,fontSize=13.sp,fontWeight=FontWeight.SemiBold,color=if(filter==label) Color.White else TripsInk)
-                                        if(label!="All") Text(" $count",color=if(filter==label) Color.White else Color(0xFFCF4F35),fontSize=13.sp,fontWeight=FontWeight.Bold)
+                                        Text(stringResource(status?.labelRes ?: R.string.ui_all),fontSize=13.sp,fontWeight=FontWeight.SemiBold,color=if(filter == status) Color.White else TripsInk)
+                                        if(status != null) Text(" $count",color=if(filter == status) Color.White else Color(0xFFCF4F35),fontSize=13.sp,fontWeight=FontWeight.Bold)
                                     }
                                 }
                             }
@@ -107,14 +119,14 @@ fun MyTripsScreen(
                     if(loading) item {LinearProgressIndicator(Modifier.fillMaxWidth())}
                     if(error!=null) item {
                         Text(error,color=MaterialTheme.colorScheme.error)
-                        refresh?.let {TextButton(it) {Text("Retry")}}
+                        refresh?.let {TextButton(it) {Text(stringResource(R.string.booking_retry))}}
                     }
                     if(visible.isEmpty() && !loading) item {
                         Surface(shape=RoundedCornerShape(25.dp),color=Color.White.copy(alpha=.7f)) {
                             Column(Modifier.fillMaxWidth().padding(24.dp)) {
-                                Text("No trips yet",fontWeight=FontWeight.Bold,fontSize=17.sp)
-                                Text(if(filter=="All") "Your bookings and ride offers will appear here." else "No ${filter.lowercase()} trips.")
-                                TextButton({navigate("find_ride")}) {Text("Find a ride")}
+                                Text(stringResource(R.string.trips_empty),fontWeight=FontWeight.Bold,fontSize=17.sp)
+                                Text(stringResource(if (filter == null) R.string.trips_empty_all else R.string.trips_empty_filter))
+                                TextButton({navigate("find_ride")}) {Text(stringResource(R.string.find_ride))}
                             }
                         }
                     }
@@ -154,13 +166,13 @@ private fun ActiveTripCard(trip:MyTripItem,navigate:(String)->Unit,sos:()->Unit)
         Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
             FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                 verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                TripPill("Active trip",active=true)
+                TripPill(stringResource(R.string.trips_active_label),active=true)
                 Text(trip.departure,color=TripsMuted,fontSize=11.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.padding(top=4.dp))
             }
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-                    Text("${trip.origin} → ${trip.destination}",fontSize=14.sp,lineHeight=19.sp,fontWeight=FontWeight.Bold)
-                    Text(listOf(trip.vehicle,trip.seats?.let{"$it seat${if(it==1) "" else "s"}"}.orEmpty()).filter {it.isNotBlank()}.joinToString(" · "),
+                    Text("${trip.originLabel()} → ${trip.destinationLabel()}",fontSize=14.sp,lineHeight=19.sp,fontWeight=FontWeight.Bold)
+                    Text(listOf(trip.vehicle,trip.seats?.let { pluralStringResource(R.plurals.home_seats, it, it) }.orEmpty()).filter {it.isNotBlank()}.joinToString(" · "),
                         color=TripsMuted,fontSize=11.sp)
                 }
                 trip.chatRoute?.let {route->
@@ -171,7 +183,7 @@ private fun ActiveTripCard(trip:MyTripItem,navigate:(String)->Unit,sos:()->Unit)
                 }
             }
             if(trip.sosRoute!=null) HoldSosControl(trip.id,sos)
-            else TextButton({navigate(trip.detailRoute)}) {Text("View trip")}
+            else TextButton({navigate(trip.detailRoute)}) {Text(stringResource(R.string.ui_view_trip))}
         }
     }
 }
@@ -183,16 +195,20 @@ private fun BookingTripCard(trip:MyTripItem,navigate:(String)->Unit) {
         color=Color.White.copy(alpha=.78f),border=BorderStroke(1.dp,Color.White)) {
         Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(7.dp)) {
             FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                TripPill(trip.statusLabel ?: when(trip.status){MyTripStatus.Confirmed->"Confirmed booking";MyTripStatus.Completed->"Completed trip";else->"Cancelled trip"},dark=true)
+                TripPill(stringResource(trip.statusLabelRes ?: when (trip.status) {
+                    MyTripStatus.Confirmed -> R.string.trips_confirmed_label
+                    MyTripStatus.Completed -> R.string.trips_completed_label
+                    else -> R.string.trips_cancelled_label
+                }),dark=true)
                 Text(trip.reference,Modifier.padding(top=3.dp),color=TripsMuted,fontSize=11.sp,fontWeight=FontWeight.Bold)
             }
             Box(Modifier.fillMaxWidth()) {
                 Column(Modifier.fillMaxWidth().padding(start=26.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
                     FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                        Text(trip.origin,fontSize=14.sp,fontWeight=FontWeight.Bold)
+                        Text(trip.originLabel(),fontSize=14.sp,fontWeight=FontWeight.Bold)
                         Text(trip.departure,color=TripsMuted,fontSize=11.sp,fontWeight=FontWeight.SemiBold)
                     }
-                    Text(trip.destination,fontSize=14.sp,fontWeight=FontWeight.Bold)
+                    Text(trip.destinationLabel(),fontSize=14.sp,fontWeight=FontWeight.Bold)
                 }
                 RouteDots(Modifier.matchParentSize())
             }
@@ -200,24 +216,30 @@ private fun BookingTripCard(trip:MyTripItem,navigate:(String)->Unit) {
             FlowRow(Modifier.fillMaxWidth().padding(top=5.dp),horizontalArrangement=Arrangement.SpaceBetween,
                 verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 val cost=trip.costPerSeat
+                val summary = trip.summaryLabel()
+                val breakdown = if (trip.seats != null && cost != null) {
+                    stringResource(R.string.trips_price_breakdown,
+                        pluralStringResource(R.plurals.home_seats, trip.seats, trip.seats), money(cost), trip.seats)
+                } else null
                 Text(buildAnnotatedString {
-                    if(trip.seats!=null && cost!=null) {
-                        append("${trip.seats} ${if(trip.seats==1) "seat" else "seats"} · RM${money(cost)} × ${trip.seats} = ")
+                    if (breakdown != null && trip.seats != null && cost != null) {
+                        append(breakdown)
+                        append(" ")
                         withStyle(SpanStyle(fontWeight=FontWeight.Bold,color=TripsInk)) {append("RM${money(cost*trip.seats)}")}
-                    } else append(trip.summary)
+                    } else append(summary)
                 },
                     Modifier.padding(top=8.dp),fontSize=12.sp,color=Color(0xFF6F5A52))
                 Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     trip.chatRoute?.let {route->Surface(onClick={navigate(route)},shape=CircleShape,color=Color.White) {
-                        Text("Message driver",Modifier.padding(horizontal=12.dp,vertical=9.dp),fontWeight=FontWeight.Bold,color=Color.Black,fontSize=11.sp)
+                        Text(stringResource(R.string.trips_message_driver),Modifier.padding(horizontal=12.dp,vertical=9.dp),fontWeight=FontWeight.Bold,color=Color.Black,fontSize=11.sp)
                     }}
                     Surface(onClick={navigate(trip.detailRoute)},shape=CircleShape,color=TripsInk) {
-                        Text(if(trip.status==MyTripStatus.Confirmed && trip.statusLabel==null) "Ticket" else "Details",
+                        Text(stringResource(if (trip.status == MyTripStatus.Confirmed && trip.statusLabelRes == null) R.string.trips_ticket else R.string.ui_details),
                             Modifier.padding(horizontal=12.dp,vertical=9.dp),color=Color.White,fontSize=11.sp,fontWeight=FontWeight.SemiBold)
                     }
                 }
             }
-            Text("Contribution is settled directly with the driver, outside the app.",color=TripsMuted,fontSize=10.sp,lineHeight=14.sp)
+            Text(stringResource(R.string.trips_contribution_note),color=TripsMuted,fontSize=10.sp,lineHeight=14.sp)
         }
     }
 }
@@ -236,31 +258,33 @@ private fun PendingTripCard(trip:MyTripItem,navigate:(String)->Unit) {
         }) {
         Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
             FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                TripPill(trip.statusLabel ?: "Pending group request")
+                TripPill(stringResource(trip.statusLabelRes ?: R.string.trips_pending_group))
                 Text(trip.departure,color=TripsMuted,fontSize=11.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.padding(top=4.dp))
             }
-            Text("Pickup: ${trip.origin} → ${trip.destination}",fontSize=14.sp,lineHeight=19.sp,fontWeight=FontWeight.Bold)
+            Text(stringResource(R.string.trips_pickup_route, trip.originLabel(), trip.destinationLabel()),fontSize=14.sp,lineHeight=19.sp,fontWeight=FontWeight.Bold)
             FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-                Text(trip.summary,color=Color(0xFF6F5A52),fontSize=12.sp)
+                Text(trip.summaryLabel(),color=Color(0xFF6F5A52),fontSize=12.sp)
                 TextButton({navigate(trip.detailRoute)},contentPadding=PaddingValues(0.dp),modifier=Modifier.heightIn(min=24.dp)) {
-                    Text(if(trip.statusLabel==null) "Review offer" else "View details",color=Color(0xFFA9442F),fontWeight=FontWeight.Bold,fontSize=11.sp)
+                    Text(stringResource(if (trip.statusLabelRes == null) R.string.trips_review_offer else R.string.ui_view_details),color=Color(0xFFA9442F),fontWeight=FontWeight.Bold,fontSize=11.sp)
                 }
             }
-            Text(if(trip.statusLabel=="Your ride offer") "Manage your offer and start your trip from its details." else "No seat reserved until a driver offer is confirmed.",color=TripsMuted,fontSize=10.sp,lineHeight=14.sp)
+            Text(stringResource(if (trip.statusLabelRes == R.string.trips_your_offer) R.string.trips_manage_offer else R.string.trips_no_seat_reserved),color=TripsMuted,fontSize=10.sp,lineHeight=14.sp)
         }
     }
 }
 
 @Composable
 private fun HoldSosControl(id:String,activate:()->Unit) {
+    val holdLabel = stringResource(R.string.trips_hold_sos)
+    val openLabel = stringResource(R.string.trips_open_sos)
     val scope=rememberCoroutineScope()
     val action by rememberUpdatedState(activate)
     var holding by remember {mutableStateOf(false)}
     Box(Modifier.fillMaxWidth().heightIn(min=44.dp).background(
         Brush.horizontalGradient(listOf(Color(0xFF934A3D),Color(0xFF2B1713))),CircleShape)
         .semantics {
-            contentDescription="Hold SOS for 3 seconds"
-            customActions=listOf(CustomAccessibilityAction("Open SOS controls"){action();true})
+            contentDescription=holdLabel
+            customActions=listOf(CustomAccessibilityAction(openLabel){action();true})
         }
         .pointerInput(id) {
             detectTapGestures(onPress={
@@ -271,7 +295,7 @@ private fun HoldSosControl(id:String,activate:()->Unit) {
         }.padding(horizontal=16.dp,vertical=11.dp),contentAlignment=Alignment.Center) {
         Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)) {
             Text("⚠",color=Color.White,fontSize=16.sp)
-            Text(if(holding) "Keep holding…" else "Hold SOS for 3 seconds",fontSize=14.sp,fontWeight=FontWeight.Bold,color=Color.White)
+            Text(if(holding) stringResource(R.string.trips_keep_holding) else holdLabel,fontSize=14.sp,fontWeight=FontWeight.Bold,color=Color.White)
         }
     }
 }
@@ -299,16 +323,38 @@ private fun RouteDots(modifier:Modifier) {
         drawCircle(Color.White,1.dp.toPx(),Offset(x,pinY-3.dp.toPx()))
     }
 }
+@Composable
+private fun MyTripItem.originLabel() = origin ?: stringResource(R.string.trips_pickup_missing)
+
+@Composable
+private fun MyTripItem.destinationLabel() = destination ?: stringResource(R.string.trips_destination_missing)
+
+@Composable
+private fun MyTripItem.summaryLabel(): String {
+    val count = availableSeats
+    val cost = costPerSeat
+    return when {
+        count != null && cost != null -> stringResource(
+            R.string.trips_offer_summary,
+            pluralStringResource(R.plurals.trips_seats_available, count, count),
+            money(cost),
+        )
+        statusLabelRes == R.string.trips_pending_booking -> stringResource(R.string.trips_awaiting_booking)
+        else -> summary
+    }
+}
+
 internal fun money(value:Double)=java.text.DecimalFormat("0.##").format(value)
 
+@Composable
 internal fun demoTripItems()=listOf(
-    MyTripItem("demo-active",MyTripStatus.Active,"Kolej Kediaman 10","FSKTM","Started 8:05 AM · Driver: Dorsett Tan",
+    MyTripItem("demo-active",MyTripStatus.Active,"Kolej Kediaman 10","FSKTM",stringResource(R.string.trips_demo_started),
         vehicle="Toyota Vios · WXY 1234",seats=1,detailRoute="active_trip/demo-active",chatRoute="chat/booking/demo-active",sosRoute="sos/demo-active"),
-    MyTripItem("demo-confirmed",MyTripStatus.Confirmed,"Kolej Kediaman 10","Faculty of Engineering","Wed 8:15 AM","UMP–2841",
+    MyTripItem("demo-confirmed",MyTripStatus.Confirmed,"Kolej Kediaman 10",stringResource(R.string.trips_demo_faculty),stringResource(R.string.trips_demo_wed),"UMP–2841",
         seats=2,costPerSeat=4.0,detailRoute=BookingRoute.Ticket(DemoRideIds.CONFIRMED_BOOKING).encode(),
         chatRoute="chat/booking/"+DemoRideIds.CONFIRMED_BOOKING),
-    MyTripItem("demo-pending",MyTripStatus.Pending,"Kolej Kediaman 10","FSKTM","Thu 8:00–8:30 AM",
-        summary="3 passengers · No driver assigned yet",detailRoute=BookingRoute.OfferDetails(DemoRideIds.HOME_OFFER).encode()),
+    MyTripItem("demo-pending",MyTripStatus.Pending,"Kolej Kediaman 10","FSKTM",stringResource(R.string.trips_demo_thu),
+        summary=stringResource(R.string.trips_demo_summary),detailRoute=BookingRoute.OfferDetails(DemoRideIds.HOME_OFFER).encode()),
 )
 
 @Preview(name="My Trips",widthDp=390,heightDp=844)

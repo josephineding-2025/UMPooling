@@ -18,7 +18,7 @@ Source: the live Supabase project as exported on 2026-11-15, plus migrations in 
 |---|---|---|
 | `users` | `"usersId"` (pk, = auth user id), `"usersEmail"`, `"usersRole"`, `"vehiclePlate"`, `"vehicleModel"`, `"createdTime"`, `faculty`, `residential_area`, `residential_college`, `vehicle_type`, `fuel_category`, `trust_rating`, `emergency_contact` (jsonb), `fcm_token`, `display_name` | Email must end with a UM domain (table check plus trigger). `usersRole` is not writable by clients. Profile row is created by the auth trigger. |
 | `saved_routes` | `route_id`, `user_id`, `origin_geo`, `destination_geo`, `distance_km`, `preferred_time`, `origin_zone`, `destination_zone` | Geo columns are NOT NULL (PostGIS geography). |
-| `trip_offers` | `trip_offer_id`, `driver_id`, `origin_geo`, `destination_geo`, `cost_per_seat`, `available_seats`, `status`, `departure_time`, `created_at`, `origin_zone`, `destination_zone`, `distance_km` | `cost_per_seat` is limited by a table check (RM 10) and by the cap trigger (default RM 5). Clients cannot change `available_seats` or, after migration 7, `status` directly. |
+| `trip_offers` | `trip_offer_id`, `driver_id`, `origin_geo`, `destination_geo`, `cost_per_seat`, `available_seats`, `status`, `departure_time`, `created_at`, `origin_zone`, `destination_zone`, `distance_km` | From migration 10, `cost_per_seat` is nonnegative and limited by the configured cap trigger. Clients cannot change `available_seats` or, after migration 7, `status` directly. |
 | `ride_requests` | `request_id`, `user_id`, `trip_offer_id` (nullable), `pickup_geo` (NOT NULL), `destination_geo`, `preferred_time`, `status`, `requested_at` | One request per user and offer (`unique_passenger_offer`). A request with no offer is allowed. |
 | `bookings` | `booking_id`, `trip_offer_id`, `trip_id`, `passenger_id`, `seats_booked`, `pickup_geo`, `status`, `created_at` | Created only by `book_seat_transaction`. Unique per offer and passenger. `trip_id` is filled when the driver starts the trip. `status` values used: confirmed, completed (passenger confirmed the end), no_show, cancelled. |
 | `trips` | `trip_id`, `trip_offer_id`, `driver_id`, `status`, `start_time`, `end_time`, `origin_zone`, `destination_zone`, `distance_km`, `confirmed_passenger_count`, `co2_saved_kg`, `vehicle_plate_snapshot` | Read-only for clients. Created and changed only by the trip lifecycle functions. |
@@ -30,6 +30,10 @@ Source: the live Supabase project as exported on 2026-11-15, plus migrations in 
 | `app_config` | `key`, `value` | Settings such as `max_cost_per_seat`. Clients can read. |
 
 Views: `public_profiles` (user_id, display_name, trust_rating), `anonymised_impact_dashboard` (closed to clients).
+
+### Booking and contribution contract
+
+Migration 10 exposes the configured per-seat contribution cap through `max_cost_per_seat()` and uses the same value in the offer trigger. Migration 12 adds offer quote versions, the `book_seat_with_quote` RPC and booking snapshots for the reference, contribution, route and departure. Offer review uses the offer ID. The successful reservation returns the booking ID used to load the ticket. See the [user flow](design/User_Flow.md).
 
 ## 3. Functions and triggers
 

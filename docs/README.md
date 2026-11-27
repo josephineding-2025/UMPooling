@@ -24,6 +24,7 @@ This is the team's shared space for ideas, notes and planning documents. **If yo
 
 | File | Purpose |
 |---|---|
+| [User flow](design/User_Flow.md) | Target navigation, matching, booking and trip coordination |
 | [UMPooling.md](UMPooling.md) | Project proposal: problem, modules, requirements, SDG 13.3 mapping, risks |
 | [Task_Division.md](Task_Division.md) | Who does what in each phase |
 | [Survey_Interview_Kit.md](Survey_Interview_Kit.md) | Survey form and UM unit email |

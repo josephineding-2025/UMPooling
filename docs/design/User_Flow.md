@@ -1,182 +1,88 @@
-# UMPooling — Refined User Flow and Functional Specification
+# UMPooling user flow and functional specification
 
-## Document basis
-
-This specification combines the proposed screen flow with the requirements in [Copy of WIA2007 MAD.pdf](https://chatgpt.com/library?file_id=libfile_ea0a9a5b16fc8191bd9b48de702f514f&account_id=personal).
-
-The 30-minute branching rule, 1–3 requested passenger seats, and three-second SOS hold are additional user-supplied interaction rules. This describes intended behaviour, not current implementation status.
+This document specifies the target commuter experience. See [Screen navigation](../navigation.md) and the [UI handoff](ui-handoff.md) for implementation status. The [project proposal](../UMPooling.md) lists the functional requirements.
 
 ## 1. Authentication and onboarding
 
-Users register or sign in using **@siswa.um.edu.my** or **@um.edu.my** accounts. Email verification must be completed before accessing live ride features.
-
-During profile setup, users select **Passenger, Driver, or Both**, then provide their faculty and residential area. Drivers also provide the required vehicle details. Users can configure emergency contacts and notification preferences.
+Users register or sign in with an **@siswa.um.edu.my** or **@um.edu.my** account and verify their email before using live ride features. During setup, they select Passenger, Driver, or Both and enter their faculty and residential area. Drivers provide vehicle details. Users can configure emergency contacts and notification preferences.
 
 ## 2. Home and main navigation
 
-Home displays a welcome message, ride-search form, available rides, and recommended matches. Ride cards show the route, departure time, available seats, contribution per seat, driver rating, and estimated CO₂ savings.
-
-| Action | Destination |
+| Home action | Destination |
 |---|---|
-| Find a Carpool | `FindRideScreen` |
+| Find a Carpool | `FeedScreen` (Available Rides) |
 | Offer a Ride | `OfferRideScreen` |
+| Schedule a ride filter chip | `ScheduleRideScreen` |
 | Carbon Footprint | `SustainabilityDashboardScreen` |
 | Saved | `SavedRoutesScreen` |
 | Profile | `ProfileScreen` |
-| My Trips | Upcoming, pending, active, and past trip records |
-| Microphone button | `VoiceRequestScreen` |
-| Notifications | Notifications inbox, separate from notification settings |
+| Bottom-menu record button | `VoiceRequestScreen` |
+| My Trips | Pending requests and confirmed, active, completed, or cancelled trips |
+| Notifications | Notifications inbox |
 
-Search choices entered on Home must carry forward into the next screen.
+Carry any search criteria entered on Home into the selected ride flow. Ride cards show the route, departure, available seats, contribution per seat, driver rating, and estimated CO₂ savings.
 
-## 3. Posting a ride offer
+## 3. Post a ride offer
 
-In `OfferRideScreen`, the driver enters or selects:
+1. In `OfferRideScreen`, the driver selects valid pickup and drop-off locations, sets the departure date and time and available seats, and enters a suggested contribution per seat.
+2. Load the contribution cap from backend configuration (`app_config.max_cost_per_seat`, exposed through the `max_cost_per_seat` RPC). Display it and validate the amount before submission. If the cap cannot be loaded, preserve the draft and offer a retry. The backend enforces the cap when saving.
+3. After the backend accepts the post, publish the offer for eligible searches and match notifications. Preserve the form and offer a retry if posting fails.
 
-- Origin and destination, with valid pickup/drop-off locations.
-- Departure date and time.
-- Available passenger seats.
-- Suggested contribution per seat.
+Passengers and drivers settle the contribution outside the app.
 
-The app **reads the contribution cap from backend configuration**, displays it, and validates the entered amount. The backend enforces the cap again when saving.
+## 4. Find or schedule a ride
 
-After a successful post, the offer appears in the filtered ride feed and can trigger notifications for passengers with compatible saved routes. Posting failures preserve the form and provide a retry action.
+### 4.1 Browse Available Rides
 
-**Contributions are settled outside the app; there is no in-app payment.**
+**Find a Carpool** opens `FeedScreen` directly. Passengers can browse upcoming open offers and refine the results by origin or pickup area, destination, departure, and requested seats. Exclude the passenger's own offers and offers with insufficient seats. Tapping an offer opens its details in `BookingConfirmationScreen`.
 
-## 4. Finding a ride
+### 4.2 Find a ride by voice or manual entry
 
-### 4.1 Manual entry
+1. Tap the bottom-menu record button to open `VoiceRequestScreen`. Press **Hold to Talk** to record, requesting microphone permission when needed. Display the transcript so the passenger can check and correct it.
+2. AI extracts origin, destination, departure date and time, and requested seats from the text. Prefill the **Review Booking Form** in `LiveBookingScreen`. Flag missing or ambiguous details for the passenger to resolve.
+3. **Fill in manually** opens the same form directly. Keep any reliable details already entered. This path is available if permission is denied or transcription or extraction fails.
+4. The passenger reviews the fields and taps **Confirm** to search. When an eligible offer is found, open `BookingConfirmationScreen` with the matched driver's offer. Offer access to other matches in Available Rides when applicable. If no offer matches, let the passenger edit the form or schedule a ride.
 
-The passenger taps **Find a Carpool** to open `FindRideScreen`, then reviews or edits:
+### 4.3 Schedule a ride
 
-- Origin and destination.
-- Departure date and time.
-- Requested seats: **1–3**, subject to the selected vehicle’s remaining capacity.
+1. Tap the **Schedule a ride** filter chip and edit origin, destination, departure date and time, and **1–3 seats** in `ScheduleRideScreen`.
+2. Tap **Confirm Schedule**. If eligible offers exist, open `FeedScreen` with the schedule filters applied. Show compatible pickup groups where available. A group with a reservable driver offer leads to offer details. A group awaiting a driver can be saved as a pending request.
+3. If the search succeeds with no matches, show a message explaining that continuing saves a pending request and that the passenger will receive a push notification when a compatible offer becomes available, subject to notification settings and device permissions. **Cancel** keeps the form open and creates no request. **Continue** saves the request and shows its pending status in My Trips after the save succeeds.
+4. If searching or saving fails, retain the form and provide a retry. A failed search and an empty result have separate messages.
 
-The user taps **Confirm & Find Rides**. Empty locations, identical origin/destination, invalid seats, and past departure times receive clear validation messages.
+Validate missing or identical endpoints, past departure times, and seat counts on both passenger forms. Use route, time, and capacity compatibility to find offers. The entry action determines which screen opens.
 
-### 4.2 Voice-assisted entry
+### 4.4 Open a match notification
 
-The passenger taps the microphone button to open `VoiceRequestScreen`.
+Tapping a scheduled-request or saved-route match notification opens `RideMatchScreen`. Resolve the offer and, where applicable, the request from their IDs. Refresh availability before allowing the passenger to proceed to offer details. If the offer has filled, expired, or been cancelled, show its current status and let the passenger return to matching results. Pending requests, group participation, and match notifications leave seats available until a reservation succeeds.
 
-1. Press and hold **Hold to Talk**, granting microphone permission when needed.
-2. Speech recognition converts the recording into visible, editable text.
-3. A cloud language model extracts **origin, destination, departure date/time, and seats**.
-4. The app opens `FindRideScreen` with those fields prefilled.
-5. The passenger reviews, corrects, and confirms the form.
+## 5. Review and reserve
 
-Speech transcription and AI field extraction are separate steps. Missing or ambiguous information must be highlighted rather than silently guessed. **Fill in manually** opens the same form directly, preserving any information already entered.
+1. `BookingConfirmationScreen` shows the selected offer's driver card, rating, vehicle, price per seat, requested seats and total contribution, and pickup-to-destination timeline. Confirm the pickup point before submitting.
+2. **Confirm Booking** submits the selected offer ID, seat count, and pickup to the backend. Block repeated taps while the request is in progress. The backend validates eligibility, departure, current terms, and capacity, then writes the booking and reduces availability in one transaction.
+3. After the backend returns a booking ID, load `ConfirmedTripTicketScreen` from that ID. Use the same ID when reopening the ticket from My Trips. If ticket retrieval fails after booking, retry loading the ticket by ID.
+4. If booking fails, stay on the review and show the reason with a refresh or retry action. If the result is uncertain after a connection failure, check My Trips before resubmitting. If price or availability changes, refresh the offer and require the passenger to review it again.
 
-## 5. Matching and departure-time branching
+The ticket shows the pickup, destination, departure, driver and vehicle details, reserved seats, per-seat and total contribution, status, and booking reference. Example ticket values are **RM 4 × 2 seats = RM 8** and **UMP-2841**. Live tickets use the recorded booking values and reference.
 
-After confirmation, the system filters offers using compatible origin/pickup area, destination, departure time, and sufficient seats. The **30-minute rule determines the presentation**, while route/time compatibility determines which rides actually match.
+## 6. Coordinate and complete the trip
 
-| Requested departure | Result |
-|---|---|
-| Now through the next 30 minutes, inclusive | Immediate ride results and driver details |
-| More than 30 minutes away | Advance ride results and pickup-group recommendations |
-| Already in the past | Ask the passenger to update the departure time |
+### 6.1 Chat
 
-### 5.1 Immediate rides
+**Message driver** opens `ChatScreen` for the booking or trip. Provide quick replies, typed messages, timestamps, message history, and retry for failed sends. A labelled demo can show an auto-reply. Live replies come from the other participant.
 
-The passenger selects a result to view the driver card, trust rating, vehicle details, price per seat, remaining seats, estimated CO₂ savings, and pickup-to-destination timeline.
+### 6.2 Active-trip SOS
 
-Tapping **Request to join** opens a reservation summary showing the requested seats and total contribution. The system then attempts the transactional booking.
+When the driver starts the trip, the ticket's **SOS** action opens the active-trip safety screen in `SafetyScreens.kt`. Hold **SOS** continuously for three seconds to prepare the emergency action. Releasing early or leaving the screen cancels the hold. After the hold, the passenger can cancel or choose **Call emergency services**, which opens the system dialer for the authorised responder. The passenger places the call in the dialer.
 
-### 5.2 Advance rides and pickup groups
+Where available, the passenger can also review a prefilled SMS or WhatsApp message with trip details and available location, addressed to the configured emergency contact or UM Security. The passenger sends it in that app. The safety screen reports the handoff separately from any call or message outcome.
 
-`RequestFutureRideScreen` recommends passengers from nearby residential areas with compatible destinations and departure windows.
+### 6.3 Trip completion and review
 
-Each group shows its pickup area, proposed departure window, passenger count, and driver/vehicle status.
+Passengers confirm trip completion and the driver finalises the trip. Use recorded distance and confirmed occupancy to estimate CO₂ savings and update impact totals. Then invite users to **Rate & Review** with 1–5 stars, feedback tags, and an optional written review. **Submit** saves the review and returns Home. **Skip** returns Home immediately. Preserve feedback for retry if saving fails. Ratings contribute to the community trust rating.
 
-- **Driver and reservable offer available:** joining attempts a transactional booking.
-- **No driver assigned:** joining saves a **Pending group request** in My Trips. It does not reserve a seat or produce a confirmed ticket.
-- When an offer becomes available, the passenger reviews the final details and confirms the reservation.
+## 7. Saved routes and sustainability
 
-When no match exists, users can adjust filters, save the route for notifications, or submit an unmatched ride request that notifies compatible drivers.
+In `SavedRoutesScreen`, passengers can add, edit, or delete favourite recurring routes with a pickup area, destination, and preferred departure window. A newly posted compatible driver offer can trigger a prompt push notification for a saved route or pending request. A new passenger request can also notify drivers with overlapping saved routes. Match notifications identify the trip and show departure, destination, seat information, and estimated CO₂ savings when available. See [Matching rules](../matching-rules.md).
 
-## 6. Transactional booking and confirmed ticket
-
-The connected sequence is:
-
-1. Driver posts an offer.
-2. Passenger filters offers.
-3. Passenger selects offer details.
-4. Passenger confirms the reservation.
-5. Backend books seats atomically.
-6. Ticket loads by booking ID.
-
-The backend checks offer status, departure time, contribution rules, and remaining capacity. It creates the booking and reduces availability in one transaction.
-
-**Show confirmation only after a successful booking.** Disable repeated submissions while processing. If the offer becomes full, expires, or fails, show the reason and refresh availability.
-
-The confirmed ticket displays:
-
-- Pickup, destination, and departure time.
-- Driver and vehicle details.
-- Number of reserved seats.
-- Contribution per seat and total.
-- Booking status and a unique booking reference.
-- **Message driver** and **SOS** actions, with SOS activation available during an active trip.
-
-For example, **RM4 × 2 seats = RM8**. RM4 and **UMP-2841** are sample values; production tickets use the actual contribution and a reference associated with the booking.
-
-## 7. My Trips and chat
-
-My Trips distinguishes **Pending group requests, Confirmed bookings, Active trips, Completed trips, and Cancelled records**.
-
-Opening a confirmed booking loads its ticket by booking ID. Selecting **Message driver** opens the conversation associated with that booking or trip.
-
-Chat supports quick replies, typed messages, timestamps, message history, and sending/failure/retry states. Quick replies let the user review or send common coordination messages.
-
-An **auto-reply may be used in an explicitly labelled demo**. In live use, replies come from the other participant unless a separate automated assistant is deliberately introduced.
-
-## 8. Active trip, SOS, and completion
-
-The driver starts the trip, making its active status visible to participants.
-
-### 8.1 SOS interaction
-
-During an active trip, holding **SOS for three seconds** prepares the emergency action. Releasing early cancels the hold. Before handoff, the user can cancel the action.
-
-To match the document’s requirement, SOS opens **SMS or WhatsApp with a prefilled message** containing trip details and the available current location, addressed to the configured emergency contact or UM Security. The user completes sending in that application.
-
-The app must not claim delivery merely because the composer opened. Cancellation cannot retract an already-sent message.
-
-### 8.2 Trip completion
-
-At trip end, passengers confirm completion and the driver finalizes the trip. The system records confirmed passenger count and distance, then displays estimated CO₂ savings and updates personal impact totals.
-
-## 9. Rate & Review
-
-After completion, users can select **1–5 stars**, choose feedback tags, and add an optional written review.
-
-- **Submit:** save the review successfully, then return Home.
-- **Skip:** return Home without creating a review.
-- **Submission failure:** preserve the review and offer retry.
-
-Ratings contribute to the other participant’s community trust rating.
-
-## 10. Saved routes, notifications, and sustainability
-
-### 10.1 Saved recurring routes
-
-Users can add, edit, and delete recurring routes, including their residential area and preferred departure window.
-
-### 10.2 Matching notifications
-
-Matching works in both directions:
-
-- **New driver offer → notify passengers with compatible saved routes.**
-- **New passenger request → notify drivers with overlapping saved routes.**
-
-Notifications show relevant departure, destination, seat information, estimated CO₂ savings, and request/booking status. Opening a notification leads to the associated offer or request.
-
-### 10.3 Sustainability dashboard
-
-The sustainability dashboard presents per-trip and cumulative estimated CO₂ savings, weekly/monthly trends, commuting tips, and Green Commuter Tier progress.
-
-Community leaderboards compare **faculties or residential colleges**. Authorised staff receive anonymised aggregate views.
-
-CO₂ values shown before booking are **estimates**; completed-trip totals use recorded distance and confirmed occupancy. This connects the carpooling journey to the project’s climate-awareness objective.
+**Carbon Footprint** shows estimated per-trip and cumulative CO₂ savings, weekly and monthly trends, commuting tips, and Green Commuter Tier progress. Community leaderboards compare faculties or residential colleges. Authorised staff can view anonymised aggregates. Recurring-route matching helps commuters coordinate rides for early lectures while reducing single-occupant trips and demand for campus parking.

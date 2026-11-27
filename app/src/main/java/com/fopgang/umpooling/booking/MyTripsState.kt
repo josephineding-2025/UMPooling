@@ -1,5 +1,6 @@
 package com.fopgang.umpooling.booking
 
+import com.fopgang.umpooling.R
 import com.fopgang.umpooling.coordination.CoordinationData
 
 import com.fopgang.umpooling.booking.CAMPUS_ZONE
@@ -7,13 +8,13 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-internal fun tripDeparture(value:String):String = runCatching {
+internal fun tripDeparture(value: String, locale: Locale = Locale.getDefault()): String = runCatching {
     OffsetDateTime.parse(value).atZoneSameInstant(CAMPUS_ZONE)
-        .format(DateTimeFormatter.ofPattern("EEE h:mm a",Locale.getDefault()))
+        .format(DateTimeFormatter.ofPattern("EEE h:mm a", locale))
 }.getOrDefault(value)
 
 /** Never infer an active reservation from a cancelled booking or fabricate missing profile data. */
-internal fun CoordinationData.myTripItems(owner:String):List<MyTripItem> {
+internal fun CoordinationData.myTripItems(owner: String, locale: Locale = Locale.getDefault()): List<MyTripItem> {
     fun status(booking:String?,trip:String?,offer:String?) = when {
         booking=="cancelled" || trip=="cancelled" || offer=="cancelled" -> MyTripStatus.Cancelled
         trip=="in_progress" -> MyTripStatus.Active
@@ -27,11 +28,10 @@ internal fun CoordinationData.myTripItems(owner:String):List<MyTripItem> {
         val state=status(booking.status,trip?.status,offer?.status)
         MyTripItem(
             id="booking/"+booking.id,status=state,
-            origin=offer?.originZone ?: "Pickup unavailable",destination=offer?.destinationZone ?: "Destination unavailable",
-            departure=offer?.departureTime?.let(::tripDeparture).orEmpty(),reference=booking.id.take(8).uppercase(),
+            origin=offer?.originZone,destination=offer?.destinationZone,
+            departure=offer?.departureTime?.let { tripDeparture(it, locale) }.orEmpty(),reference=booking.id.take(8).uppercase(),
             vehicle=trip?.plate.orEmpty(),seats=booking.seats,costPerSeat=offer?.costPerSeat,
-            statusLabel=if(state==MyTripStatus.Pending) "Pending booking" else null,
-            summary="Awaiting booking confirmation",
+            statusLabelRes=if(state==MyTripStatus.Pending) R.string.trips_pending_booking else null,
             detailRoute="confirmed_ticket/"+booking.id,
             chatRoute=if(trip!=null) "chat/trip/"+trip.id else "chat/booking/"+booking.id,
             sosRoute=trip?.takeIf {state==MyTripStatus.Active}?.let {"sos_trip/"+it.id},
@@ -42,11 +42,11 @@ internal fun CoordinationData.myTripItems(owner:String):List<MyTripItem> {
         val trip=trips.firstOrNull {it.offerId==id}
         val state=status(null,trip?.status,offer.status)
         MyTripItem(
-            id="offer/"+id,status=state,origin=offer.originZone ?: "Pickup unavailable",
-            destination=offer.destinationZone ?: "Destination unavailable",
-            departure=tripDeparture(offer.departureTime),reference=id.take(8).uppercase(),
-            vehicle=trip?.plate.orEmpty(),statusLabel=if(state==MyTripStatus.Pending) "Your ride offer" else "Your trip",
-            summary="${offer.availableSeats} seats available · RM${money(offer.costPerSeat)} per seat",
+            id="offer/"+id,status=state,origin=offer.originZone,
+            destination=offer.destinationZone,
+            departure=tripDeparture(offer.departureTime, locale),reference=id.take(8).uppercase(),
+            vehicle=trip?.plate.orEmpty(),statusLabelRes=if(state==MyTripStatus.Pending) R.string.trips_your_offer else R.string.trips_your_trip,
+            availableSeats=offer.availableSeats,costPerSeat=offer.costPerSeat,
             detailRoute="driver_offer/"+id,chatRoute=trip?.let {"chat/trip/"+it.id},
             sosRoute=trip?.takeIf {state==MyTripStatus.Active}?.let {"sos_trip/"+it.id},
         )
